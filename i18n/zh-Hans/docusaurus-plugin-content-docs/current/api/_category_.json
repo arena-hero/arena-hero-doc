@@ -1,0 +1,8 @@
+{
+  "label": "游戏 API",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "description": "纯游戏 HTTP 与 WebSocket 协议、状态模型、结算结果和错误恢复。"
+  }
+}

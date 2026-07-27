@@ -1,0 +1,9 @@
+{
+  "label": "Game API",
+  "position": 4,
+  "link": {
+    "type": "generated-index",
+    "title": "Game API",
+    "description": "The v0.1 HTTP command and WebSocket state contract."
+  }
+}

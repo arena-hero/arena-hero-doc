@@ -1,0 +1,332 @@
+asyncapi: 3.1.0
+info:
+  title: Arena Hero Game WebSocket API
+  version: 0.1.0
+  description: |
+    Authoritative Tick, complete private state, and canonical plan receipt
+    messages for Arena Hero. Clients send commands through the HTTP contract in
+    openapi.yaml and must not send WebSocket business messages.
+  externalDocs:
+    description: Human-readable WebSocket protocol
+    url: https://arena-hero.github.io/arena-hero-doc/docs/api/websocket
+defaultContentType: application/json
+servers:
+  production:
+    host: api.arenahero.io
+    protocol: wss
+    pathname: /api/v1/game/ws
+    description: Production
+    security:
+      - $ref: '#/components/securitySchemes/bearerAuth'
+  local:
+    host: localhost:8080
+    protocol: ws
+    pathname: /api/v1/game/ws
+    description: Local default
+    security:
+      - $ref: '#/components/securitySchemes/bearerAuth'
+channels:
+  gameStream:
+    address: /api/v1/game/ws
+    description: |
+      Server-to-client authoritative stream. The server sends text JSON frames.
+      Client text and binary business frames are prohibited.
+    messages:
+      tick:
+        $ref: '#/components/messages/TickMessage'
+      state:
+        $ref: '#/components/messages/StateMessage'
+      received:
+        $ref: '#/components/messages/ReceivedMessage'
+operations:
+  receiveGameStream:
+    action: receive
+    channel:
+      $ref: '#/channels/gameStream'
+    summary: Receive authoritative game messages
+    description: |
+      Act only on state. Tick announces a new logical Tick while commands
+      remain closed. Received confirms a canonical persisted source plan.
+    messages:
+      - $ref: '#/channels/gameStream/messages/tick'
+      - $ref: '#/channels/gameStream/messages/state'
+      - $ref: '#/channels/gameStream/messages/received'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: opaque
+      description: Send the opaque Agent credential in the Authorization header.
+  messages:
+    TickMessage:
+      name: tick
+      title: Tick announcement
+      summary: Announces the current Tick while commands are still closed.
+      payload:
+        $ref: '#/components/schemas/TickEnvelope'
+      examples:
+        - name: tick10583
+          payload:
+            type: tick
+            data: 10583
+    StateMessage:
+      name: state
+      title: Complete player state
+      summary: Replaces the previous authoritative state and opens action for this player.
+      payload:
+        $ref: '#/components/schemas/StateEnvelope'
+    ReceivedMessage:
+      name: received
+      title: Canonical plan receipt
+      summary: Replaces the latest receipt for its AGENT or MANUAL source.
+      payload:
+        $ref: '#/components/schemas/ReceivedEnvelope'
+  schemas:
+    UUID:
+      type: string
+      format: uuid
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+    Position:
+      type: array
+      prefixItems:
+        - type: integer
+          format: int64
+        - type: integer
+          format: int64
+      minItems: 2
+      maxItems: 2
+    Direction:
+      type: string
+      enum: [UP, DOWN, LEFT, RIGHT]
+    UnitType:
+      type: string
+      enum: [WORKER, VANGUARD, RANGER]
+    TickEnvelope:
+      type: object
+      additionalProperties: false
+      required: [type, data]
+      properties:
+        type:
+          const: tick
+        data:
+          type: integer
+          format: int64
+          minimum: 1
+    StateEnvelope:
+      type: object
+      additionalProperties: false
+      required: [type, data]
+      properties:
+        type:
+          const: state
+        data:
+          $ref: '#/components/schemas/PlayerState'
+    ReceivedEnvelope:
+      type: object
+      additionalProperties: false
+      required: [type, data]
+      properties:
+        type:
+          const: received
+        data:
+          $ref: '#/components/schemas/ReceivedPlan'
+    PlayerState:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - resources
+        - population
+        - population_tier
+        - upkeep_next_tick
+        - champion_beacon
+        - objects
+        - events
+      properties:
+        status:
+          type: string
+          enum: [ACTIVE, RESPAWNING]
+        respawn_at_tick:
+          type: integer
+          format: int64
+        resources:
+          type: integer
+        population:
+          type: integer
+          minimum: 0
+        population_tier:
+          type: integer
+          minimum: 0
+        upkeep_next_tick:
+          type: integer
+          minimum: 0
+        champion_beacon:
+          $ref: '#/components/schemas/ChampionBeacon'
+        objects:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorldObject'
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResolutionEvent'
+    ChampionBeacon:
+      type: object
+      additionalProperties: false
+      required: [position]
+      properties:
+        position:
+          $ref: '#/components/schemas/Position'
+        status:
+          type: string
+          enum: [GROUND, CARRIED]
+        carrier_id:
+          $ref: '#/components/schemas/UUID'
+    WorldObject:
+      oneOf:
+        - $ref: '#/components/schemas/TerrainBatch'
+        - $ref: '#/components/schemas/CoreObject'
+        - $ref: '#/components/schemas/UnitObject'
+    TerrainBatch:
+      type: object
+      additionalProperties: false
+      required: [kind, positions]
+      properties:
+        kind:
+          type: string
+          enum: [OBSTACLE, RESOURCE]
+        positions:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/Position'
+    CoreObject:
+      type: object
+      additionalProperties: false
+      required: [kind, id, controlled, position, hp, shield, state]
+      properties:
+        kind:
+          const: CORE
+        id:
+          $ref: '#/components/schemas/UUID'
+        controlled:
+          type: boolean
+        position:
+          $ref: '#/components/schemas/Position'
+        hp:
+          type: integer
+        shield:
+          type: integer
+        state:
+          type: string
+          enum: [NORMAL, MOVING]
+        move_direction:
+          $ref: '#/components/schemas/Direction'
+        move_progress:
+          type: integer
+          minimum: 1
+        move_required_ticks:
+          type: integer
+          minimum: 1
+        destination:
+          $ref: '#/components/schemas/Position'
+    UnitObject:
+      type: object
+      additionalProperties: false
+      required: [kind, id, controlled, position, hp, unit_type]
+      properties:
+        kind:
+          const: UNIT
+        id:
+          $ref: '#/components/schemas/UUID'
+        controlled:
+          type: boolean
+        position:
+          $ref: '#/components/schemas/Position'
+        hp:
+          type: integer
+        unit_type:
+          $ref: '#/components/schemas/UnitType'
+        cargo:
+          type: integer
+          minimum: 0
+    ResolutionEvent:
+      type: object
+      additionalProperties: false
+      required: [event_id, tick, event_type]
+      properties:
+        event_id:
+          $ref: '#/components/schemas/UUID'
+        tick:
+          type: integer
+          format: int64
+        event_type:
+          type: string
+        reason_code:
+          type: string
+        actor_id:
+          $ref: '#/components/schemas/UUID'
+        target_id:
+          $ref: '#/components/schemas/UUID'
+        position:
+          $ref: '#/components/schemas/Position'
+        values:
+          type: object
+          additionalProperties: true
+    UnitAction:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [WAIT, MOVE, HARVEST, DEPOSIT, SWEEP, SHOOT, PICKUP_BEACON, DROP_BEACON]
+        direction:
+          $ref: '#/components/schemas/Direction'
+        target_id:
+          $ref: '#/components/schemas/UUID'
+        expected_cell:
+          $ref: '#/components/schemas/Position'
+      additionalProperties: false
+    CoreAction:
+      type: object
+      required: [type]
+      properties:
+        type:
+          type: string
+          enum: [WAIT, SPAWN, REPAIR_SHIELD, START_MOVE, CANCEL_MOVE, PICKUP_BEACON, DROP_BEACON]
+        direction:
+          $ref: '#/components/schemas/Direction'
+        unit_type:
+          $ref: '#/components/schemas/UnitType'
+      additionalProperties: false
+    CommandPlan:
+      type: object
+      additionalProperties: false
+      required: [tick]
+      properties:
+        tick:
+          type: integer
+          format: int64
+        unit_actions:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/UnitAction'
+        core_action:
+          $ref: '#/components/schemas/CoreAction'
+    ReceivedPlan:
+      type: object
+      additionalProperties: false
+      required: [tick, source, received_at, plan]
+      properties:
+        tick:
+          type: integer
+          format: int64
+        source:
+          type: string
+          enum: [AGENT, MANUAL]
+        received_at:
+          type: string
+          format: date-time
+        plan:
+          $ref: '#/components/schemas/CommandPlan'

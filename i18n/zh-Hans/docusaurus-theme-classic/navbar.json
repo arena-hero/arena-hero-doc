@@ -1,0 +1,26 @@
+{
+  "title": {
+    "message": "ARENA HERO",
+    "description": "The title in the navbar"
+  },
+  "logo.alt": {
+    "message": "Arena Hero",
+    "description": "The alt text of navbar logo"
+  },
+  "item.label.Documentation": {
+    "message": "文档",
+    "description": "Navbar item with label Documentation"
+  },
+  "item.label.Rules": {
+    "message": "规则",
+    "description": "Navbar item with label Rules"
+  },
+  "item.label.API": {
+    "message": "API",
+    "description": "Navbar item with label API"
+  },
+  "item.label.Open Arena": {
+    "message": "进入 Arena",
+    "description": "Navbar item with label Open Arena"
+  }
+}

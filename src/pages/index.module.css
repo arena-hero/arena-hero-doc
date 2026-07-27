@@ -1,0 +1,215 @@
+.hero {
+  position: relative;
+  min-height: 660px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(139, 183, 212, 0.12);
+  background:
+    radial-gradient(circle at 76% 44%, rgba(69, 145, 197, 0.14), transparent 31rem),
+    linear-gradient(100deg, rgba(2, 3, 5, 0.98) 0%, rgba(2, 3, 5, 0.86) 54%, rgba(2, 3, 5, 0.68) 100%),
+    url('../../static/img/background.webp') center / cover;
+}
+
+.hero::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 70%, #050607);
+  content: '';
+  pointer-events: none;
+}
+
+.heroGrid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  min-height: 660px;
+  grid-template-columns: minmax(0, 1fr) minmax(460px, 0.9fr);
+  align-items: center;
+  gap: 5rem;
+}
+
+.heroCopy h1 {
+  max-width: 12ch;
+  margin: 1.3rem 0 1.5rem;
+  color: #f2f7fa;
+  font-size: clamp(3.4rem, 7vw, 6.4rem);
+  font-weight: 620;
+  letter-spacing: -0.065em;
+  line-height: 0.93;
+}
+
+.heroCopy > p {
+  max-width: 40rem;
+  color: #a0abb3;
+  font-size: 1.08rem;
+  line-height: 1.8;
+}
+
+.eyebrow {
+  color: #8bb7d4;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 2.1rem;
+}
+
+.protocol {
+  display: flex;
+  max-width: 35rem;
+  align-items: center;
+  gap: 0.65rem;
+  margin-top: 2.4rem;
+  color: #67727a;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.64rem;
+  letter-spacing: 0.12em;
+}
+
+.protocol i {
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, #4591c5, rgba(69, 145, 197, 0.12));
+}
+
+.fleet {
+  position: relative;
+  aspect-ratio: 1;
+  max-width: 560px;
+  border: 1px solid rgba(139, 183, 212, 0.13);
+  background: rgba(2, 4, 6, 0.54);
+  box-shadow: 0 34px 90px rgba(0, 0, 0, 0.5);
+  transform: rotateX(58deg) rotateZ(-28deg);
+}
+
+.gridLines {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(139, 183, 212, 0.09) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(139, 183, 212, 0.09) 1px, transparent 1px);
+  background-size: 12.5% 12.5%;
+}
+
+.unit {
+  position: absolute;
+  display: grid;
+  width: 19%;
+  transform: rotateZ(28deg) rotateX(-58deg);
+  place-items: center;
+}
+
+.unit img {
+  width: 84%;
+  filter: drop-shadow(0 0 13px rgba(69, 145, 197, 0.7));
+}
+
+.unit span {
+  margin-top: -0.2rem;
+  color: #a8cadf;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.unit0 { left: 39%; top: 38%; }
+.unit1 { left: 18%; top: 55%; }
+.unit2 { left: 59%; top: 58%; }
+.unit3 { left: 50%; top: 16%; }
+
+.pillars {
+  padding: 5.5rem 0 6.5rem;
+  background: #050607;
+}
+
+.pillarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+.pillar {
+  min-height: 280px;
+  border: 1px solid rgba(139, 183, 212, 0.13);
+  border-radius: 0.8rem;
+  background: linear-gradient(145deg, rgba(31, 37, 91, 0.15), rgba(10, 10, 11, 0.76));
+  padding: 2rem;
+  color: inherit;
+  transition: border-color 180ms ease, transform 180ms ease, background 180ms ease;
+}
+
+.pillar:hover {
+  border-color: rgba(69, 145, 197, 0.5);
+  background: linear-gradient(145deg, rgba(31, 37, 91, 0.26), rgba(10, 10, 11, 0.92));
+  color: inherit;
+  text-decoration: none;
+  transform: translateY(-3px);
+}
+
+.pillar > span {
+  color: #4591c5;
+  font-family: var(--ifm-font-family-monospace);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+
+.pillar h2 {
+  margin: 2.8rem 0 0.8rem;
+  color: #edf4f8;
+  font-size: 1.42rem;
+}
+
+.pillar p {
+  color: #89949d;
+  line-height: 1.7;
+}
+
+.pillar strong {
+  display: inline-block;
+  margin-top: 1rem;
+  color: #8bb7d4;
+  font-size: 0.78rem;
+}
+
+@media (max-width: 996px) {
+  .heroGrid {
+    min-height: auto;
+    grid-template-columns: 1fr;
+    gap: 3rem;
+    padding: 6rem 0 4rem;
+  }
+
+  .fleet {
+    width: min(82vw, 520px);
+    margin: -2rem auto 3rem;
+  }
+
+  .pillarGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .pillar {
+    min-height: 220px;
+  }
+}
+
+@media (max-width: 560px) {
+  .heroCopy h1 {
+    font-size: 3.35rem;
+  }
+
+  .protocol {
+    gap: 0.4rem;
+    font-size: 0.56rem;
+  }
+
+  .fleet {
+    width: 96%;
+  }
+}

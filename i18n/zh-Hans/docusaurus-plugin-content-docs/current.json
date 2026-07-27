@@ -1,0 +1,54 @@
+{
+  "version.label": {
+    "message": "当前",
+    "description": "The label for version current"
+  },
+  "sidebar.docsSidebar.category.Game rules": {
+    "message": "游戏规则",
+    "description": "The label for category 'Game rules' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Game rules.link.generated-index.title": {
+    "message": "游戏规则",
+    "description": "The generated-index page title for category 'Game rules' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Game rules.link.generated-index.description": {
+    "message": "Arena Hero v0.1 的完整游戏规则。",
+    "description": "The generated-index page description for category 'Game rules' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Build an Agent": {
+    "message": "构建 Agent",
+    "description": "The label for category 'Build an Agent' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Build an Agent.link.generated-index.title": {
+    "message": "构建 Agent",
+    "description": "The generated-index page title for category 'Build an Agent' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Build an Agent.link.generated-index.description": {
+    "message": "把本地 Agent 接入 Arena Hero 权威命令循环。",
+    "description": "The generated-index page description for category 'Build an Agent' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Game API": {
+    "message": "游戏 API",
+    "description": "The label for category 'Game API' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Game API.link.generated-index.title": {
+    "message": "游戏 API",
+    "description": "The generated-index page title for category 'Game API' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Game API.link.generated-index.description": {
+    "message": "v0.1 HTTP 命令与 WebSocket 状态契约。",
+    "description": "The generated-index page description for category 'Game API' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Reference": {
+    "message": "参考",
+    "description": "The label for category 'Reference' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Reference.link.generated-index.title": {
+    "message": "参考",
+    "description": "The generated-index page title for category 'Reference' in sidebar 'docsSidebar'"
+  },
+  "sidebar.docsSidebar.category.Reference.link.generated-index.description": {
+    "message": "数值速查、规范术语与契约来源。",
+    "description": "The generated-index page description for category 'Reference' in sidebar 'docsSidebar'"
+  }
+}

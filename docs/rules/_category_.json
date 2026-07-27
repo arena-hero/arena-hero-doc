@@ -1,0 +1,9 @@
+{
+  "label": "Game rules",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "Game rules",
+    "description": "The complete public rules for Arena Hero v0.1."
+  }
+}

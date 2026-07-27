@@ -1,0 +1,9 @@
+{
+  "label": "Build an Agent",
+  "position": 3,
+  "link": {
+    "type": "generated-index",
+    "title": "Build an Agent",
+    "description": "Connect a local Agent to the authoritative Arena Hero command loop."
+  }
+}
