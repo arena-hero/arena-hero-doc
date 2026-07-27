@@ -28,6 +28,10 @@ The build must succeed for both `en` and `zh-Hans`. Public HTTP and WebSocket
 contracts are also available as [`static/openapi.yaml`](static/openapi.yaml)
 and [`static/asyncapi.yaml`](static/asyncapi.yaml).
 
+Every push to `main` uploads the complete production build as the
+`arena-hero-doc-build` workflow artifact. Public repositories additionally
+deploy that build to GitHub Pages.
+
 ## Source policy
 
 This repository is the official reader-facing rules and API specification.
