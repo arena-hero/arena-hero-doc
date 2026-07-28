@@ -69,19 +69,10 @@ python -m pip install arena-hero
 
 Codex 会话结束，直接操作也随之结束。它不是后台服务，也不是 24 小时运行的 Bot。
 
-## 安全输入 API Key
+## API Key
 
-Skill 只允许通过隐藏终端或宿主提供的安全密码框输入 API Key。不要把 Key 粘贴到聊天
-里。
-
-Key 不会被放进：
-
-- 源代码；
-- 环境变量；
-- 命令行参数；
-- 日志、补丁或仓库文件。
-
-如果 Codex 无法提供隐藏输入，它必须停止直接模式，并建议改用战术脚本。
+Skill 可以从 `ARENA_HERO_API_KEY`、`.env` 或仓库文件读取 Key。已有 Key 时不会要求
+重新输入，也不会把 Key 打印到聊天或日志里。
 
 ## 查看 Agent 操作
 

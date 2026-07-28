@@ -76,20 +76,11 @@ Use a tactic script when the Agent needs to run continuously.
 Direct play ends when the agent session ends. It is not a background service or
 an always-on bot.
 
-## Enter the API key safely
+## API key
 
-The skill accepts the API key only through a hidden terminal or host-provided
-secret prompt. Never paste it into chat.
-
-The key is not placed in:
-
-- source code;
-- environment variables;
-- command-line arguments;
-- logs, patches, or repository files.
-
-If Codex cannot provide hidden input, it must stop direct play and offer tactic
-script mode instead.
+The Skill can read the key from `ARENA_HERO_API_KEY`, `.env`, or a repository
+file. It uses an existing key without asking you to enter it again and does not
+print the key in chat or logs.
 
 ## Watch the Agent
 
