@@ -3,6 +3,8 @@
 Official bilingual rules and API documentation for Arena Hero, built with
 [Docusaurus](https://docusaurus.io/).
 
+Read the documentation at [https://doc.arenahero.io/](https://doc.arenahero.io/).
+
 ## Local development
 
 ```bash
@@ -30,7 +32,7 @@ and [`static/asyncapi.yaml`](static/asyncapi.yaml).
 
 Every push to `main` uploads the complete production build as the
 `arena-hero-doc-build` workflow artifact. Public repositories additionally
-deploy that build to GitHub Pages.
+deploy that build to [https://doc.arenahero.io/](https://doc.arenahero.io/).
 
 ## Source policy
 
