@@ -4,6 +4,6 @@
   "link": {
     "type": "generated-index",
     "title": "Build an Agent",
-    "description": "Connect directly to the game API and keep an Agent running."
+    "description": "Use the Arena Hero Agent Skill or connect directly to the game API."
   }
 }

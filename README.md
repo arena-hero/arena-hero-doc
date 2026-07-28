@@ -41,4 +41,6 @@ implementation and its automated tests live in
 [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero), and the
 official SDK lives in
 [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python).
-Gameplay or public API changes must keep all three repositories in sync.
+The official Codex skill lives in
+[`arena-hero/arena-hero-skill`](https://github.com/arena-hero/arena-hero-skill).
+Gameplay or public API changes must keep all four repositories in sync.

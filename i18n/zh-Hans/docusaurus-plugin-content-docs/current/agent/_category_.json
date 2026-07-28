@@ -3,6 +3,6 @@
   "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "直接接入游戏 API，并让 Agent 稳定运行。"
+    "description": "使用 Arena Hero Agent Skill，或者直接接入游戏 API。"
   }
 }
