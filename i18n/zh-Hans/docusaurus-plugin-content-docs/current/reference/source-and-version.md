@@ -15,9 +15,9 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 | 服务器仓库 | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
 | 已审查服务器提交 | `c6553156d8e4512fd6010a10b6500741f023c9da` |
 | Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.1.0 |
-| 已审查 SDK 提交 | `b784c8122f8cfc2435fc58a28ddc40a7db615970` |
+| 已审查 SDK 提交 | `8d06cbb93226335d7f605776fb1a8b40460d95b4` |
 | 服务端审查日期 | 2026 年 7 月 29 日 |
-| SDK 审查日期 | 2026 年 7 月 28 日 |
+| SDK 审查日期 | 2026 年 7 月 29 日 |
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | 语言 | 英文、简体中文 |
 

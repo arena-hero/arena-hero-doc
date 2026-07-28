@@ -15,9 +15,9 @@ description: The server version covered by these docs and which changes affect c
 | Server repository | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
 | Reviewed server commit | `c6553156d8e4512fd6010a10b6500741f023c9da` |
 | Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python), v0.1.0 |
-| Reviewed SDK commit | `b784c8122f8cfc2435fc58a28ddc40a7db615970` |
+| Reviewed SDK commit | `8d06cbb93226335d7f605776fb1a8b40460d95b4` |
 | Server review date | 29 July 2026 |
-| SDK review date | 28 July 2026 |
+| SDK review date | 29 July 2026 |
 | Documentation repository | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | Languages | English, Simplified Chinese |
 
