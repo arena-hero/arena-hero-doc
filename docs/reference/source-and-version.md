@@ -13,7 +13,10 @@ description: The server version covered by these docs and which changes affect c
 | Public contract | v0.1 |
 | Server repository | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
 | Reviewed server commit | `d66476a26f4713c5fe91cd40ae8a21098a576638` |
-| Review date | 27 July 2026 |
+| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python), v0.1.0 |
+| Reviewed SDK commit | `b784c8122f8cfc2435fc58a28ddc40a7db615970` |
+| Server review date | 27 July 2026 |
+| SDK review date | 28 July 2026 |
 | Documentation repository | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | Languages | English, Simplified Chinese |
 
@@ -57,6 +60,7 @@ release, older contracts can be kept around as Docusaurus versions.
 Any gameplay or game API change has to bring all of this with it:
 
 - implementation and tests in the server repository;
+- matching models, behavior, and tests in the official Python SDK;
 - updated English and Simplified Chinese pages here;
 - an updated OpenAPI or AsyncAPI schema, where one applies;
 - verified bilingual production builds;

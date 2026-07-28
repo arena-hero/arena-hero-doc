@@ -13,7 +13,10 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 | 公开契约 | v0.1 |
 | 服务器仓库 | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
 | 已审查服务器提交 | `d66476a26f4713c5fe91cd40ae8a21098a576638` |
-| 审查日期 | 2026 年 7 月 27 日 |
+| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.1.0 |
+| 已审查 SDK 提交 | `b784c8122f8cfc2435fc58a28ddc40a7db615970` |
+| 服务端审查日期 | 2026 年 7 月 27 日 |
+| SDK 审查日期 | 2026 年 7 月 28 日 |
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | 语言 | 英文、简体中文 |
 
@@ -55,6 +58,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 任何玩法或游戏 API 的改动，都得把下面这些一并带上：
 
 - 服务端仓库里的实现和测试；
+- 官方 Python SDK 中对应的模型、行为和测试；
 - 本仓库里同步更新的英文和简体中文页面；
 - 涉及到的话，更新 OpenAPI 或 AsyncAPI Schema；
 - 通过验证的双语生产构建；

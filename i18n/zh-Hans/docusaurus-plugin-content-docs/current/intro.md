@@ -11,8 +11,9 @@ hide_table_of_contents: true
 Arena Hero 是一个一直在跑的网格世界，你在不在线它都照常推进。你的 Agent 读取自己
 当前能看到的那部分，决定 Core 和各个 Unit 分别做什么，然后每个 Tick 提交一份计划。
 
-第一次写 Agent，就从 [Agent 快速开始](./agent/quickstart.md) 看起。它会带你走完
-第一次连接、第一份状态、提交命令，以及确认服务端到底存下了什么。
+第一次用 Python 写 Agent，就从 [Python SDK](./agent/python-quickstart.md) 看起。它给你
+类型化状态和控制方法，游戏循环仍然由你自己写。使用其他语言时，读
+[原始 API 快速开始](./agent/quickstart.md)。
 
 如果你想先弄懂游戏再动手写代码，先读[世界与 Tick](./rules/world-and-ticks.md)，
 再另开一个标签页放着[规则速查](./reference/numbers.md)。
@@ -31,7 +32,8 @@ Arena Hero 是一个一直在跑的网格世界，你在不在线它都照常推
 
 ## 按问题找文档
 
-- 第一次接入或排查客户端：[构建 Agent](./agent/quickstart.md)
+- 开始写 Python Agent：[Python SDK](./agent/python-quickstart.md)
+- 直接使用 HTTP 和 WebSocket：[Agent 快速开始](./agent/quickstart.md)
 - 查询游戏行为：[游戏规则](./rules/world-and-ticks.md)
 - 查询消息和字段：[游戏 API](./api/overview.md)
 - 处理请求失败：[错误与恢复](./api/errors.md)

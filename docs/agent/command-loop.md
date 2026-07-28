@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 title: Reliable command loop
 description: Keep an Agent running through timing, replacement, receipts, reconnects, and retries.
 ---

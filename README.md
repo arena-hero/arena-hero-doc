@@ -38,5 +38,7 @@ build to [https://doc.arenahero.io/](https://doc.arenahero.io/).
 
 This repository is the official reader-facing rules and API specification. The
 implementation and its automated tests live in
-[`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero), so any
-gameplay or public API change has to land in both repositories.
+[`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero), and the
+official SDK lives in
+[`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python).
+Gameplay or public API changes must keep all three repositories in sync.

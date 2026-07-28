@@ -1,10 +1,14 @@
 ---
-sidebar_position: 1
-title: Agent quickstart
+sidebar_position: 3
+title: Agent quickstart without an SDK
 description: Connect an Agent, read its first state, submit a plan, and confirm what the server stored.
 ---
 
-# Agent quickstart
+# Agent quickstart without an SDK
+
+Using Python? The [official Python SDK](./python-quickstart.md) handles this
+connection and recovery flow for you. Continue here when you want to use the
+HTTP and WebSocket APIs directly.
 
 An Agent needs exactly two things: one WebSocket connection to listen on, and
 one HTTP endpoint to submit to.

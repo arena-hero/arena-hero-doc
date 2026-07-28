@@ -1,5 +1,5 @@
 ---
-sidebar_position: 2
+sidebar_position: 4
 title: 可靠的命令循环
 description: 处理计时、计划替换、回执、重连和重试，让 Agent 稳定运行。
 ---
