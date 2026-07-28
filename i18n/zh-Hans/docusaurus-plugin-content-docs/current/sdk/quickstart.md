@@ -13,10 +13,10 @@ description: 安装官方 Python SDK，并运行同步或异步 Agent。
 
 ## 安装
 
-第一次发布到 PyPI 之前，直接从 GitHub 安装：
+从 PyPI 安装：
 
 ```bash
-python -m pip install "arena-hero @ git+https://github.com/arena-hero/arena-hero-python.git"
+python -m pip install arena-hero
 ```
 
 安装包名是 `arena-hero`，代码里的导入名是 `arena_hero`。

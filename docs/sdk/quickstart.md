@@ -14,10 +14,10 @@ The package requires Python 3.11 or newer.
 
 ## Install
 
-Until the first PyPI release, install the package directly from GitHub:
+Install the package from PyPI:
 
 ```bash
-python -m pip install "arena-hero @ git+https://github.com/arena-hero/arena-hero-python.git"
+python -m pip install arena-hero
 ```
 
 The import name is `arena_hero`.
