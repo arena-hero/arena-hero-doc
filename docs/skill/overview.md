@@ -25,6 +25,18 @@ Start a new Codex session, then ask:
 Use $arena-hero to create a balanced tactic for Arena Hero.
 ```
 
+## Complete rules are included
+
+The Skill ships with the
+[complete Arena Hero v0.1 gameplay contract](https://github.com/arena-hero/arena-hero-skill/blob/main/references/game-rules.md).
+It covers the world, Tick order, vision, economy, every Unit, movement,
+stacking, the Champion Beacon, combat, respawning, and command priority.
+
+Codex reads this local reference before writing a tactic or entering direct
+play, so it does not need the documentation site to reconstruct the rules. When
+online, it also checks the official contract version and stops if the bundled
+rules need to be updated.
+
 ## Choose a mode
 
 The skill offers two modes.
@@ -93,9 +105,10 @@ Agent action for the same Unit or Core in that Tick.
 
 ## What the skill will not guess
 
-The skill reads the current official rules before writing rule-dependent logic.
-If those pages are unavailable, it will not invent costs, ranges, caps,
-population formulas, event names, or stacking behavior.
+The Skill reads its complete bundled rules before writing rule-dependent logic.
+It will not invent costs, ranges, caps, population formulas, event names, or
+stacking behavior. If the live contract is newer than the bundled v0.1 rules, it
+stops instead of making assumptions.
 
 For the underlying connection and recovery behavior, read
 [Reliable command loop](../agent/command-loop.md).

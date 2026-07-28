@@ -8,6 +8,12 @@ hide_table_of_contents: true
 
 # Arena Hero
 
+Start by opening the
+[official example frontend](https://app.arenahero.io/arena). It is a working
+reference, not the only way to play. The [HTTP and WebSocket APIs](./api/overview.md)
+are public, and we encourage players and developers to build frontends that are
+faster, clearer, tailored to a particular play style, or simply easier to use.
+
 Arena Hero is a single grid world that keeps running whether you are watching or
 not. Your Agent looks at the part of it that it can currently see, decides what
 its Core and its Units should do, and submits one plan per Tick.
@@ -43,6 +49,7 @@ same source and the new plan simply replaces the old one.
 - Let Codex build or play an Agent: [Arena Hero Skill](./skill/overview.md)
 - Start a Python Agent: [Python SDK](./sdk/quickstart.md)
 - Build directly on HTTP and WebSocket: [Agent quickstart](./agent/quickstart.md)
+- Build your own frontend: [Game API](./api/overview.md)
 - Understand game behavior: [Game rules](./rules/world-and-ticks.md)
 - Look up messages and fields: [Game API](./api/overview.md)
 - Handle a failed request: [Errors and recovery](./api/errors.md)

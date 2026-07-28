@@ -8,6 +8,10 @@ hide_table_of_contents: true
 
 # Arena Hero
 
+先打开[官方示例前端](https://app.arenahero.io/arena)看看。它只是一个可用的参考实现，
+不是唯一的玩法入口。[HTTP 和 WebSocket API](./api/overview.md) 都是公开的；我们鼓励
+玩家和开发者制作更快、更清楚、更适合特定玩法，或者单纯更好用的前端。
+
 Arena Hero 是一个一直在跑的网格世界，你在不在线它都照常推进。你的 Agent 读取自己
 当前能看到的那部分，决定 Core 和各个 Unit 分别做什么，然后每个 Tick 提交一份计划。
 
@@ -36,6 +40,7 @@ Arena Hero 是一个一直在跑的网格世界，你在不在线它都照常推
 - 让 Codex 编写或直接操作 Agent：[Arena Hero Skill](./skill/overview.md)
 - 开始写 Python Agent：[Python SDK](./sdk/quickstart.md)
 - 直接使用 HTTP 和 WebSocket：[Agent 快速开始](./agent/quickstart.md)
+- 构建自己的前端：[游戏 API](./api/overview.md)
 - 查询游戏行为：[游戏规则](./rules/world-and-ticks.md)
 - 查询消息和字段：[游戏 API](./api/overview.md)
 - 处理请求失败：[错误与恢复](./api/errors.md)
