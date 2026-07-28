@@ -74,6 +74,8 @@ the Arena Hero web client uses its own secure session instead.
 - Empty arrays still arrive as `[]`.
 - A field hidden by visibility is left out entirely, not sent as `null`.
 - Each `state` replaces the last one — do not merge its object arrays.
+- `RESOURCE` positions mean currently visible availability, not permanent map
+  facts. A point can be consumed or replenished while outside vision.
 - There is no deadline timestamp, event cursor, replay ID, plan version, or
   submission sequence anywhere in the protocol.
 

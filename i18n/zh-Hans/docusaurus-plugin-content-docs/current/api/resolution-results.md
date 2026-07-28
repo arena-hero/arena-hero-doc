@@ -73,8 +73,13 @@ HTTP `202` 只说明服务端把计划存下来了，动作还没结算。结果
 | `DEPOSIT_SUCCEEDED` | 无 | `actor_id`：Worker；`target_id`：Core；`position`：同格坐标 | `{amount: int}` | Worker 身上的货全部转进 Core 的资源。 |
 | `HARVEST_FAILED` | `NOT_RESOURCE_CELL` | `actor_id`：Worker；`position`：Worker 格 | 无 | 当前地形不是资源格。 |
 | `HARVEST_FAILED` | `CARGO_FULL` | `actor_id`：Worker；`position`：Worker 格 | 无 | Worker 身上已经有资源了。 |
-| `HARVEST_SUCCEEDED` | 无 | `actor_id`：Worker；`position`：Worker 格 | `{amount: int}` | 资源已经装进 Worker 的 cargo。 |
+| `HARVEST_FAILED` | `RESOURCE_DEPLETED` | `actor_id`：Worker；`position`：已消耗的资源点 | 无 | 同 Tick 另一个 UUID 更低的合格空载 Worker 赢走了这个点。 |
+| `HARVEST_SUCCEEDED` | 无 | `actor_id`：Worker；`position`：已消耗的资源点 | `{amount: int}` | 一个点被消耗，Worker 装载 1 资源；有 Beacon 时装载 2。 |
 | `BEACON_HARVEST_BONUS` | 无 | `actor_id`：Worker；`position`：Worker 格 | `{amount: int}` | 因为持有 Beacon 而多采到的那部分。 |
+
+每个资源坐标上的合格空载 Worker 按 UUID 原始字节排序，只有最低 UUID 成功并消耗该点。
+其他竞争者都收到 `RESOURCE_DEPLETED`，即使它们的玩家持有 Beacon 也一样。资源补充
+不会生成玩家事件；后续完整状态只会在新点可见时暴露它。
 
 ## 战斗事件 {#combat-events}
 

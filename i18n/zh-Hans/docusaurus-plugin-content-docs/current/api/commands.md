@@ -82,7 +82,7 @@ Unit A: WAIT
 |---|---|---|---|
 | `WAIT` | 所有 | `{"type":"WAIT"}` | Unit 不行动。 |
 | `MOVE` | 所有 | `{"type":"MOVE","direction":"RIGHT"}` | 尝试向正交方向移动一格。 |
-| `HARVEST` | Worker | `{"type":"HARVEST"}` | 采集 1 资源；玩家持有 Beacon 时采集 2。 |
+| `HARVEST` | Worker | `{"type":"HARVEST"}` | 消耗资源点并装载 1 资源；玩家持有 Beacon 时装载 2。 |
 | `DEPOSIT` | Worker | `{"type":"DEPOSIT"}` | 把全部货物存入同格的己方 Core。 |
 | `SWEEP` | Vanguard | `{"type":"SWEEP","direction":"UP"}` | 对相邻目标格内每个敌方实体造成 1 伤害。 |
 | `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | 尝试射击该格的指定目标，正交射程 1-3。 |
@@ -101,7 +101,12 @@ Unit A: WAIT
 这两个动作只有 Worker 能用。
 
 - `HARVEST` 要求 Worker 空载，并且站在 `RESOURCE` 格上。
-- 资源格不会枯竭。
+- 一次成功采集会消耗这个资源点。
+- 同一个 Tick 有多个合格空载 Worker 采同一个点时，只有 UUID 原始字节序最小的
+  Worker 成功；其他人收到 `HARVEST_FAILED`，reason 是 `RESOURCE_DEPLETED`。
+- Beacon 只把赢家的 cargo 从 1 变成 2，不会多消耗一个点，也不会改变 UUID 胜负顺序。
+- 被消耗的点会从当前状态消失。每结算满 4 个 Tick，每个区块只把缺少的槽位按确定性
+  规则补回固定配额。
 - `DEPOSIT` 要求 Worker 有货，并且和自己的 Core 同格。
 - Core 处在迁移受限的 Tick 时收不了货。
 - 存入失败，货还在 Worker 身上，不会丢。

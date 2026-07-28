@@ -17,11 +17,13 @@ latest_received.AGENT
 latest_received.MANUAL
 connection_phase
 reconnect_attempt
-terrain_memory
+obstacle_memory
+resource_observation_memory
 ```
 
 连接总有断的时候。最新状态和最新回执都在你自己手里，重连后直接整体换掉就行，
-不用再去推断中间漏了什么。
+不用再去推断中间漏了什么。障碍和资源观察要分开保存：障碍是永久的，资源点在视野外
+可能被消耗，也可能被补充。
 
 ## 状态机
 

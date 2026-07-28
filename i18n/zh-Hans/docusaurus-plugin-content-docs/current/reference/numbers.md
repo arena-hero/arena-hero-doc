@@ -11,6 +11,7 @@ description: 查询当前时序、成本、射程、容量和协议限制。
 | 规则 | 数值 |
 |---|---:|
 | 全局命令窗口 | 15 秒 |
+| 资源补充 | 每 4 个已结算 Tick（约 1 分钟） |
 | Core 迁移 | 每格 4 个逻辑 Tick |
 | Core 重生延迟 | 20 个逻辑 Tick |
 | WebSocket Ping 间隔 | 20 秒 |
@@ -45,12 +46,22 @@ description: 查询当前时序、成本、射程、容量和协议限制。
 | 单格容量 | 2 个占位实体 |
 | 地形类型 | `EMPTY`、`RESOURCE`、`OBSTACLE` |
 | 区块大小 | 32×32 |
-| 资源丰富度尺度 | 256 |
+| 中央区块环 | `cx, cy ∈ {-1, 0}` 的 2×2 个区块 |
+| 资源配额 | 每区块 `max(2, floor(16 × 8 / (8 + ring)))` |
 | 与最近存活 Core 的出生距离 | 20-30 |
 | 坐标类型 | 有符号 int64 `[x, y]` |
 | Beacon 初始位置 | `[0, 0]` |
 
 ## 经济
+
+```text
+axis(c) = c if c >= 0 else -c - 1
+ring = axis(cx) + axis(cy)
+resource_quota = max(2, floor(16 * 8 / (8 + ring)))
+```
+
+一个点让普通 Worker 得到 1 资源，让 Beacon 玩家的 Worker 得到 2 资源；两种情况都只
+消耗一个点。同点竞争由最低的合格 Worker UUID 获胜。
 
 ```text
 population = Worker + Vanguard + Ranger

@@ -181,7 +181,9 @@ on disconnect:
 
 - Dispatch strictly on `type`; do not guess a message's meaning from its shape.
 - Replace the world view on `state` instead of patching the old one.
-- Keep remembered terrain in its own store, separate from current state.
+- Keep remembered obstacles and resource observations in their own stores,
+  separate from current state. Obstacles remain valid; resource observations can
+  become stale in fog.
 - Finish deciding well before the global window can run out.
 - Give every logical plan its own idempotency key.
 - Cover all of the HTTP and WebSocket recovery cases, not just the happy path.

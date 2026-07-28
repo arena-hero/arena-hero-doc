@@ -10,12 +10,13 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 
 | 项目 | 值 |
 |---|---|
-| 公开契约 | v0.1 |
+| HTTP 与 WebSocket API | v0.1 |
+| 游戏规则 | v0.2 |
 | 服务器仓库 | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
-| 已审查服务器提交 | `d66476a26f4713c5fe91cd40ae8a21098a576638` |
+| 已审查服务器提交 | `c6553156d8e4512fd6010a10b6500741f023c9da` |
 | Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.1.0 |
 | 已审查 SDK 提交 | `b784c8122f8cfc2435fc58a28ddc40a7db615970` |
-| 服务端审查日期 | 2026 年 7 月 27 日 |
+| 服务端审查日期 | 2026 年 7 月 29 日 |
 | SDK 审查日期 | 2026 年 7 月 28 日 |
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | 语言 | 英文、简体中文 |
@@ -43,6 +44,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 - WebSocket 消息类型和重连快照；
 - 战争迷雾的隐私边界；
 - 地图生成器契约；
+- 有限资源的区块配额、消耗、刷新与竞争规则；
 - 决定重放结果的核心平衡规则。
 
 其余的东西——文字、排版、图表、示例、讲解顺序——可以随意改进，因为它们都不改变游戏
@@ -50,8 +52,8 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 
 ## 为什么现在还没有版本选择器
 
-公开 API 还停在 v0.1，所以站点只发布一个当前版本，提供英文和简体中文两种语言。等有了
-第一个稳定的兼容版本，旧协议就可以作为 Docusaurus 版本保留下来。
+公开 API 仍是 v0.1，当前游戏规则是 v0.2，所以站点只发布一个当前版本，提供英文和简体
+中文两种语言。等有了第一个稳定的兼容版本，旧协议就可以作为 Docusaurus 版本保留下来。
 
 ## 修改协议时要更新什么
 

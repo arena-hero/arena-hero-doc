@@ -17,12 +17,15 @@ latest_received.AGENT
 latest_received.MANUAL
 connection_phase
 reconnect_attempt
-terrain_memory
+obstacle_memory
+resource_observation_memory
 ```
 
 The connection will drop sooner or later. Holding the latest state and the latest
 receipts on your side means that when it comes back you can swap them out
-cleanly, rather than trying to work out what you missed.
+cleanly, rather than trying to work out what you missed. Keep obstacles and
+resource observations separate: obstacles are permanent, while a resource point
+may be consumed or replenished while its cell is outside vision.
 
 ## State machine
 

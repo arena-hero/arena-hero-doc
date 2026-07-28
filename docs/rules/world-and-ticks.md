@@ -21,7 +21,7 @@ into a half-built snapshot. Instead the server records a persistent
 `activation_tick`, and the player enters through deterministic respawn processing
 at that Tick like everyone else.
 
-## Deterministic infinite generation
+## Deterministic chunk generation
 
 Terrain comes in 32×32 chunks, generated from a permanent secret world seed and a
 versioned HMAC-SHA256 contract. Clients never see the seed.
@@ -37,6 +37,11 @@ That buys you a few guarantees worth relying on:
   Beacon is never walled off.
 - If the generator contract does not match, the service refuses to start.
   Changing generation semantics therefore means a new world database.
+
+Obstacles and backbone passages are permanent terrain. Resource points are a
+separate, consumable layer with a fixed quota per chunk; their replenishment is
+also deterministic. See [Map and vision](./map-and-vision.md#resource-quotas) for
+the quota and placement rules.
 
 ## Tick lifecycle
 
@@ -62,6 +67,7 @@ sequenceDiagram
   A-->>C: received
   G->>G: Lock all plans
   E->>E: Resolve deterministically
+  E->>E: Replenish due resource slots
   E->>D: Atomic world + events + journal commit
   A-->>C: tick N+1
 ```
@@ -88,11 +94,19 @@ This order is part of the protocol, not an implementation detail:
 8. Freeze one immutable combat snapshot and accumulate every legal attack.
 9. Apply damage simultaneously, remove destroyed objects, and resolve any respawns
    that are due.
-10. Atomically commit the world, events, statistics, journal, and new clock.
-11. Announce the next Tick and prepare fresh private states.
+10. After every fourth resolved Tick, replenish only the consumed resource slots
+    in each affected chunk back to that chunk's fixed quota.
+11. Atomically commit the world, resource layer, events, statistics, journal, and
+    new clock.
+12. Announce the next Tick and prepare fresh private states.
 
 The server never skips a Tick to catch up with wall-clock time; downtime simply
 pauses the world. And two Ticks never resolve at the same time.
+
+Resource replenishment belongs to the resolved Tick. A point consumed on a
+replenishment Tick is removed first; the later replenishment step then fills the
+chunk's missing slots. Existing unharvested points stay where they are, and unused
+capacity never accumulates above the quota.
 
 ## Atomicity and replay
 
@@ -113,3 +127,10 @@ result byte for byte.
 | Server crashes while OPEN | Keep persisted plans; on restart send the same `tick`, full `state`, latest receipts, and reopen a full window. |
 | Server crashes after lock | Do not reopen; replay the persisted locked plans deterministically. |
 | Server is offline | The world and all logical timers pause. |
+
+## Existing-world transition
+
+The consumable-resource release replaces the legacy resource layout in the
+existing world. It does not reset the world clock, players, Cores, Units,
+inventories, respawn status, or Champion Beacon state. Resource positions switch
+to the new per-chunk quota and replenishment contract as a map-layer migration.

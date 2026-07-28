@@ -146,8 +146,8 @@ difference is that `AsyncTurn.submit()` must be awaited.
 | `vanguards` | `tuple[Vanguard, ...]` | Controlled Vanguards. |
 | `rangers` | `tuple[Ranger, ...]` | Controlled Rangers. |
 | `visible_enemies` | `tuple[UnitView | CoreView, ...]` | Enemy objects currently visible. |
-| `terrain` | `tuple[TerrainView, ...]` | Visible resource and obstacle batches. |
-| `resource_cells` | `frozenset[Position]` | Visible resource cells. |
+| `terrain` | `tuple[TerrainView, ...]` | Visible obstacle and currently available resource batches. |
+| `resource_cells` | `frozenset[Position]` | Resource points visible and available in this Turn only. |
 | `obstacle_cells` | `frozenset[Position]` | Visible obstacle cells. |
 | `beacon` | `ChampionBeacon` | Current visibility-limited Beacon view. |
 | `events` | `tuple[ResolutionEvent, ...]` | Private results from the previous Tick. |
@@ -198,8 +198,13 @@ Extra controls:
 
 | Method | Meaning |
 |---|---|
-| `harvest()` | Harvest the resource on the current cell. |
+| `harvest()` | Try to consume the resource point on the current cell. |
 | `deposit()` | Deposit cargo while sharing a cell with the Core. |
+
+One successful harvest consumes one point. A normal winner carries 1 resource;
+a winner whose player holds the Beacon carries 2 from the same point. If several
+eligible Workers harvest one point, only the lowest UUID succeeds and the others
+receive `HARVEST_FAILED` with `RESOURCE_DEPLETED`.
 
 ### Vanguard
 
@@ -269,7 +274,7 @@ rules.
 |---|---|
 | `UnitView` | `kind`, `id`, `controlled`, `position`, `hp`, `unit_type`, `cargo` |
 | `CoreView` | `kind`, `id`, `controlled`, `position`, `hp`, `shield`, `state`, movement fields |
-| `TerrainView` | `kind`, `positions` |
+| `TerrainView` | `kind`, `positions`; `RESOURCE` positions are current visible availability |
 | `ChampionBeacon` | `position`, `status`, `carrier_id` |
 
 The controller classes (`Worker`, `Vanguard`, `Ranger`, `Core`) are convenient
@@ -292,6 +297,9 @@ views over controlled objects. Enemy objects remain immutable `UnitView` or
 Event names and reason codes stay as strings so newer server values do not
 break an older SDK. See [Resolution results](../api/resolution-results.md) for
 their meanings.
+
+In particular, `HARVEST_FAILED` with `RESOURCE_DEPLETED` means a lower-UUID
+eligible Worker consumed the contested point in that Tick.
 
 ### `Tick`, `Received`, and `Accepted`
 

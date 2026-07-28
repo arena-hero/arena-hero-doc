@@ -24,8 +24,11 @@ description: Worker、Vanguard 和 Ranger 能做什么，需要多少资源。
 允许的动作：`MOVE`、`HARVEST`、`DEPOSIT`、`PICKUP_BEACON`、`DROP_BEACON`、`WAIT`。
 
 `HARVEST` 要求一个空载 Worker 站在 `RESOURCE` 格上。通常一次采 1 点资源，所属玩家
-持有 Champion Beacon 时采 2 点。资源格不会枯竭，所以同一格上有多个符合条件的
-Worker，每个都能拿满。
+持有 Champion Beacon 时采 2 点；无论哪种情况，都会消耗这一个资源点。
+
+如果同一个 Tick 有多个合格的空载 Worker 采同一个点，只有 UUID 原始字节序最小的
+Worker 成功。资源点只消耗一次，其他竞争者都收到 `HARVEST_FAILED`，reason 是
+`RESOURCE_DEPLETED`。Beacon 不会改变这个胜负顺序。
 
 所谓载重上限，其实就是上一次成功采集拿到的量：平时是 1，有 Beacon 加成时是 2。
 Beacon 丢了也不会把 Worker 身上已经背着的那点加成资源抹掉。

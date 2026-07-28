@@ -129,7 +129,7 @@ toc_max_heading_level: 3
 | `"CORE"` | 一个 Core | `id` |
 | `"UNIT"` | 一个 Worker、Vanguard 或 Ranger | `id` |
 | `"OBSTACLE"` | 所有可见障碍格 | 单个坐标 |
-| `"RESOURCE"` | 所有可见资源格 | 单个坐标 |
+| `"RESOURCE"` | 所有可见且当前可用的资源点 | 单个坐标 |
 
 ```js title="按 kind 分发"
 for (const object of state.objects) {
@@ -150,11 +150,14 @@ for (const object of state.objects) {
 
 | 字段 | 格式 | 含义 |
 |---|---|---|
-| `kind` | `"OBSTACLE"` 或 `"RESOURCE"` | 地形类型。 |
+| `kind` | `"OBSTACLE"` 或 `"RESOURCE"` | 可见地图要素类型。 |
 | `positions` | 非空 `[x, y]` 数组 | 可见格，先按 `x`、再按 `y` 排序。 |
 
-同一种可见地形的所有格子都合并成一项。某个 `kind` 整个不出现，就说明当前一格都
-看不见。地形没有 `id`、没有 `controlled`、没有 HP，也没有资源数量。
+同一种可见要素的所有位置都合并成一项。某个 `kind` 整个不出现，就说明当前没有一个
+位置可见。这些批次没有 `id`、没有 `controlled`、没有 HP，也没有资源数量。
+
+`OBSTACLE` 位置是永久地形。`RESOURCE` 位置表示当前可用，而不是永久地形记忆：一次
+成功采集会消耗这个点，之后的补充可能在区块内其他位置生成替代点。
 
 ### Core
 
@@ -235,12 +238,13 @@ for (const object of state.objects) {
 |---|---|---|
 | 己方 Core 和 Unit | 始终 | 对象格式里的字段全都可见 |
 | 敌方 Core 和 Unit | 所在格当前可见 | 所有者身份；敌方 Worker 的 cargo |
-| 地形 | 所在格当前可见 | 资源数量 |
+| 障碍与资源点 | 所在格当前可见 | 资源数量 |
 | Beacon 位置 | 始终 | 无 |
 | Beacon 状态和携带者 | Beacon 所在格当前可见 | 视野外时两个字段都没有 |
 
-这里没有任何「上次看见」的时间戳，所以你记住的地形要单独存一份，别和服务端当前
-状态混在一起。
+这里没有任何「上次看见」的时间戳。记住的障碍一直有效，但记住的资源点在重新看见
+之前可能已经过期。两类探索记忆都要和服务端当前状态分开；不要把视野外的旧资源坐标
+当成当前仍可用。
 
 ## 更新状态 {#updating-state}
 

@@ -119,8 +119,9 @@ tick(N)
 3. 算出一份计划；
 4. 在当前窗口关闭前把它 POST 出去。
 
-你自己的东西全都在里面。敌方实体和地形只在可见时出现。字段细节看
-[状态模型](./state-model.md)，`events` 看[结算结果](./resolution-results.md)。
+你自己的东西全都在里面。敌方实体、障碍和当前可用资源点只在可见时出现；资源观察在
+视野外可能过期。字段细节看[状态模型](./state-model.md)，`events` 看
+[结算结果](./resolution-results.md)。
 
 ### `received`
 

@@ -50,6 +50,10 @@ with ArenaHeroClient(api_key=api_key) as game:
 2. `turn.submit()` 才会一次性提交完整计划。同一个对象提交前又调用了别的动作方法，
    后一次会顶掉前一次。
 
+`turn.resource_cells` 只包含本 Turn 可见且可用的资源点。成功采集会消耗一个点；多个
+合格 Worker 抢同一个点时，只有最低 UUID 成功，其余 Worker 会在下一份 Turn 收到
+`HARVEST_FAILED`/`RESOURCE_DEPLETED`。
+
 退出 `with` 时，HTTP 和 WebSocket 连接会自动关闭。
 
 ## 异步循环
@@ -116,6 +120,9 @@ turn.events
 
 能用分类好的集合时就直接用。例如 `turn.workers` 只包含自己控制的 Worker，
 `turn.visible_enemies` 包含当前看得到的敌方 Unit 和 Core。
+
+不要把旧的 `resource_cells` 当成永久地图数据。资源会被消耗；区块每结算满 4 个 Tick
+只补回缺少的槽位；视野外新增或消失的点，要等重新看到那格才知道。
 
 `turn.events` 是上一个 Tick 的私有结算结果。之前的命令到底发生了什么，看这里。
 

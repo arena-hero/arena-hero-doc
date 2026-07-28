@@ -45,7 +45,8 @@ description: Arena Hero 规则和 API 页面中常用的术语。
 
 **探索记忆（Exploration memory）**
 
-客户端从旧状态攒下来的知识。其中地形部分一直有效，关于实体的部分则可能早就过期了。
+客户端从旧状态攒下来的知识。记住的障碍一直有效；资源点和实体在重新进入视野前可能
+已经过期。
 
 **Manual**
 
@@ -63,6 +64,16 @@ Core 或 Unit，会占掉一个格子两个容量槽中的一个。Beacon 和地
 **结算结果（Resolution event）**
 
 放在下一条 `state.events` 里的动作结果，而不是一条单独的实时消息。
+
+**资源点（Resource point）**
+
+一个可消耗的地图点。成功采集会移除它，并给 Worker 1 点资源；所属玩家持有 Beacon 时
+给 2 点。每结算满 4 个 Tick，确定性补充只填回各区块缺少的槽位，直到固定配额。
+
+**资源配额（Resource quota）**
+
+一次补充完成后区块固定拥有的可用点数：
+`max(2, floor(16 × 8 / (8 + ring)))`；中央 2×2 个区块属于第 0 环。
 
 **静态验证（Static validation）**
 
@@ -82,7 +93,7 @@ Tick 的命令 gate。
 **地形批次（Terrain batch）**
 
 一个没有 UUID 的 `OBSTACLE` 或 `RESOURCE` 对象，里面的 `positions` 是当前可见的同类
-格子的有序数组。
+位置的有序数组。障碍是永久地形；资源位置表示当前可见且可用。
 
 **世界快照（World snapshot）**
 

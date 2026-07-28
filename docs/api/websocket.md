@@ -121,9 +121,11 @@ When `state` arrives:
 3. compute a plan;
 4. POST it before the current window closes.
 
-Everything you own is in there. Enemy entities and terrain appear only while
-they are visible. For every field, see the [State model](./state-model.md); for
-`events`, see [Resolution results](./resolution-results.md).
+Everything you own is in there. Enemy entities, obstacles, and currently
+available resource points appear only while they are visible. Resource
+observations can become stale outside vision. For every field, see the
+[State model](./state-model.md); for `events`, see
+[Resolution results](./resolution-results.md).
 
 ### `received`
 

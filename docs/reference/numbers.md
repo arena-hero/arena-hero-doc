@@ -11,6 +11,7 @@ description: Look up the current timing, costs, ranges, capacity, and protocol l
 | Rule | Value |
 |---|---:|
 | Global command window | 15 seconds |
+| Resource replenishment | every 4 resolved Ticks (about 1 minute) |
 | Core migration | 4 logical Ticks per cell |
 | Core respawn delay | 20 logical Ticks |
 | WebSocket Ping interval | 20 seconds |
@@ -45,12 +46,23 @@ description: Look up the current timing, costs, ranges, capacity, and protocol l
 | Cell capacity | 2 occupying entities |
 | Terrain kinds | `EMPTY`, `RESOURCE`, `OBSTACLE` |
 | Chunk size | 32×32 |
-| Resource richness scale | 256 |
+| Central chunk ring | the 2×2 chunks with `cx, cy ∈ {-1, 0}` |
+| Resource quota | `max(2, floor(16 × 8 / (8 + ring)))` per chunk |
 | Spawn distance from nearest active Core | 20-30 |
 | Coordinate type | signed int64 `[x, y]` |
 | Beacon start | `[0, 0]` |
 
 ## Economy
+
+```text
+axis(c) = c if c >= 0 else -c - 1
+ring = axis(cx) + axis(cy)
+resource_quota = max(2, floor(16 * 8 / (8 + ring)))
+```
+
+One point yields 1 resource to a normal Worker or 2 to a Beacon player's Worker.
+Either harvest consumes exactly one point. A same-point tie goes to the lowest
+eligible Worker UUID.
 
 ```text
 population = Worker + Vanguard + Ranger

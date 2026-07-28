@@ -49,11 +49,13 @@ Holding the Beacon raises that player's Core shield cap from 5 to 10.
 ## Worker bonus
 
 An eligible empty Worker normally brings back 1 resource. While its owner holds
-the Beacon, it collects and carries 2.
+the Beacon, it collects and carries 2. Either result consumes exactly one
+resource point.
 
 Bonus cargo already on board stays at 2 even after the Beacon is gone, and can be
-deposited in one go. And because resource points are infinite, every eligible
-Worker sharing the cell still collects its full amount.
+deposited in one go. When several eligible Workers harvest the same point, the
+lowest UUID wins the point; the Beacon doubles only the winner's cargo and does
+not grant an extra success or consume a second point.
 
 ## Movement and drop-on-death
 

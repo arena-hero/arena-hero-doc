@@ -239,6 +239,10 @@ components:
     HarvestAction:
       type: object
       additionalProperties: false
+      description: |
+        Attempts to consume the resource point under an empty Worker. When
+        eligible Workers contest one point, only the lowest UUID succeeds; the
+        others receive HARVEST_FAILED with RESOURCE_DEPLETED after resolution.
       required: [type]
       properties:
         type:

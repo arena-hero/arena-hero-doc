@@ -52,6 +52,11 @@ There are two important details:
 2. `turn.submit()` sends the complete plan once. Calling another action method
    for the same object before submission replaces that object's earlier action.
 
+`turn.resource_cells` contains only resource points visible and available in this
+Turn. A successful harvest consumes one point. If several eligible Workers target
+the same point, only the lowest UUID succeeds; the rest receive
+`HARVEST_FAILED`/`RESOURCE_DEPLETED` in the next Turn.
+
 The context manager closes the HTTP and WebSocket connections when the loop
 ends.
 
@@ -122,6 +127,11 @@ turn.events
 Use the filtered collections when possible. For example,
 `turn.workers` contains controlled Workers, while
 `turn.visible_enemies` contains visible enemy Units and Cores.
+
+Do not treat an old `resource_cells` value as permanent map data. Consumed points
+disappear, chunks replenish missing slots every four resolved Ticks, and a new or
+removed point outside current vision remains unknown until you see that cell
+again.
 
 `turn.events` contains the private resolution results from the previous Tick.
 It tells you what actually happened to your earlier commands.

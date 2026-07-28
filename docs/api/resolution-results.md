@@ -73,8 +73,15 @@ it for an attack, and only when at least one participant can be named.
 | `DEPOSIT_SUCCEEDED` | absent | `actor_id`: Worker; `target_id`: Core; `position`: shared cell | `{amount: int}` | All Worker cargo moved into Core resources. |
 | `HARVEST_FAILED` | `NOT_RESOURCE_CELL` | `actor_id`: Worker; `position`: Worker cell | absent | Current terrain is not a resource cell. |
 | `HARVEST_FAILED` | `CARGO_FULL` | `actor_id`: Worker; `position`: Worker cell | absent | Worker already carries resources. |
-| `HARVEST_SUCCEEDED` | absent | `actor_id`: Worker; `position`: Worker cell | `{amount: int}` | Resources loaded into Worker cargo. |
+| `HARVEST_FAILED` | `RESOURCE_DEPLETED` | `actor_id`: Worker; `position`: consumed point | absent | Another eligible empty Worker with a lower UUID won this same point in the Tick. |
+| `HARVEST_SUCCEEDED` | absent | `actor_id`: Worker; `position`: consumed point | `{amount: int}` | One point was consumed and 1 resource, or 2 with the Beacon, was loaded into Worker cargo. |
 | `BEACON_HARVEST_BONUS` | absent | `actor_id`: Worker; `position`: Worker cell | `{amount: int}` | Bonus portion of the harvest granted by carrying the Beacon. |
+
+For every resource position, all eligible empty Workers are ordered by UUID raw
+bytes. Only the lowest UUID succeeds and consumes the point. All other contenders
+receive `RESOURCE_DEPLETED`, even if their player holds the Beacon. Replenishment
+does not create player events; later complete states expose newly available
+points only when they are visible.
 
 ## Combat events
 

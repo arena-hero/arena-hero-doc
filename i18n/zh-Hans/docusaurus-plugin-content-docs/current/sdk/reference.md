@@ -143,8 +143,8 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | `vanguards` | `tuple[Vanguard, ...]` | 自己控制的 Vanguard。 |
 | `rangers` | `tuple[Ranger, ...]` | 自己控制的 Ranger。 |
 | `visible_enemies` | `tuple[UnitView | CoreView, ...]` | 当前可见的敌方对象。 |
-| `terrain` | `tuple[TerrainView, ...]` | 可见的资源和障碍物批次。 |
-| `resource_cells` | `frozenset[Position]` | 当前可见的资源格。 |
+| `terrain` | `tuple[TerrainView, ...]` | 可见障碍与当前可用资源的批次。 |
+| `resource_cells` | `frozenset[Position]` | 仅本 Turn 可见且可用的资源点。 |
 | `obstacle_cells` | `frozenset[Position]` | 当前可见的障碍格。 |
 | `beacon` | `ChampionBeacon` | 经过视野裁剪的信标状态。 |
 | `events` | `tuple[ResolutionEvent, ...]` | 上一个 Tick 的私有结算结果。 |
@@ -194,8 +194,12 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 
 | 方法 | 含义 |
 |---|---|
-| `harvest()` | 采集当前格的资源。 |
+| `harvest()` | 尝试消耗当前格的资源点。 |
 | `deposit()` | 与 Core 同格时，把携带资源存入 Core。 |
+
+一次成功采集消耗一个点。普通赢家携带 1 资源；所属玩家持有 Beacon 的赢家从同一个点
+携带 2。多个合格 Worker 采同一个点时，只有最低 UUID 成功，其他人收到
+`HARVEST_FAILED`，reason 是 `RESOURCE_DEPLETED`。
 
 ### Vanguard
 
@@ -262,7 +266,7 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 |---|---|
 | `UnitView` | `kind`、`id`、`controlled`、`position`、`hp`、`unit_type`、`cargo` |
 | `CoreView` | `kind`、`id`、`controlled`、`position`、`hp`、`shield`、`state`、移动字段 |
-| `TerrainView` | `kind`、`positions` |
+| `TerrainView` | `kind`、`positions`；`RESOURCE` 表示当前可见的可用位置 |
 | `ChampionBeacon` | `position`、`status`、`carrier_id` |
 
 控制类（`Worker`、`Vanguard`、`Ranger`、`Core`）是受控对象的便捷接口。敌方对象仍然是
@@ -283,6 +287,9 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 
 事件名和原因码保留为字符串，这样服务端以后新增值时，旧版 SDK 不会直接崩掉。具体
 含义见[结算结果](../api/resolution-results.md)。
+
+其中 `HARVEST_FAILED`/`RESOURCE_DEPLETED` 表示同 Tick 有 UUID 更低的合格 Worker
+消耗了被竞争的资源点。
 
 ### `Tick`、`Received` 和 `Accepted`
 

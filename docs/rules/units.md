@@ -32,9 +32,13 @@ Allowed actions:
 - `WAIT`
 
 `HARVEST` needs an empty-cargo Worker standing on a `RESOURCE` cell. It picks up
-1 resource, or 2 while its owner holds the Champion Beacon. Resource cells never
-deplete, so if several eligible Workers share one cell they all take a full
-amount.
+1 resource, or 2 while its owner holds the Champion Beacon, and consumes that
+one resource point.
+
+If several eligible empty Workers harvest the same point in one Tick, only the
+Worker with the lowest UUID in raw-byte order succeeds. The point is consumed
+once. Every other contender receives `HARVEST_FAILED` with
+`RESOURCE_DEPLETED`; Beacon ownership does not change the tie-break.
 
 Cargo capacity is really just however much the last successful harvest brought
 in: 1 normally, 2 with the Beacon bonus. Losing the Beacon does not delete bonus
