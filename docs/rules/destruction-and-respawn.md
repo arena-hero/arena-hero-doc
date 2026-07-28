@@ -1,7 +1,7 @@
 ---
-sidebar_position: 8
+sidebar_position: 9
 title: Destruction and respawn
-description: Core destruction consequences, respawn delay, deterministic spawn selection, and restored assets.
+description: What a player loses when the Core is destroyed and how respawning works.
 ---
 
 # Destruction and respawn

@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: 单位
-description: Worker、Vanguard 与 Ranger 的属性、动作、价格和精确限制。
+description: Worker、Vanguard 和 Ranger 能做什么，需要多少资源。
 ---
 
 # 单位
@@ -14,9 +14,10 @@ description: Worker、Vanguard 与 Ranger 的属性、动作、价格和精确�
 |---|---:|---:|---:|---:|---|
 | Worker | 2 | 3 | 5 | 无 | 采集与交付 |
 | Vanguard | 4 | 4 | 10 | 范围 1 格、伤害 1 | 相邻格范围压制 |
-| Ranger | 2 | 5 | 12 | 直线 1–3 格、伤害 1 | 精确远程攻击 |
+| Ranger | 2 | 5 | 12 | 直线 1-3 格、伤害 1 | 精确远程攻击 |
 
-所有 Unit 都可使用 `MOVE`、`PICKUP_BEACON`、`DROP_BEACON` 和 `WAIT`，专属动作会严格校验。
+所有 Unit 都能使用 `MOVE`、`PICKUP_BEACON`、`DROP_BEACON` 和 `WAIT`。其他动作取决于
+Unit 类型。
 
 ## Worker
 
@@ -70,4 +71,5 @@ POST 会接受未见过或不存在的 UUID，避免接口成为战争迷雾探�
 }
 ```
 
-联合结构严格禁止无关字段，即使传 `null`、空字符串或零 UUID 也会以 `UNEXPECTED_ACTION_FIELDS` 拒绝整份计划。
+动作只能包含对应 `type` 需要的字段。多余字段会让整份计划以
+`UNEXPECTED_ACTION_FIELDS` 被拒绝，即使值是 `null`、空字符串或零 UUID。

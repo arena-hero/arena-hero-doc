@@ -1,7 +1,7 @@
 ---
-sidebar_position: 6
+sidebar_position: 8
 title: Combat
-description: Combat snapshot timing, Vanguard sweeps, Ranger shots, simultaneous damage, destruction participation, and privacy.
+description: How sweeps, shots, simultaneous damage, and destruction resolve.
 ---
 
 # Combat
@@ -47,7 +47,7 @@ Several sweeps can hit the same target and their damage adds.
 }
 ```
 
-The Ranger attacks one exact object at distance 1–3 on a horizontal or vertical
+The Ranger attacks one exact object at distance 1-3 on a horizontal or vertical
 line. Every intermediate obstacle, Unit, or Core blocks the shot. The target
 cell itself can contain another colocated object without creating a front/back
 ordering.

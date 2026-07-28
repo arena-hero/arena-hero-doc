@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Core and economy
-description: Core attributes, resources, production, repair, migration, capacity, and upkeep.
+description: How the Core stores resources, creates Units, repairs, moves, and pays upkeep.
 ---
 
 # Core and economy
@@ -107,11 +107,11 @@ upkeep = tier × (tier + 1) / 2
 
 | Population | Tier | Resources per Tick |
 |---:|---:|---:|
-| 0–19 | 0 | 0 |
-| 20–39 | 1 | 1 |
-| 40–59 | 2 | 3 |
-| 60–79 | 3 | 6 |
-| 80–99 | 4 | 10 |
+| 0-19 | 0 | 0 |
+| 20-39 | 1 | 1 |
+| 40-59 | 2 | 3 |
+| 60-79 | 3 | 6 |
+| 80-99 | 4 | 10 |
 
 Upkeep is automatic and consumes no action. If inventory is insufficient,
 inventory becomes zero and each missing resource deals 1 Core damage, shield

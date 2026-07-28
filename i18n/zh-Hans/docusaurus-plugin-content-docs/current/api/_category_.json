@@ -3,6 +3,6 @@
   "position": 4,
   "link": {
     "type": "generated-index",
-    "description": "纯游戏 HTTP 与 WebSocket 协议、状态模型、结算结果和错误恢复。"
+    "description": "WebSocket 消息、命令请求、状态字段、结算结果和错误处理。"
   }
 }

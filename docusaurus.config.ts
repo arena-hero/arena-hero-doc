@@ -3,12 +3,12 @@ import type {Options, ThemeConfig} from '@docusaurus/preset-classic';
 import {themes as prismThemes} from 'prism-react-renderer';
 
 const config: Config = {
-  title: 'Arena Hero Documentation',
-  tagline: 'Official rules and API reference for Arena Hero',
+  title: 'Arena Hero',
+  tagline: 'Rules and API',
   favicon: 'img/favicon.svg',
 
   url: 'https://arena-hero.github.io',
-  baseUrl: '/arena-hero-doc/',
+  baseUrl: '/',
   organizationName: 'arena-hero',
   projectName: 'arena-hero-doc',
   trailingSlash: false,
@@ -44,8 +44,7 @@ const config: Config = {
         hashed: true,
         language: ['en', 'zh'],
         indexDocs: true,
-        indexPages: true,
-        docsRouteBasePath: '/docs',
+        docsRouteBasePath: '/',
         highlightSearchTermsOnTargetPage: true,
         explicitSearchResultPath: true,
       },
@@ -57,9 +56,10 @@ const config: Config = {
       'classic',
       {
         docs: {
-          routeBasePath: 'docs',
+          routeBasePath: '/',
           sidebarPath: './sidebars.ts',
           editUrl: 'https://github.com/arena-hero/arena-hero-doc/edit/main/',
+          editLocalizedFiles: true,
         },
         blog: false,
         theme: {
@@ -74,68 +74,31 @@ const config: Config = {
   ],
 
   themeConfig: {
-    image: 'img/social-card.jpg',
     colorMode: {
-      defaultMode: 'dark',
+      defaultMode: 'light',
       disableSwitch: false,
       respectPrefersColorScheme: true,
     },
     metadata: [
       {
         name: 'description',
-        content: 'Official bilingual rules and HTTP/WebSocket API documentation for Arena Hero.',
+        content: 'Arena Hero rules and game API documentation.',
       },
     ],
     navbar: {
-      title: 'ARENA HERO',
+      title: 'Arena Hero',
       logo: {
         alt: 'Arena Hero',
         src: 'img/logo.svg',
       },
       items: [
-        {type: 'docSidebar', sidebarId: 'docsSidebar', position: 'left', label: 'Documentation'},
-        {to: '/docs/rules/world-and-ticks', label: 'Rules', position: 'left'},
-        {to: '/docs/api/overview', label: 'API', position: 'left'},
         {type: 'localeDropdown', position: 'right'},
-        {href: 'https://app.arenahero.io', label: 'Open Arena', position: 'right'},
         {
           href: 'https://github.com/arena-hero/arena-hero-doc',
+          label: 'GitHub',
           position: 'right',
-          className: 'header-github-link',
-          'aria-label': 'GitHub repository',
         },
       ],
-    },
-    footer: {
-      style: 'dark',
-      links: [
-        {
-          title: 'Rules',
-          items: [
-            {label: 'World and Ticks', to: '/docs/rules/world-and-ticks'},
-            {label: 'Units', to: '/docs/rules/units'},
-            {label: 'Champion Beacon', to: '/docs/rules/champion-beacon'},
-          ],
-        },
-        {
-          title: 'Developers',
-          items: [
-            {label: 'Agent Quickstart', to: '/docs/agent/quickstart'},
-            {label: 'WebSocket Protocol', to: '/docs/api/websocket'},
-            {label: 'OpenAPI', href: 'https://arena-hero.github.io/arena-hero-doc/openapi.yaml'},
-            {label: 'AsyncAPI', href: 'https://arena-hero.github.io/arena-hero-doc/asyncapi.yaml'},
-          ],
-        },
-        {
-          title: 'Arena Hero',
-          items: [
-            {label: 'Play', href: 'https://app.arenahero.io'},
-            {label: 'Server source', href: 'https://github.com/arena-hero/arena-hero'},
-            {label: 'Documentation source', href: 'https://github.com/arena-hero/arena-hero-doc'},
-          ],
-        },
-      ],
-      copyright: `Copyright © ${new Date().getFullYear()} Arena Hero.`,
     },
     prism: {
       theme: prismThemes.github,

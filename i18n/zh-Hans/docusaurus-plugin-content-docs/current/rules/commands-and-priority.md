@@ -1,7 +1,7 @@
 ---
-sidebar_position: 9
+sidebar_position: 5
 title: 指令与优先级
-description: 完整来源计划、Manual/Agent 优先级、替换、校验、幂等和回执。
+description: Agent 和 Manual 计划如何组合、替换、校验和返回结果。
 ---
 
 # 指令与优先级
@@ -14,14 +14,14 @@ description: 完整来源计划、Manual/Agent 优先级、替换、校验、幂
 Manual 显式动作 > Agent 显式动作 > WAIT
 ```
 
-- Agent 计划是完整自动计划；Agent 未列出的对象默认 `WAIT`，除非 Manual 有显式动作。
-- Manual 是完整人工覆盖集合；未列出的对象回退到 Agent。
-- Manual 必须显式 `WAIT` 才能强制对象不行动。
+- Agent 计划包含自动动作。没写的对象使用 `WAIT`，除非 Manual 给了动作。
+- Manual 计划包含人工覆盖。没写的对象回退到 Agent 动作。
+- 玩家想阻止 Agent 动作时，Manual 需要明确发送 `WAIT`。
 - 同一玩家的所有 Agent 客户端共享同一 Agent 槽，多个网页标签共享同一 Manual 槽。
 
-## 完整替换
+## 后一次计划会替换前一次
 
-同来源每次成功 POST 都完整替换上一份计划，服务端从不 patch 或 merge。
+同一来源后提交成功的计划会替换前一份。服务端不会把新旧计划 patch 或 merge。
 
 ```mermaid
 flowchart TD
@@ -32,15 +32,15 @@ flowchart TD
   M2 --> E
 ```
 
-若 Agent 只想修改一个 Unit 但保留其他动作，仍必须重新发送完整期望计划。
+如果 Agent 只想修改一个 Unit，同时保留其他动作，必须把其他动作再发送一次。
 
 ## 静态与动态校验
 
 持久化前静态检查：
 
-- 严格单一 JSON 对象且无未知字段；
+- 一个 JSON object，且不能有未知字段；
 - Tick 为正；
-- Unit key 是规范小写 UUID；
+- Unit key 是小写、带连字符的 UUID；
 - 所有行动 Unit 属于玩家；
 - 动作适用于该 Unit；
 - 必需字段存在、无关字段不存在。
@@ -51,7 +51,8 @@ flowchart TD
 
 ## 顺序与限制
 
-同一 `(player, tick, source)` 的有效请求按进入 gate 的顺序串行处理，后持久化的完整计划覆盖前者。协议没有客户端版本号。
+同一 `(player, tick, source)` 的有效请求按进入 gate 的顺序处理，后保存的计划覆盖前者。
+协议没有客户端版本号。
 
 每个来源槽每 Tick 最多处理 64 个通过幂等预查的新请求；有效与静态非法都计数。超限返回 `429 COMMAND_RATE_LIMITED`，最后有效计划保持不变。
 
@@ -61,4 +62,6 @@ flowchart TD
 - 相同 key + 不同 body：`IDEMPOTENCY_CONFLICT`。
 - 幂等重放不会再次广播 `received`。
 
-新计划成功持久化后，HTTP 返回最小 `202` 元数据；玩家所有实时连接收到完整规范化 `received.plan`。当前 Tick 重连会恢复每个来源最新回执，新 Tick 开始即清空，它不是计划历史。
+计划保存成功后，HTTP 返回精简的 `202` 元数据，玩家所有在线连接都会在
+`received.plan` 中收到服务端保存的计划。当前 Tick 重连时会恢复每个来源的最新回执；
+新 Tick 开始后会清空。这不是计划历史。

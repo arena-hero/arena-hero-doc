@@ -1,7 +1,7 @@
 ---
 sidebar_position: 7
 title: Champion Beacon
-description: 全局坐标、拾取与放下顺序、载体、护盾与采集增益、移动和死亡掉落。
+description: Champion Beacon 如何显示、被携带、掉落并提供加成。
 ---
 
 # Champion Beacon

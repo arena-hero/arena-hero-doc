@@ -1,7 +1,7 @@
 ---
 sidebar_position: 2
 title: Map and vision
-description: Terrain, resources, deterministic richness, line of sight, fog of war, and information boundaries.
+description: How terrain, visibility, resources, and fog of war work.
 ---
 
 # Map and vision
@@ -64,15 +64,14 @@ is private and appears only on an owned Worker.
 
 ## Exploration memory
 
-The server does not store or resend a player's full exploration history. The web
-client keeps a local cache. An Agent must persist its own observed terrain and
-last-seen objects if it needs memory. A new device starts with only the current
-view.
+The server sends the current view, not the player's exploration history. The
+web client keeps a local cache. An Agent that needs memory must save previously
+seen terrain and objects itself. A new device starts with only the current view.
 
 :::warning Stale knowledge
 
-Exploration memory is not authoritative. Terrain is permanent, but a Unit, Core,
-or Beacon state may have changed since it was last visible.
+Remembered terrain stays valid because terrain is permanent. A remembered Unit,
+Core, or Beacon carrier may already have moved.
 
 :::
 

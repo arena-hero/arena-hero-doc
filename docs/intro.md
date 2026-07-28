@@ -1,66 +1,43 @@
 ---
+slug: /
 sidebar_position: 1
 title: Arena Hero
-description: The official entry point for Arena Hero rules and developer documentation.
+description: Learn the Arena Hero rules and connect an Agent to the game.
+hide_table_of_contents: true
 ---
 
 # Arena Hero
 
-Arena Hero is a persistent tactical world shared by human players and local
-Agents. The world does not reset between matches. Every player controls one
-Core and a fleet of Workers, Vanguards, and Rangers. All players act against the
-same authoritative Tick, and every accepted plan resolves deterministically.
+Arena Hero is a persistent grid world. Your Agent reads its current view of the
+world, chooses actions for its Core and Units, and submits one plan each Tick.
 
-:::info Current contract
+Writing an Agent for the first time? Start with the
+[Agent quickstart](./agent/quickstart.md). It takes you through the first
+connection, state message, command request, and receipt.
 
-This site documents rules and API contract **v0.1**, reviewed against
-`arena-hero` server commit `d66476a` on 27 July 2026. The implementation and its
-automated tests enforce the contract; this site is its official public
-explanation.
+If you want to understand the game before writing code, read
+[World and Ticks](./rules/world-and-ticks.md), then keep
+[Rules at a glance](./reference/numbers.md) nearby.
 
-:::
+## What happens each Tick
 
-## Choose your path
+1. The WebSocket sends [`tick`](./api/websocket.md#tick). Save the number and wait.
+2. It sends [`state`](./api/websocket.md#state). Replace your old state and choose your actions.
+3. POST [one plan](./api/commands.md#commandplan-model) for that Tick.
+4. [`received`](./api/websocket.md#received) tells every connected client which plan the server stored.
+5. The next [`state.events`](./api/resolution-results.md) explains how those actions resolved.
 
-| You want to… | Start here |
-|---|---|
-| Understand the game | [World and Ticks](./rules/world-and-ticks.md) |
-| Compare every unit | [Units](./rules/units.md) |
-| Learn movement conflicts | [Movement and stacking](./rules/movement-and-stacking.md) |
-| Build a local Agent | [Agent quickstart](./agent/quickstart.md) |
-| Implement the realtime loop | [WebSocket protocol](./api/websocket.md) |
-| Submit commands safely | [Command API](./api/commands.md) |
-| Inspect exact fields | [State model](./api/state-model.md) |
-| Handle failures | [Errors and recovery](./api/errors.md) |
+The command window lasts 15 seconds for everyone. It opens before your `state`
+arrives, so submit as soon as your plan is ready. A later successful POST from
+the same source replaces the earlier plan.
 
-## The game in one loop
+## Find the page you need
 
-```mermaid
-flowchart LR
-  T["tick<br/>commands closed"] --> S["state<br/>commands open"]
-  S --> P["POST complete plan"]
-  P --> R["received<br/>canonical plan"]
-  R --> L["global lock"]
-  L --> X["deterministic resolution"]
-  X --> T
-```
+- Start or debug a client: [Build an Agent](./agent/quickstart.md)
+- Understand game behavior: [Game rules](./rules/world-and-ticks.md)
+- Look up messages and fields: [Game API](./api/overview.md)
+- Handle a failed request: [Errors and recovery](./api/errors.md)
+- Generate a client: [OpenAPI](pathname:///openapi.yaml) and [AsyncAPI](pathname:///asyncapi.yaml)
 
-The `state` message—not `tick`—is the action trigger. The server opens one
-fixed 15-second global command window, publishes a complete private state to
-each player, persists final plans, and commits the result atomically. Resolution
-time is not part of the next command window.
-
-## Public endpoints
-
-- Web app: [app.arenahero.io](https://app.arenahero.io)
-- HTTP API: `https://api.arenahero.io`
-- WebSocket: `wss://api.arenahero.io/api/v1/game/ws`
-- Server source: [arena-hero/arena-hero](https://github.com/arena-hero/arena-hero)
-- Documentation source: [arena-hero/arena-hero-doc](https://github.com/arena-hero/arena-hero-doc)
-
-## Contract language
-
-The words **must**, **must not**, **required**, **shall**, **shall not**,
-**should**, **should not**, **recommended**, **may**, and **optional** are used
-as normative requirements. Coordinates are signed 64-bit integer pairs
-`[x, y]`. Times on the wire are UTC RFC3339Nano.
+These pages cover public contract v0.1 and were checked against server commit
+[`d66476a`](https://github.com/arena-hero/arena-hero/commit/d66476a).

@@ -11,12 +11,10 @@ info:
     identifier: LicenseRef-Arena-Hero
 externalDocs:
   description: Human-readable game API documentation
-  url: https://arena-hero.github.io/arena-hero-doc/docs/api/overview
+  url: https://arena-hero.github.io/arena-hero-doc/api/overview
 servers:
   - url: https://api.arenahero.io
     description: Production
-  - url: http://localhost:8080
-    description: Local default
 tags:
   - name: Commands
     description: Replace the complete plan for one player, Tick, and source.
@@ -30,8 +28,12 @@ paths:
         Persists one complete source plan during the current OPEN command
         window. A successful response confirms persistence, not dynamic action
         success. Every later successful POST replaces the entire earlier plan
-        from that source. Use the same Idempotency-Key only to retry the exact
-        same body.
+        from that source.
+
+        Idempotency hashes the exact raw request bytes. Reuse the same
+        Idempotency-Key only to retry the byte-identical body; changing
+        whitespace or object-key order counts as a different body. Completed
+        responses are retained for seven days.
       security:
         - bearerAuth: []
       parameters:
@@ -145,7 +147,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/CommandErrorResponse'
+                $ref: '#/components/schemas/RateLimitErrorResponse'
               examples:
                 concurrency:
                   value:
@@ -183,8 +185,8 @@ components:
       in: header
       required: true
       description: |
-        8–128 visible ASCII bytes (0x21–0x7e). Reuse only for an exact-body
-        retry of one logical request.
+        8–128 visible ASCII bytes (0x21–0x7e), so spaces, tabs, and newlines are
+        invalid. Reuse only for a byte-identical retry of one logical request.
       schema:
         type: string
         minLength: 8
@@ -201,18 +203,23 @@ components:
           format: int64
       minItems: 2
       maxItems: 2
+      description: |
+        Exactly [x, y] using signed 64-bit integers. Increasing x moves right;
+        increasing y moves down.
       examples:
         - [120, 85]
     Direction:
       type: string
       enum: [UP, DOWN, LEFT, RIGHT]
+      description: UP=[0,-1], DOWN=[0,1], LEFT=[-1,0], RIGHT=[1,0].
     UnitType:
       type: string
       enum: [WORKER, VANGUARD, RANGER]
     UUID:
       type: string
       format: uuid
-      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'
+      pattern: '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      description: Canonical lowercase hyphenated UUID.
     WaitAction:
       type: object
       additionalProperties: false
@@ -278,6 +285,9 @@ components:
         type:
           const: DROP_BEACON
     UnitAction:
+      description: |
+        Strict discriminator union. A field not listed for the selected type
+        makes the complete plan invalid, even when its value is null or empty.
       oneOf:
         - $ref: '#/components/schemas/WaitAction'
         - $ref: '#/components/schemas/MoveAction'
@@ -331,6 +341,9 @@ components:
     CoreDropBeaconAction:
       $ref: '#/components/schemas/DropBeaconAction'
     CoreAction:
+      description: |
+        Strict discriminator union. A field not listed for the selected type
+        makes the complete plan invalid, even when its value is null or empty.
       oneOf:
         - $ref: '#/components/schemas/CoreWaitAction'
         - $ref: '#/components/schemas/SpawnAction'
@@ -343,14 +356,22 @@ components:
       type: object
       additionalProperties: false
       required: [tick]
+      description: |
+        Complete replacement plan for one source and Tick. Omitted Unit and
+        Core actions default to WAIT unless an explicit higher-precedence
+        source supplies that action.
       properties:
         tick:
           type: integer
           format: int64
           minimum: 1
+          description: Must equal the Tick from the state used to compute this plan.
         unit_actions:
           type: object
           default: {}
+          description: |
+            Map from canonical lowercase owned Unit UUID to one strict
+            UnitAction. Omit the field or use {} when no Unit acts.
           propertyNames:
             $ref: '#/components/schemas/UUID'
           additionalProperties:
@@ -364,23 +385,29 @@ components:
       properties:
         accepted:
           const: true
+          description: Confirms durable persistence, not dynamic action success.
         tick:
           type: integer
           format: int64
+          description: Tick whose source plan was replaced.
         source:
           type: string
           enum: [AGENT, MANUAL]
+          description: Source slot that was replaced.
         received_at:
           type: string
           format: date-time
+          description: UTC database persistence timestamp in RFC 3339 format.
     ErrorResponse:
       type: object
       required: [error]
       properties:
         error:
           type: string
+          description: Stable machine-readable error code.
         message:
           type: string
+          description: Optional safe human-readable explanation. Do not branch on it.
       additionalProperties: true
     CommandErrorResponse:
       type: object
@@ -390,12 +417,29 @@ components:
           type: boolean
         error:
           type: string
+          enum:
+            - COMMAND_WINDOW_CLOSED
+            - TICK_MISMATCH
+            - TICK_NOT_READY
+            - COMMAND_RATE_LIMITED
+            - IDEMPOTENCY_CONFLICT
         tick:
           type: integer
           format: int64
         current_tick:
           type: integer
           format: int64
+      additionalProperties: false
+    RateLimitErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        accepted:
+          const: false
+          description: Present for the per-source Tick rate limit; absent for body concurrency.
+        error:
+          type: string
+          enum: [COMMAND_CONCURRENCY_LIMIT, COMMAND_RATE_LIMITED]
       additionalProperties: false
     ValidationIssue:
       type: object
@@ -406,6 +450,24 @@ components:
           $ref: '#/components/schemas/UUID'
         reason:
           type: string
+          enum:
+            - TICK_MUST_BE_POSITIVE
+            - UNIT_NOT_OWNED
+            - UNKNOWN_ACTION_TYPE
+            - UNKNOWN_CORE_ACTION_TYPE
+            - UNEXPECTED_ACTION_FIELDS
+            - INVALID_DIRECTION
+            - INVALID_UNIT_TYPE
+            - TARGET_ID_REQUIRED
+            - EXPECTED_CELL_REQUIRED
+            - VANGUARD_CANNOT_HARVEST
+            - RANGER_CANNOT_HARVEST
+            - VANGUARD_CANNOT_DEPOSIT
+            - RANGER_CANNOT_DEPOSIT
+            - WORKER_CANNOT_SWEEP
+            - RANGER_CANNOT_SWEEP
+            - WORKER_CANNOT_SHOOT
+            - VANGUARD_CANNOT_SHOOT
     ValidationErrorResponse:
       type: object
       additionalProperties: false

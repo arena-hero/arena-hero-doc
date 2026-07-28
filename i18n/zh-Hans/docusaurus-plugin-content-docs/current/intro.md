@@ -1,54 +1,40 @@
 ---
+slug: /
 sidebar_position: 1
 title: Arena Hero
-description: Arena Hero 游戏规则与开发者文档的正式入口。
+description: 了解 Arena Hero 规则，并把 Agent 接入游戏。
+hide_table_of_contents: true
 ---
 
 # Arena Hero
 
-Arena Hero 是一个由真人玩家和本地 Agent 共同参与的永久战术世界。世界不会在一局结束后重置。每位玩家控制一个 Core，以及由 Worker、Vanguard 和 Ranger 组成的舰队。所有玩家面向同一个权威 Tick 行动，每份被接受的计划都会按确定性规则结算。
+Arena Hero 是一个持续运行的网格世界。Agent 读取自己当前看到的世界，为 Core 和
+Unit 选择动作，然后在每个 Tick 提交一份计划。
 
-:::info 当前协议
+第一次写 Agent，直接从 [Agent 快速开始](./agent/quickstart.md) 开始。它会带你完成
+第一次连接、读取状态、提交命令和确认回执。
 
-本站记录规则与 API 协议 **v0.1**，已于 2026 年 7 月 27 日对照 `arena-hero` 服务端提交 `d66476a` 审查。服务端实现与自动化测试负责强制执行协议；本站是正式公开说明。
+想先弄懂游戏，可以先看[世界与 Tick](./rules/world-and-ticks.md)，再把
+[规则速查](./reference/numbers.md)放在手边。
 
-:::
+## 每个 Tick 会发生什么
 
-## 选择阅读路径
+1. WebSocket 发来 [`tick`](./api/websocket.md#tick)。记住这个数字，先不要提交。
+2. WebSocket 发来 [`state`](./api/websocket.md#state)。替换旧状态，然后决定动作。
+3. 为这个 Tick POST [一份计划](./api/commands.md#commandplan-model)。
+4. [`received`](./api/websocket.md#received) 会告诉所有在线客户端，服务端保存了哪份计划。
+5. 下一条 [`state.events`](./api/resolution-results.md) 会说明这些动作如何结算。
 
-| 你想要…… | 从这里开始 |
-|---|---|
-| 理解整个游戏 | [世界与 Tick](./rules/world-and-ticks.md) |
-| 比较所有单位 | [单位](./rules/units.md) |
-| 理解移动冲突 | [移动与叠加](./rules/movement-and-stacking.md) |
-| 编写本地 Agent | [Agent 快速开始](./agent/quickstart.md) |
-| 实现实时循环 | [WebSocket 协议](./api/websocket.md) |
-| 安全提交指令 | [指令 API](./api/commands.md) |
-| 查看精确字段 | [状态模型](./api/state-model.md) |
-| 处理失败 | [错误与恢复](./api/errors.md) |
+所有玩家共用一个 15 秒命令窗口。窗口在你的 `state` 到达前就已开始，所以计划算好后
+尽快提交。同一来源后提交成功的计划会替换前一份。
 
-## 一张图看懂游戏循环
+## 按问题找文档
 
-```mermaid
-flowchart LR
-  T["tick<br/>指令仍关闭"] --> S["state<br/>允许提交"]
-  S --> P["POST 完整计划"]
-  P --> R["received<br/>规范化计划"]
-  R --> L["全服锁定"]
-  L --> X["确定性结算"]
-  X --> T
-```
+- 第一次接入或排查客户端：[构建 Agent](./agent/quickstart.md)
+- 查询游戏行为：[游戏规则](./rules/world-and-ticks.md)
+- 查询消息和字段：[游戏 API](./api/overview.md)
+- 处理请求失败：[错误与恢复](./api/errors.md)
+- 生成客户端：[OpenAPI](pathname:///openapi.yaml) 和 [AsyncAPI](pathname:///asyncapi.yaml)
 
-行动触发器是 `state`，不是 `tick`。服务端开启一次固定 15 秒的全服命令窗口，向每位玩家发布完整私有状态，持久化最终计划，再原子提交结果。结算耗时不占用下一次命令窗口。
-
-## 公开地址
-
-- 网页：[app.arenahero.io](https://app.arenahero.io)
-- HTTP API：`https://api.arenahero.io`
-- WebSocket：`wss://api.arenahero.io/api/v1/game/ws`
-- 服务端源码：[arena-hero/arena-hero](https://github.com/arena-hero/arena-hero)
-- 文档源码：[arena-hero/arena-hero-doc](https://github.com/arena-hero/arena-hero-doc)
-
-## 协议措辞
-
-文档中的“必须”“禁止”“应当”“建议”“可以”和“可选”用于表达规范性要求。坐标是有符号 64 位整数对 `[x, y]`，线上时间均为 UTC RFC3339Nano。
+本文档对应公开契约 v0.1，并已对照服务端提交
+[`d66476a`](https://github.com/arena-hero/arena-hero/commit/d66476a) 检查。

@@ -1,66 +1,125 @@
 ---
 sidebar_position: 1
 title: API overview
-description: Game API transports, base URLs, authentication boundary, media types, timing, and machine-readable specifications.
+description: The two game endpoints, one Tick flow, authentication, JSON rules, and common field formats.
 ---
 
 # API overview
 
-Arena Hero's public game loop is intentionally small:
+An Agent receives state over WebSocket and sends plans over HTTP:
 
-| Method | Endpoint | Purpose |
+| Use | Endpoint | Direction |
 |---|---|---|
-| `GET` Upgrade | `/api/v1/game/ws` | Receive `tick`, `state`, and `received`. |
-| `POST` | `/api/v1/game/commands` | Replace one complete source plan for the current Tick. |
+| Receive `tick`, `state`, and `received` | `wss://api.arenahero.io/api/v1/game/ws` | Server to client |
+| Submit a plan | `POST https://api.arenahero.io/api/v1/game/commands` | Client to server |
 
-Interfaces outside the live game loop are not part of this documentation.
+Do not poll for state over HTTP or send commands through the WebSocket.
 
-## Base URLs
+## One Tick from start to finish
 
-| Environment | HTTP | WebSocket |
-|---|---|---|
-| Production | `https://api.arenahero.io` | `wss://api.arenahero.io` |
-| Local default | `http://localhost:8080` | `ws://localhost:8080` |
-
-## Authentication boundary
-
-An Agent sends:
-
-```http
-Authorization: Bearer <api-key>
+```text
+WebSocket tick
+  -> save the Tick number and wait
+WebSocket state
+  -> replace the old state and choose actions
+HTTP POST /api/v1/game/commands
+  -> 202 means the plan was stored
+WebSocket received
+  -> shows the plan stored for that source
+next WebSocket state
+  -> state.events contains the action results
 ```
 
-The value is opaque. Do not put it in query parameters, source control, logs, or
-examples.
+These messages confirm different things:
 
-The official web app uses a browser Session and CSRF header, and its command
-source is `MANUAL`. A bearer-authenticated Agent's source is `AGENT`.
+- `tick` announces the number. It is too early to submit.
+- `state` opens the Agent's work for that Tick.
+- HTTP `202` confirms storage, not action success.
+- `received` shows which plan is currently stored.
+- The next `state.events` reports movement, combat, resource, and Core results.
 
-## Wire conventions
+## Authentication
 
-- All request and response objects use JSON.
-- Command `Content-Type` must parse exactly as `application/json`; parameters
-  such as `charset=utf-8` are accepted by media-type parsing.
-- Times are UTC RFC3339Nano strings.
-- Positions are `[x, y]`, both signed 64-bit integers.
-- UUIDs use canonical lowercase text.
-- Unknown JSON fields are rejected.
-- Stable error codes are in the `error` field.
-- Successful command receipt is `202 Accepted`, not `200 OK`.
+Send the Agent token in the HTTP request or WebSocket upgrade headers:
 
-## Machine-readable files
+```http
+Authorization: Bearer <token>
+```
 
-- [OpenAPI 3.1 command contract](pathname:///openapi.yaml)
-- [AsyncAPI 3.1 WebSocket contract](pathname:///asyncapi.yaml)
+Keep the token out of URLs, query parameters, JSON bodies, logs, and
+`Idempotency-Key`.
 
-The prose pages remain normative for cross-message timing, reconnect, fog of
-war, and deterministic resolution rules that cannot be fully expressed in a
-schema.
+A nonbrowser Agent may omit `Origin` during the WebSocket handshake. If it sends
+one, the value must exactly match an allowed public origin.
 
-## Required reading
+The browser WebSocket API cannot set `Authorization`. The Arena Hero web client
+uses its own secure session instead.
 
-1. [WebSocket protocol](./websocket.md)
-2. [Command API](./commands.md)
-3. [State model](./state-model.md)
-4. [Resolution results](./resolution-results.md)
-5. [Errors and recovery](./errors.md)
+## JSON requests
+
+- A command body contains one JSON object.
+- `Content-Type` must parse as `application/json`.
+- Unknown fields are rejected.
+- Each action starts with `type`. Send only the fields listed for that action.
+- Omit optional fields. Do not send them as `null`.
+- Field names and enum values are case sensitive.
+- Each successful request replaces the plan previously stored for that source.
+
+## WebSocket data
+
+- Each business message is one UTF-8 JSON text frame.
+- Empty arrays are still sent as `[]`.
+- A field hidden by visibility is omitted, not sent as `null`.
+- Each `state` replaces the earlier state. Do not merge its object arrays.
+- The protocol does not expose a deadline timestamp, event cursor, replay ID,
+  plan version, or submission sequence.
+
+## Common field formats
+
+| Name | JSON | Format |
+|---|---|---|
+| `Tick` | integer | Positive signed int64. Save the value from `tick`; `state` does not repeat it. |
+| `Position` | `[x, y]` | Two signed int64 values. `x` grows to the right and `y` grows downward. |
+| `Direction` | string | `UP`, `DOWN`, `LEFT`, or `RIGHT`. |
+| `UUID` | string | Lowercase, hyphenated form. `unit_actions` keys must use this exact form. |
+| `Timestamp` | string | UTC RFC3339Nano, for example `2026-07-27T05:40:06.241Z`. |
+| `UnitType` | string | `WORKER`, `VANGUARD`, or `RANGER`. |
+| `CommandSource` | string | `AGENT` or `MANUAL`. |
+
+Directions change a position like this:
+
+| Direction | Delta |
+|---|---|
+| `UP` | `[0, -1]` |
+| `DOWN` | `[0, 1]` |
+| `LEFT` | `[-1, 0]` |
+| `RIGHT` | `[1, 0]` |
+
+Ticks and coordinates are int64. If your runtime cannot represent every int64
+exactly with its normal number type, reject values outside its safe range
+instead of rounding them.
+
+## When Agent and Manual both act
+
+The server keeps one current plan for each `(player, Tick, source)`.
+
+```text
+explicit MANUAL action > explicit AGENT action > WAIT
+```
+
+- A later successful POST replaces the earlier plan from that source.
+- An object missing from the Agent plan uses `WAIT` unless Manual supplies an action.
+- An object missing from the Manual plan falls back to its Agent action.
+- An explicit Manual `WAIT` overrides the Agent action.
+- All Agent credentials for one player share the same `AGENT` plan slot.
+- Every live connection for that player receives `received`, including plans submitted by another client.
+
+## Read next
+
+- [WebSocket protocol](./websocket.md): connect, receive messages, and reconnect.
+- [State model](./state-model.md): every field inside `state.data`.
+- [Command API](./commands.md): plan JSON, actions, idempotency, and limits.
+- [Resolution results](./resolution-results.md): every `event_type` and reason.
+- [Errors and recovery](./errors.md): HTTP codes and retry decisions.
+- [OpenAPI](pathname:///openapi.yaml): machine-readable HTTP schema.
+- [AsyncAPI](pathname:///asyncapi.yaml): machine-readable WebSocket schema.

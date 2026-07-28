@@ -1,8 +1,8 @@
 {
   "label": "Agent 开发",
-  "position": 3,
+  "position": 2,
   "link": {
     "type": "generated-index",
-    "description": "连接实时协议、提交完整计划，并实现可恢复的自动 Agent。"
+    "description": "接入 Agent，提交第一份计划，并让它稳定运行。"
   }
 }

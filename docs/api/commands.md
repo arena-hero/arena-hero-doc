@@ -1,23 +1,20 @@
 ---
-sidebar_position: 3
+sidebar_position: 4
 title: Command API
-description: Complete command request and receipt schemas, strict action unions, replacement, idempotency, validation, and limits.
+description: Submit a plan, choose Unit and Core actions, retry safely, and understand replacement and limits.
 ---
 
 # Command API
 
+Send one plan after each `state` message:
+
 ```http
-POST /api/v1/game/commands
-Authorization: Bearer <api-key>
-Idempotency-Key: <8..128 visible ASCII bytes>
+POST /api/v1/game/commands HTTP/1.1
+Host: api.arenahero.io
+Authorization: Bearer <token>
+Idempotency-Key: agent-10583-plan-01
 Content-Type: application/json
 ```
-
-The maximum configured production command body is part of server deployment;
-clients should keep plans compact. Oversized bodies return
-`REQUEST_BODY_TOO_LARGE`.
-
-## Request
 
 ```json
 {
@@ -36,51 +33,155 @@ clients should keep plans compact. Oversized bodies return
 }
 ```
 
-### Plan fields
+An Agent request replaces the player's current `AGENT` plan. Send it only after
+the `state` for that Tick arrives.
 
-| Field | Type | Required | Rule |
+## Headers
+
+| Header | Required | Format | What it does |
+|---|---:|---|---|
+| `Authorization` | Yes | `Bearer <token>` | Identifies the Agent. |
+| `Content-Type` | Yes | `application/json` | `charset=utf-8` and other parameters are allowed. |
+| `Idempotency-Key` | Yes | 8-128 bytes in ASCII `0x21`-`0x7e` | Identifies this request and its exact body. |
+
+The maximum body size depends on the deployment. A body over that limit returns
+`413 REQUEST_BODY_TOO_LARGE`.
+
+## Plan body {#commandplan-model}
+
+| Field | JSON type | Required | What to send |
 |---|---|---:|---|
-| `tick` | positive int64 | Yes | Must equal the current command Tick. |
-| `unit_actions` | object keyed by canonical Unit UUID | No | Only Units owned by the caller. Omitted or empty means no explicit Unit actions; `{}` is recommended. |
-| `core_action` | Core action or omitted | No | Omitted means no explicit action from this source. |
+| `tick` | integer | Yes | The positive int64 from the latest `tick` message. |
+| `unit_actions` | object | No | Unit UUIDs mapped to actions. Use `{}` when no Unit acts. |
+| `core_action` | object | No | One Core action. Omit it when the Agent has no Core action. |
 
-Each POST is a full replacement of that source's previous plan.
+`unit_actions` is an object, not an array. Each key must be the lowercase,
+hyphenated UUID of a living Unit owned by the player. Never generate duplicate
+JSON keys.
 
-## Unit action unions
+### A POST replaces the earlier plan
 
-| Type | Allowed Unit | Required fields |
+Suppose the stored Agent plan says:
+
+```text
+Unit A: MOVE
+Unit B: HARVEST
+```
+
+The next body contains only:
+
+```text
+Unit A: WAIT
+```
+
+The stored Agent plan now contains `WAIT` for Unit A and no action for Unit B.
+Unit B also resolves to `WAIT` unless the Manual source supplies an action. The
+server does not copy missing actions from the previous Agent plan.
+
+## Unit actions
+
+Read `type` first. Send only the fields shown in that row.
+
+| `type` | Unit | JSON | What happens during resolution |
+|---|---|---|---|
+| `WAIT` | Any | `{"type":"WAIT"}` | The Unit does nothing. |
+| `MOVE` | Any | `{"type":"MOVE","direction":"RIGHT"}` | The Unit tries to move one cardinal cell. |
+| `HARVEST` | Worker | `{"type":"HARVEST"}` | Loads 1 resource, or 2 while the player holds the Beacon. |
+| `DEPOSIT` | Worker | `{"type":"DEPOSIT"}` | Moves all cargo into the player's Core on the same cell. |
+| `SWEEP` | Vanguard | `{"type":"SWEEP","direction":"UP"}` | Deals 1 damage to each enemy entity in the adjacent cell. |
+| `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | Tries to hit that target at that cell from cardinal range 1-3. |
+| `PICKUP_BEACON` | Any | `{"type":"PICKUP_BEACON"}` | Tries to pick up the ground Beacon on the actor's cell. |
+| `DROP_BEACON` | Any | `{"type":"DROP_BEACON"}` | The current carrier tries to drop the Beacon. |
+
+### Moving
+
+`direction` must be `UP`, `DOWN`, `LEFT`, or `RIGHT`.
+
+The server checks terrain, other movement, occupancy, swaps, dependencies, and
+cell capacity during resolution. If the move fails, the next state contains
+`UNIT_MOVE_FAILED`.
+
+### Harvesting and depositing
+
+Only a Worker can use these actions.
+
+- `HARVEST` needs an empty Worker on a `RESOURCE` cell.
+- Resource cells never run out.
+- `DEPOSIT` needs a Worker with cargo and the player's Core on the same cell.
+- A Core cannot receive a deposit during a migration-restricted Tick.
+- A failed deposit leaves the cargo on the Worker.
+
+### Sweeping
+
+`SWEEP` targets the adjacent cell in `direction`. Every enemy Unit and Core in
+that cell takes 1 damage. Sweeping an empty cell still succeeds and reports
+`targets_hit: 0`.
+
+### Shooting
+
+A shot needs both fields:
+
+| Field | Format | Meaning |
 |---|---|---|
-| `WAIT` | all | none |
-| `MOVE` | all | `direction` |
-| `HARVEST` | Worker | none |
-| `DEPOSIT` | Worker | none |
-| `SWEEP` | Vanguard | `direction` |
-| `SHOOT` | Ranger | `target_id`, `expected_cell` |
-| `PICKUP_BEACON` | all | none |
-| `DROP_BEACON` | all | none |
+| `target_id` | UUID | The Unit or Core the Ranger is trying to hit. |
+| `expected_cell` | `[x, y]` | Where the Agent expects that target to be during resolution. |
 
-`direction` is `UP`, `DOWN`, `LEFT`, or `RIGHT`.
+The target must still be an enemy at `expected_cell`, on the same row or column,
+at range 1-3. No obstacle or entity may sit between the Ranger and the target.
 
-## Core action unions
+Every dynamic failure returns the same event:
+`{"event_type":"SHOT_MISSED","reason_code":"SHOT_MISSED"}`. The result does not
+reveal whether the target moved, was friendly, was out of range, or was hidden
+behind something.
 
-| Type | Required fields |
-|---|---|
-| `WAIT` | none |
-| `SPAWN` | `unit_type`: `WORKER`, `VANGUARD`, or `RANGER` |
-| `REPAIR_SHIELD` | none |
-| `START_MOVE` | `direction` |
-| `CANCEL_MOVE` | none |
-| `PICKUP_BEACON` | none |
-| `DROP_BEACON` | none |
+### Picking up and dropping the Beacon
 
-Fields not defined for the selected union are forbidden even when set to
-`null`, empty text, or a zero value.
+Any Unit can use the two Beacon actions.
 
-## Success
+- The ground Beacon must be on the actor's cell for pickup.
+- Only the current carrier can drop it.
+- A living carrier cannot be robbed.
+- If several actors try to pick it up, the lowest UUID by raw byte order wins.
+- A Beacon carried at the start of a Tick cannot be dropped and picked up again in that Tick.
+
+## Core actions
+
+| `type` | JSON | What happens during resolution |
+|---|---|---|
+| `WAIT` | `{"type":"WAIT"}` | No new Core action. An existing migration continues. |
+| `SPAWN` | `{"type":"SPAWN","unit_type":"WORKER"}` | Pays the cost and creates one Unit on the Core cell. |
+| `REPAIR_SHIELD` | `{"type":"REPAIR_SHIELD"}` | Pays 1 resource to restore 1 shield, up to the current cap. |
+| `START_MOVE` | `{"type":"START_MOVE","direction":"LEFT"}` | Starts a four-Tick migration to an adjacent empty cell. |
+| `CANCEL_MOVE` | `{"type":"CANCEL_MOVE"}` | Stops the current migration and clears its progress. |
+| `PICKUP_BEACON` | `{"type":"PICKUP_BEACON"}` | A normal Core tries to pick up the Beacon on its cell. |
+| `DROP_BEACON` | `{"type":"DROP_BEACON"}` | A carrier Core tries to drop the Beacon. |
+
+`unit_type` must be `WORKER`, `VANGUARD`, or `RANGER`. Their current costs are
+5, 10, and 12 resources.
+
+A moving Core may continue with `WAIT` or stop with `CANCEL_MOVE`. Any other
+Core action fails with `CORE_ALREADY_MOVING`. `CANCEL_MOVE` fails with
+`CORE_NOT_MOVING` when the Core is not moving.
+
+## Extra fields make an action invalid
+
+An action may contain only the fields listed for its `type`. All of these
+examples reject the whole plan:
+
+```json
+{"type":"WAIT","direction":"UP"}
+{"type":"HARVEST","target_id":null}
+{"type":"MOVE","direction":"UP","expected_cell":[1,2]}
+{"type":"SPAWN","unit_type":"WORKER","direction":""}
+```
+
+These usually return the validation reason `UNEXPECTED_ACTION_FIELDS`.
+
+## Accepted response
 
 ```http
 HTTP/1.1 202 Accepted
-Content-Type: application/json
+Content-Type: application/json; charset=utf-8
 ```
 
 ```json
@@ -92,48 +193,57 @@ Content-Type: application/json
 }
 ```
 
-This confirms persistence of the full source plan. It does not guarantee
-dynamic action success. The full canonical plan arrives over WebSocket
-`received`.
+`202` means the plan was stored. It does not mean its actions succeeded. The
+WebSocket [`received`](./websocket.md#received) message contains the plan the
+server stored, and the next [`state.events`](./resolution-results.md) contains
+the action results.
 
-## Static rejection
+A rejected request leaves the last valid plan in place.
 
-```http
-HTTP/1.1 422 Unprocessable Entity
-```
+## Safe retries
 
-```json
-{
-  "accepted": false,
-  "error": "INVALID_COMMAND",
-  "details": [
-    {
-      "unit_id": "9d3e4941-2816-4a39-a220-df8cd95e877d",
-      "reason": "INVALID_DIRECTION"
-    }
-  ]
-}
-```
+The idempotency key may contain 8-128 visible ASCII bytes (`0x21`-`0x7e`).
+Spaces, tabs, and line breaks are not allowed.
 
-The whole request is rejected and the previous valid plan remains active.
-
-## Idempotency
-
-The key must contain 8–128 visible ASCII bytes (`0x21`–`0x7e`) and no whitespace
-or line breaks.
-
-| Reuse | Result |
+| What you send | What the server does |
 |---|---|
-| Same key, byte-identical body | Return the original stored response. |
-| Same key, different body | `409 IDEMPOTENCY_CONFLICT`. |
-| New key | Process as a new replacement request. |
+| Same key and byte-for-byte identical body | Returns the stored response. It does not store or broadcast the plan again. |
+| Same key and equivalent JSON with different whitespace or key order | Returns `409 IDEMPOTENCY_CONFLICT`. |
+| Same key and different data | Returns `409 IDEMPOTENCY_CONFLICT`. |
+| New key | Handles it as a new plan replacement. |
 
-Use the same key only to retry one logical request whose outcome is unknown.
+If the connection drops after upload and you do not know the result, retry the
+exact same bytes with the same key. Use a new key only after making a new plan.
+
+## What the server checks
+
+```text
+authentication
+-> concurrent body limit
+-> media type and Idempotency-Key
+-> body size and JSON shape
+-> Tick window and request rate
+-> Unit and Core action fields
+-> store the replacement plan
+-> return 202 and send received
+-> resolve the game
+-> send results in the next state.events
+```
+
+Any error before storage rejects the whole body. A failure during game
+resolution does not bring back an older plan and does not change the earlier
+`202`.
 
 ## Concurrency and rate limits
 
-- At most four command bodies may be read concurrently for one
-  `(player, credential kind)`. Excess returns `COMMAND_CONCURRENCY_LIMIT`.
-- One `(player, tick, source)` processes at most 64 new requests after
-  idempotency precheck. Excess returns `COMMAND_RATE_LIMITED`.
-- Valid same-slot requests serialize by gate-entry order.
+- The server reads at most four command bodies at once for one
+  `(player, credential kind)`. Extra requests return
+  `429 COMMAND_CONCURRENCY_LIMIT` with `Retry-After: 1`.
+- One `(player, Tick, source)` may make at most 64 new admissions after the
+  idempotency check. Invalid commands count. Extra requests return
+  `429 COMMAND_RATE_LIMITED`.
+- Valid requests for the same plan slot are handled in gate-entry order. The
+  last successful plan replaces the earlier one.
+
+See [Errors and recovery](./errors.md) for every HTTP error and validation
+reason.

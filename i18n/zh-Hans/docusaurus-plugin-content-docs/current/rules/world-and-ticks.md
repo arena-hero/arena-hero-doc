@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: 世界与 Tick
-description: 永久世界身份、确定性地图生成、Tick 时序、结算顺序与崩溃恢复。
+description: 共享世界如何推进 Tick，并在崩溃后恢复。
 ---
 
 # 世界与 Tick
@@ -41,10 +41,10 @@ sequenceDiagram
 
   A-->>C: tick N
   Note over A,G: 指令仍关闭
-  A->>A: 构建完整私有状态
+  A->>A: 构建每个玩家的状态
   A->>G: 开启全服 15 秒窗口
   A-->>C: Tick N 的 state
-  C->>A: POST 完整计划
+  C->>A: POST 计划
   A->>D: 持久化来源计划
   A-->>C: HTTP 202
   A-->>C: received
@@ -80,7 +80,7 @@ sequenceDiagram
 
 一个 Tick 的结果在一个 PostgreSQL 事务中提交。客户端不能看到部分结算的世界。规则引擎不得使用 map 遍历顺序、墙上时间、进程随机数或无序数据库结果决定胜负。
 
-相同权威世界和相同锁定计划必须产生逐字节一致的规则结果。
+相同世界状态和锁定计划会产生逐字节相同的规则结果。
 
 ## 崩溃恢复
 

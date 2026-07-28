@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: World and Ticks
-description: Persistent-world identity, deterministic map generation, Tick timing, resolution order, and recovery.
+description: How the shared world advances from one Tick to the next and recovers after a crash.
 ---
 
 # World and Ticks
@@ -25,7 +25,7 @@ the world through deterministic respawn processing at that Tick.
 The server generates 32×32 chunks from a permanent secret world seed and a
 versioned HMAC-SHA256 contract. A client never receives the seed.
 
-Important consequences:
+This gives clients a few useful guarantees:
 
 - The same world, generator version, balance, and coordinates always produce
   the same terrain.
@@ -51,10 +51,10 @@ sequenceDiagram
 
   A-->>C: tick N
   Note over A,G: Commands still closed
-  A->>A: Build complete private states
+  A->>A: Build each player's state
   A->>G: Open global 15-second window
   A-->>C: state for Tick N
-  C->>A: POST complete plan
+  C->>A: POST plan
   A->>D: Persist source plan
   A-->>C: HTTP 202
   A-->>C: received
@@ -99,8 +99,8 @@ cannot observe a partially resolved world. The engine must not use map
 iteration order, wall-clock time, process randomness, or unordered database
 results to decide an outcome.
 
-For the same authoritative world and locked input plans, resolution must produce
-the same rule result byte for byte.
+The same world state and locked plans produce the same rule result byte for
+byte.
 
 ## Crash recovery
 

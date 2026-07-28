@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: Rules at a glance
-description: Compact balance, timing, capacity, range, cost, and protocol-limit tables for Arena Hero v0.1.
+description: Look up the current timing, costs, ranges, capacity, and protocol limits.
 ---
 
 # Rules at a glance
@@ -36,7 +36,7 @@ description: Compact balance, timing, capacity, range, cost, and protocol-limit 
 |---|---:|---:|---:|---|
 | Worker | 2 | 3 | 5 | none |
 | Vanguard | 4 | 4 | 10 | 1 to adjacent target cell |
-| Ranger | 2 | 5 | 12 | 1 at cardinal range 1–3 |
+| Ranger | 2 | 5 | 12 | 1 at cardinal range 1-3 |
 
 ## World
 
@@ -46,7 +46,7 @@ description: Compact balance, timing, capacity, range, cost, and protocol-limit 
 | Terrain kinds | `EMPTY`, `RESOURCE`, `OBSTACLE` |
 | Chunk size | 32×32 |
 | Resource richness scale | 256 |
-| Spawn distance from nearest active Core | 20–30 |
+| Spawn distance from nearest active Core | 20-30 |
 | Coordinate type | signed int64 `[x, y]` |
 | Beacon start | `[0, 0]` |
 
@@ -60,18 +60,18 @@ upkeep = tier × (tier + 1) / 2
 
 | Population | Upkeep |
 |---:|---:|
-| 0–19 | 0 |
-| 20–39 | 1 |
-| 40–59 | 3 |
-| 60–79 | 6 |
-| 80–99 | 10 |
-| 100–119 | 15 |
+| 0-19 | 0 |
+| 20-39 | 1 |
+| 40-59 | 3 |
+| 60-79 | 6 |
+| 80-99 | 10 |
+| 100-119 | 15 |
 
 ## Commands
 
 | Limit | Value |
 |---|---:|
-| Idempotency key | 8–128 visible ASCII bytes |
+| Idempotency key | 8-128 visible ASCII bytes |
 | New submissions per `(player, tick, source)` | 64 |
 | Concurrent command bodies per credential kind | 4 |
 | WebSocket inbound frame limit | 1024 bytes |

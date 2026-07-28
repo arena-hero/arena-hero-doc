@@ -1,7 +1,7 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 title: Movement and stacking
-description: Cardinal movement, two-entity capacity, contested destinations, swaps, chains, cycles, and Core migration.
+description: How contested movement, cell capacity, swaps, and Core migrations resolve.
 ---
 
 # Movement and stacking

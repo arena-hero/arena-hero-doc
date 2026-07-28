@@ -1,18 +1,18 @@
 ---
 sidebar_position: 2
 title: 术语表
-description: Arena Hero 游戏与协议的规范术语。
+description: Arena Hero 规则和 API 页面中常用的术语。
 ---
 
 # 术语表
 
 **Agent**
 
-来源为 `AGENT` 的本地自动客户端。通过 WebSocket 接收权威状态，通过 HTTP 提交计划。
+来源为 `AGENT` 的本地自动客户端。通过 WebSocket 接收状态，通过 HTTP 提交计划。
 
-**权威状态（Authoritative state）**
+**服务端状态（Server state）**
 
-服务器发送的完整当前 `state`。本地探索记忆、规划路线、预测和 UI 动画都不是权威状态。
+服务端发来的当前 `state`。记住的地形、规划路线、预测和 UI 动画属于客户端，可能已经过期。
 
 **Champion Beacon**
 
@@ -53,7 +53,7 @@ Core 或 Unit，会占用一个格子的两个容量槽之一。Beacon 和地形
 
 **计划回执（Plan receipt）**
 
-完整来源计划持久化后形成的最小 HTTP 202 元数据与 WebSocket `received` 规范化计划。
+服务端保存来源计划后返回的 HTTP 202 元数据，以及 WebSocket `received` 消息。
 
 **结算结果（Resolution event）**
 
@@ -61,8 +61,8 @@ Core 或 Unit，会占用一个格子的两个容量槽之一。Beacon 和地形
 
 **静态验证（Static validation）**
 
-可在全局结算前安全完成的检查：Schema、执行 Unit 的所有权、动作联合、必填字段和当前
-Tick 命令门。
+全局结算前完成的检查：JSON 结构、执行 Unit 的所有权、动作字段、必填字段和当前
+Tick 命令 gate。
 
 **超覆盖线（Supercover line）**
 

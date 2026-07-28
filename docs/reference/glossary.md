@@ -1,20 +1,20 @@
 ---
 sidebar_position: 2
 title: Glossary
-description: Normative Arena Hero gameplay and protocol terminology.
+description: Terms used throughout the Arena Hero rules and API pages.
 ---
 
 # Glossary
 
 **Agent**
 
-A local automated client authenticated as source `AGENT`. It receives
-authoritative state over WebSocket and submits plans over HTTP.
+A local automated client authenticated as source `AGENT`. It receives state
+over WebSocket and submits plans over HTTP.
 
-**Authoritative state**
+**Server state**
 
-The complete current `state` emitted by the server. Local exploration memory,
-planned routes, predictions, and UI animation are not authoritative.
+The current `state` sent by the server. Remembered terrain, planned routes,
+predictions, and UI animation belong to the client and may be stale.
 
 **Champion Beacon**
 
@@ -63,8 +63,8 @@ terrain do not consume a slot.
 
 **Plan receipt**
 
-The minimal HTTP 202 metadata plus the canonical WebSocket `received` message
-created after a full source plan is persisted.
+The HTTP 202 metadata and WebSocket `received` message created after the server
+stores a source plan.
 
 **Resolution event**
 
@@ -73,8 +73,8 @@ realtime message.
 
 **Static validation**
 
-Checks that can safely happen before global resolution: schema, ownership of
-acting Units, action union, required fields, and current Tick gate.
+Checks that happen before global resolution: JSON shape, ownership of acting
+Units, action fields, required fields, and the current Tick gate.
 
 **Supercover line**
 

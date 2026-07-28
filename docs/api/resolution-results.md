@@ -1,77 +1,165 @@
 ---
 sidebar_position: 5
 title: Resolution results
-description: The event objects embedded in state, common result types, reason codes, privacy, and dynamic-failure interpretation.
+description: Read action results from state.events and look up every event and reason code.
 ---
 
 # Resolution results
 
-Dynamic action results are embedded in the next complete `state`. This page
-describes that game-protocol field.
+HTTP `202` means the server stored a plan. The actions have not resolved yet.
+Their results arrive in the next `state.data.events` array.
 
-## Schema
-
-```ts
-interface ResolutionEvent {
-  event_id: string;
-  tick: number;
-  event_type: string;
-  reason_code?: string;
-  actor_id?: string;
-  target_id?: string;
-  position?: [number, number];
-  values?: Record<string, unknown>;
-}
-```
-
-Fields are omitted when irrelevant. `event_id` is a UUID. A player receives only
-their own resolution results.
-
-## Common successful results
-
-| Event type | Meaning |
-|---|---|
-| `UNIT_MOVE_SUCCEEDED` | A Unit completed its one-cell move. |
-| `CORE_MOVE_STARTED` | A new four-Tick migration began. |
-| `CORE_MOVE_PROGRESS` | An existing migration advanced. |
-| `CORE_MOVE_SUCCEEDED` | The fourth-Tick real move completed. |
-| `HARVEST_SUCCEEDED` | Worker loaded resources. |
-| `DEPOSIT_SUCCEEDED` | Worker transferred all cargo. |
-| `CORE_SPAWN_SUCCEEDED` | Core created one Unit. |
-| `CORE_REPAIR_SUCCEEDED` | Core restored one shield. |
-| `SWEEP_RESOLVED` | Vanguard sweep resolved. |
-| `SHOT_HIT` | Ranger hit the requested target. |
-| `BEACON_PICKED_UP` | Object became the carrier. |
-| `BEACON_DROPPED` | Carrier placed the Beacon on the ground. |
-| `CORE_RESPAWNED` | Player re-entered with a new Core and Worker. |
-
-## Common failure reasons
-
-| Context | Reason examples |
-|---|---|
-| Movement | `MOVE_BLOCKED_TERRAIN`, `MOVE_CONTESTED`, `MOVE_SWAP_BLOCKED`, `MOVE_DESTINATION_OCCUPIED`, `MOVE_DEPENDENCY_FAILED`, `CELL_UNIT_LIMIT` |
-| Core migration | `CORE_ALREADY_MOVING`, `CORE_NOT_MOVING`, `CORE_DESTINATION_TERRAIN_BLOCKED`, `CORE_DESTINATION_OCCUPIED` |
-| Worker | `NOT_RESOURCE_CELL`, `CARGO_FULL`, `WORKER_EMPTY`, `CORE_MOVING`, `CORE_NOT_PRESENT` |
-| Core economy | `INSUFFICIENT_RESOURCES`, `SHIELD_FULL`, `CELL_UNIT_LIMIT` |
-| Beacon | `BEACON_NOT_PRESENT`, `ALREADY_CARRIED`, `NOT_BEACON_CARRIER`, `CORE_MOVING` |
-| Ranger | Always reported as `SHOT_MISSED` for dynamic failure. |
-
-Reason codes describe the owner's own action outcome. They must not be used to
-infer hidden enemy state beyond what the protocol intentionally reveals.
-
-## Example
+Start with `event_type`, then read the fields listed for that event:
 
 ```json
 {
-  "event_id": "42b2cc96-2a75-41a6-bb35-405d57239d54",
+  "event_id": "3f360e7e-d9bd-4f48-9a51-5cf751b04075",
   "tick": 10583,
   "event_type": "UNIT_MOVE_FAILED",
-  "reason_code": "MOVE_CONTESTED",
+  "reason_code": "MOVE_BLOCKED_TERRAIN",
   "actor_id": "9d3e4941-2816-4a39-a220-df8cd95e877d",
   "position": [120, 85]
 }
 ```
 
-An HTTP `202` and later dynamic failure are compatible: the former confirms
-that the plan was accepted; the latter reports what happened when all players'
-plans resolved together.
+| Looking for | Go to |
+|---|---|
+| Upkeep, Core damage, repair, or spawning | [Economy and Core events](#economy-and-core-events) |
+| Harvesting or depositing | [Worker events](#worker-events) |
+| Sweeps, shots, and damage | [Combat events](#combat-events) |
+| Unit movement or Core migration | [Movement events](#movement-events) |
+| Beacon actions or respawning | [Beacon and respawn events](#beacon-and-respawn-events) |
+
+## Field rules
+
+| Field | Presence and meaning |
+|---|---|
+| `event_id` | Always present. Use this UUID to avoid processing the same event twice after reconnecting. |
+| `tick` | Always present. Tick in which the result was resolved. |
+| `event_type` | Always present. Read this before the other optional fields. |
+| `reason_code` | Present only when the event has a defined reason. Successful events do not send an empty string. |
+| `actor_id` | The player's Core or Unit whose action produced the result, when there is one. |
+| `target_id` | The affected Core or Unit, when exposing it is part of the result. |
+| `position` | Cell relevant to the resolved result. Its exact meaning is stated in each catalog row. |
+| `values` | Event-specific object. Keys are stable per event row; the object is omitted when no values apply. |
+
+Missing optional fields are omitted, not `null`.
+
+## Economy and Core events
+
+| `event_type` | `reason_code` | IDs and position | `values` | Meaning |
+|---|---|---|---|---|
+| `UPKEEP_PAID` | absent | `actor_id`: Core; `position`: Core cell | `{due: int, paid: int, deficit: int}` | Upkeep was collected. A positive deficit is then applied as Core damage. |
+| `CORE_DAMAGED` | `ATTACK` or `UPKEEP_DEFICIT` | `target_id`: Core; `position`: Core cell | `{damage: int, shield_damage: int, hp_damage: int}` | Total Core damage and how it was split between shield and HP. |
+| `CORE_DESTROYED` | `ATTACK` or `UPKEEP_DEFICIT` | `target_id`: destroyed Core; `position`: destruction cell | For an attack with named participants: `{destroyed_by: string[]}`; otherwise absent | The player's Core and remaining Units were removed and respawn waiting began. |
+| `CORE_ACTION_FAILED` | `CORE_NOT_MOVING` or `CORE_ALREADY_MOVING` | `actor_id`: Core; `position`: Core cell | absent | `CANCEL_MOVE` was used on a normal Core, or an incompatible Core action was used during migration. |
+| `CORE_REPAIR_FAILED` | `SHIELD_FULL` or `INSUFFICIENT_RESOURCES` | `actor_id`: Core; `position`: Core cell | absent | One-shield repair could not be applied. |
+| `CORE_REPAIR_SUCCEEDED` | absent | `actor_id`: Core; `position`: Core cell | `{shield: int, cost: int}` | Shield after repair and resources spent. |
+| `CORE_SPAWN_FAILED` | `CELL_UNIT_LIMIT` | `actor_id`: Core; `position`: Core cell | `{limit: int}` | Core cell has reached the occupiable-entity limit. |
+| `CORE_SPAWN_FAILED` | `INSUFFICIENT_RESOURCES` | `actor_id`: Core; `position`: Core cell | `{required: int}` | Resources are below the selected Unit's cost. |
+| `CORE_SPAWN_FAILED` | `DETERMINISTIC_ID_COLLISION` | `actor_id`: Core; `position`: Core cell | absent | Defensive collision check rejected the deterministic spawn ID. |
+| `CORE_SPAWN_SUCCEEDED` | absent | `actor_id`: Core; `target_id`: new Unit; `position`: Core cell | `{unit_type: UnitType, cost: int}` | One Unit was created on the Core cell. |
+
+`destroyed_by` contains participant usernames, ordered deterministically. It is
+present only for an attack when at least one participant can be named.
+
+## Worker events
+
+| `event_type` | `reason_code` | IDs and position | `values` | Meaning |
+|---|---|---|---|---|
+| `DEPOSIT_FAILED` | `WORKER_EMPTY` | `actor_id`: Worker; `position`: Worker cell | absent | Worker has no cargo. |
+| `DEPOSIT_FAILED` | `CORE_NOT_PRESENT` | `actor_id`: Worker; `position`: Worker cell | absent | Owned Core is absent or not on the same cell. |
+| `DEPOSIT_FAILED` | `CORE_MOVING` | `actor_id`: Worker; `target_id`: Core; `position`: Worker cell | absent | The colocated Core is migration-restricted this Tick. |
+| `DEPOSIT_SUCCEEDED` | absent | `actor_id`: Worker; `target_id`: Core; `position`: shared cell | `{amount: int}` | All Worker cargo moved into Core resources. |
+| `HARVEST_FAILED` | `NOT_RESOURCE_CELL` | `actor_id`: Worker; `position`: Worker cell | absent | Current terrain is not a resource cell. |
+| `HARVEST_FAILED` | `CARGO_FULL` | `actor_id`: Worker; `position`: Worker cell | absent | Worker already carries resources. |
+| `HARVEST_SUCCEEDED` | absent | `actor_id`: Worker; `position`: Worker cell | `{amount: int}` | Resources loaded into Worker cargo. |
+| `BEACON_HARVEST_BONUS` | absent | `actor_id`: Worker; `position`: Worker cell | `{amount: int}` | Bonus portion of the harvest granted by carrying the Beacon. |
+
+## Combat events
+
+| `event_type` | `reason_code` | IDs and position | `values` | Meaning |
+|---|---|---|---|---|
+| `SWEEP_RESOLVED` | absent | `actor_id`: Vanguard; `position`: swept adjacent cell | `{targets_hit: int}` | Sweep resolved; `0` is a valid result. |
+| `SHOT_MISSED` | always `SHOT_MISSED` | `actor_id`: Ranger; `target_id`: requested UUID; `position`: submitted `expected_cell` | absent | Shot failed dynamically. The detailed cause is intentionally hidden. |
+| `SHOT_HIT` | absent | `actor_id`: Ranger; `target_id`: hit Core or Unit; `position`: target cell | `{damage: int}` | Valid shot contributed damage. |
+| `UNIT_DAMAGED` | `ATTACK` | `target_id`: damaged Unit; `position`: Unit cell | `{damage: int, hp: int}` | Aggregated damage and HP after damage, clamped to `0`. `hp: 0` means the Unit was destroyed. |
+| `DESTRUCTION_PARTICIPATION` | `UNIT` or `CORE` | `target_id`: destroyed object; `position`: destruction cell | absent | This player contributed at least one damage to the destroyed object. |
+
+There is no separate `UNIT_DESTROYED` event for the victim. Detect destruction
+from `UNIT_DAMAGED.values.hp === 0` and from the Unit's absence in the new
+complete state.
+
+Every dynamic Ranger failure uses the same `SHOT_MISSED` reason. This includes
+a missing or moved target, a friendly target, invalid range, and a blocked
+line. The result does not reveal hidden state.
+
+## Movement events
+
+| `event_type` | `reason_code` | IDs and position | `values` | Meaning |
+|---|---|---|---|---|
+| `UNIT_MOVE_SUCCEEDED` | absent | `actor_id`: Unit; `position`: destination | absent | Unit completed its one-cell move. |
+| `UNIT_MOVE_FAILED` | See Unit movement reasons | `actor_id`: Unit; `position`: unchanged origin | absent | Unit stayed at its origin. |
+| `CORE_MOVE_STARTED` | absent | `actor_id`: Core; `position`: origin | `{destination: Position, progress: int, required: int}` | A migration began. Current values are progress `1`, required `4`. |
+| `CORE_MOVE_PROGRESS` | absent | `actor_id`: Core; `position`: origin | `{progress: int, required: int}` | Existing migration advanced but did not yet move the Core. |
+| `CORE_MOVE_SUCCEEDED` | absent | `actor_id`: Core; `position`: destination | absent | Final migration Tick moved the Core. |
+| `CORE_MOVE_FAILED` | See resolved movement reasons | `actor_id`: Core; `position`: unchanged origin | absent | Final migration move failed; Core returns to `NORMAL`. |
+| `CORE_MOVE_START_FAILED` | See start reasons | `actor_id`: Core; `position`: origin | absent | `START_MOVE` failed before migration state began. |
+| `CORE_MOVE_CANCELLED` | absent | `actor_id`: Core; `position`: origin | absent | Existing migration was cancelled and Core returned to `NORMAL`. |
+
+Unit movement reasons:
+
+- `MOVE_OUT_OF_BOUNDS`: signed int64 coordinate overflow would occur;
+- `MOVE_BLOCKED_TERRAIN`: destination is obstacle terrain;
+- `MOVE_CONTESTED`: different owners claimed the same destination;
+- `MOVE_SWAP_BLOCKED`: two hostile entities attempted a two-way swap;
+- `MOVE_DESTINATION_OCCUPIED`: a hostile occupant is not successfully leaving;
+- `MOVE_DEPENDENCY_FAILED`: a required departure failed;
+- `CELL_UNIT_LIMIT`: the destination would exceed the entity limit.
+
+`CORE_MOVE_FAILED` can use
+`CORE_DESTINATION_TERRAIN_BLOCKED`, `MOVE_CONTESTED`,
+`MOVE_SWAP_BLOCKED`, `MOVE_DESTINATION_OCCUPIED`,
+`MOVE_DEPENDENCY_FAILED`, or `CELL_UNIT_LIMIT`.
+
+`CORE_MOVE_START_FAILED` can use
+`CORE_DESTINATION_OUT_OF_BOUNDS`,
+`CORE_DESTINATION_TERRAIN_BLOCKED`,
+`CORE_DESTINATION_OCCUPIED`, or `CELL_UNIT_LIMIT`.
+
+## Beacon and respawn events
+
+| `event_type` | `reason_code` | IDs and position | `values` | Meaning |
+|---|---|---|---|---|
+| `BEACON_PICKUP_FAILED` | `CORE_MOVING`, `ALREADY_CARRIED`, or `BEACON_NOT_PRESENT` | `actor_id`: Core or Unit; `position`: actor cell | absent | Pickup could not be completed. |
+| `BEACON_PICKED_UP` | absent | `actor_id`: new carrier; `position`: pickup cell | absent | Actor became the carrier. |
+| `BEACON_DROP_FAILED` | `CORE_MOVING` or `NOT_BEACON_CARRIER` | `actor_id`: Core or Unit; `position`: actor cell | absent | Drop could not be completed. |
+| `BEACON_DROPPED` | absent | `actor_id`: former carrier; `position`: drop cell | absent | Voluntary drop completed. |
+| `BEACON_DROPPED_ON_DEATH` | absent | `actor_id`: destroyed carrier; `position`: death cell | absent | Beacon automatically moved to the ground. |
+| `RESPAWN_DELAYED` | `NO_LEGAL_SPAWN` | no IDs or position | absent | No legal deterministic spawn candidate was found; next attempt is one Tick later. |
+| `CORE_RESPAWNED` | absent | `target_id`: new Core; `position`: spawn cell | `{resources: int, workers: int}` | Player became `ACTIVE` with starting resources and Workers. |
+
+## Decoding example
+
+```js
+function applyEvent(event) {
+  switch (event.event_type) {
+    case 'UNIT_MOVE_FAILED':
+      markUnitBlocked(event.actor_id, event.position, event.reason_code);
+      break;
+    case 'CORE_SPAWN_SUCCEEDED':
+      registerSpawn(
+        event.target_id,
+        event.position,
+        event.values.unit_type,
+      );
+      break;
+    case 'SHOT_MISSED':
+      // The protocol does not reveal why it missed.
+      break;
+  }
+}
+```
+
+Replace your old objects with the new `state.objects`. Events explain how the
+new state was reached. Do not replay them as patches against the old state.

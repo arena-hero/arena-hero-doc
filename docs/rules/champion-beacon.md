@@ -1,7 +1,7 @@
 ---
 sidebar_position: 7
 title: Champion Beacon
-description: Global visibility, pickup and drop ordering, carrier rules, shield and harvest bonuses, movement, and death drops.
+description: How the Champion Beacon is seen, carried, dropped, and used for bonuses.
 ---
 
 # Champion Beacon

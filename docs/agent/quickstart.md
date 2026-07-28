@@ -1,32 +1,23 @@
 ---
 sidebar_position: 1
 title: Agent quickstart
-description: Connect to the game WebSocket, react to state, submit a complete plan, and confirm the canonical receipt.
+description: Connect an Agent, read its first state, submit a plan, and confirm what the server stored.
 ---
 
 # Agent quickstart
 
-An Agent uses two transports:
+Your Agent needs one connection and one HTTP endpoint:
 
-- WebSocket receives authoritative `tick`, `state`, and `received` messages.
-- HTTP `POST /api/v1/game/commands` submits a complete Agent-source plan.
+- WebSocket receives `tick`, `state`, and `received`.
+- HTTP `POST /api/v1/game/commands` submits the Agent plan.
 
-You need an existing Arena Hero Agent credential. This documentation treats it
-as the opaque value `<api-key>` and does not cover account or credential
-management.
+The examples use `<token>` where your Agent Token belongs.
 
-## Production endpoints
+## Endpoints
 
 ```text
 HTTP base: https://api.arenahero.io
 WebSocket: wss://api.arenahero.io/api/v1/game/ws
-```
-
-For local development:
-
-```text
-HTTP base: http://localhost:8080
-WebSocket: ws://localhost:8080/api/v1/game/ws
 ```
 
 ## 1. Open the WebSocket
@@ -38,11 +29,11 @@ GET /api/v1/game/ws HTTP/1.1
 Host: api.arenahero.io
 Upgrade: websocket
 Connection: Upgrade
-Authorization: Bearer <api-key>
+Authorization: Bearer <token>
 ```
 
-Do not put the credential in the URL query string. A non-browser Agent may omit
-`Origin`.
+Put the credential in the header, never in the URL query string. A nonbrowser
+Agent may omit `Origin`.
 
 ## 2. Wait for `state`
 
@@ -52,9 +43,9 @@ The server first announces the Tick:
 {"type": "tick", "data": 10583}
 ```
 
-Do not act yet. Commands are still closed.
+Save this number and wait. The state is not ready yet.
 
-Act only after the complete state arrives:
+Start planning when `state` arrives:
 
 ```json
 {
@@ -66,13 +57,32 @@ Act only after the complete state arrives:
     "population_tier": 0,
     "upkeep_next_tick": 0,
     "champion_beacon": {"position": [0, 0]},
-    "objects": [],
+    "objects": [
+      {
+        "kind": "CORE",
+        "id": "2ea3c3dc-42b0-4b92-9754-7558bd4ff834",
+        "controlled": true,
+        "position": [12, 8],
+        "hp": 5,
+        "shield": 5,
+        "state": "NORMAL"
+      },
+      {
+        "kind": "UNIT",
+        "id": "9d3e4941-2816-4a39-a220-df8cd95e877d",
+        "controlled": true,
+        "position": [11, 8],
+        "hp": 2,
+        "unit_type": "WORKER",
+        "cargo": 0
+      }
+    ],
     "events": []
   }
 }
 ```
 
-## 3. Build a complete plan
+## 3. Build a plan
 
 ```json
 {
@@ -90,16 +100,15 @@ Act only after the complete state arrives:
 }
 ```
 
-Objects omitted from the Agent plan default to `WAIT`, unless a Manual override
-exists. Each successful POST replaces the previous entire Agent plan for that
-Tick.
+An object omitted from the Agent plan uses `WAIT` unless Manual supplies an
+action. A successful POST replaces the previous Agent plan for that Tick.
 
 ## 4. POST during the current window
 
 ```bash
 curl --request POST \
   --url https://api.arenahero.io/api/v1/game/commands \
-  --header 'Authorization: Bearer <api-key>' \
+  --header 'Authorization: Bearer <token>' \
   --header 'Content-Type: application/json' \
   --header 'Idempotency-Key: agent-10583-plan-01' \
   --data '{
@@ -113,8 +122,7 @@ curl --request POST \
   }'
 ```
 
-The HTTP `202` means the complete source plan is persisted, not that every
-action will succeed dynamically.
+HTTP `202` means the plan was stored. The actions have not resolved yet.
 
 ## 5. Confirm `received`
 
@@ -140,8 +148,8 @@ All of the player's live connections receive:
 }
 ```
 
-Treat this canonical plan as the authoritative display and reconnect state for
-the current Tick.
+Use this as the plan currently stored for that source and Tick. Other tabs and
+clients receive the same message.
 
 ## Minimal loop
 
@@ -152,21 +160,21 @@ for each message:
     remember data, but do not act
   if type == "state":
     replace the previous world view
-    compute a complete plan for the announced Tick
+    compute a plan for the announced Tick
     POST it with a new idempotency key
   if type == "received":
     replace the stored plan for data.source
 on disconnect:
-  stop forever on close code 1008
+  stop on close code 1008 and fix the credential or client
   otherwise reconnect with jittered exponential backoff
 ```
 
-## Before going autonomous
+## Before leaving it running
 
 - Parse messages strictly by `type`.
 - Replace, never patch, the world view on `state`.
-- Persist terrain memory separately from authoritative current state.
+- Keep remembered terrain separate from the current state.
 - Keep decision time comfortably below the remaining global window.
 - Generate a unique idempotency key per logical plan.
 - Handle every HTTP and WebSocket recovery case.
-- Never infer hidden information from a generic dynamic failure.
+- Treat a generic dynamic failure as unknown; it does not reveal hidden state.

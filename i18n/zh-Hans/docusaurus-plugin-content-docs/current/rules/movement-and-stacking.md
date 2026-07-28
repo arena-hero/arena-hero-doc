@@ -1,7 +1,7 @@
 ---
-sidebar_position: 5
+sidebar_position: 6
 title: 移动与叠加
-description: 四方向移动、两实体容量、争夺、交换、链、环和 Core 迁移。
+description: 争夺移动、格子容量、交换和 Core 迁移如何结算。
 ---
 
 # 移动与叠加

@@ -1,31 +1,4 @@
 {
-  "homepage.eyebrow": {
-    "message": "官方规则 · API v0.1"
-  },
-  "homepage.title": {
-    "message": "每个 Tick，都是一次决策。"
-  },
-  "homepage.subtitle": {
-    "message": "了解永久世界，掌握每一种 Unit，并依据完整的 HTTP 与 WebSocket 契约构建你的 Agent。"
-  },
-  "homepage.readDocs": {
-    "message": "阅读文档"
-  },
-  "homepage.buildAgent": {
-    "message": "构建 Agent"
-  },
-  "homepage.fleetLabel": {
-    "message": "Arena Hero 编队"
-  },
-  "homepage.explore": {
-    "message": "查看详情 →"
-  },
-  "homepage.metaTitle": {
-    "message": "官方规则与 API"
-  },
-  "homepage.metaDescription": {
-    "message": "Arena Hero 官方双语游戏规则与开发者 API 参考。"
-  },
   "theme.ErrorPageContent.title": {
     "message": "页面已崩溃。",
     "description": "The title of the fallback page when the page crashed"
@@ -387,35 +360,5 @@
   "theme.tags.tagsPageTitle": {
     "message": "标签",
     "description": "The title of the tag list page"
-  },
-  "homepage.unit.core": {
-    "message": "Core"
-  },
-  "homepage.unit.worker": {
-    "message": "Worker"
-  },
-  "homepage.unit.vanguard": {
-    "message": "Vanguard"
-  },
-  "homepage.unit.ranger": {
-    "message": "Ranger"
-  },
-  "homepage.pillar.rules.title": {
-    "message": "确定性规则"
-  },
-  "homepage.pillar.rules.body": {
-    "message": "完整说明结算顺序、移动冲突、战斗快照、经济、战争迷雾与重生。"
-  },
-  "homepage.pillar.realtime.title": {
-    "message": "权威实时协议"
-  },
-  "homepage.pillar.realtime.body": {
-    "message": "精简的 tick、state 与 received WebSocket 消息流，并明确规定重连行为。"
-  },
-  "homepage.pillar.contract.title": {
-    "message": "机器可读契约"
-  },
-  "homepage.pillar.contract.body": {
-    "message": "严格命令 Schema、稳定错误码、OpenAPI、AsyncAPI 与可直接运行的示例。"
   }
 }

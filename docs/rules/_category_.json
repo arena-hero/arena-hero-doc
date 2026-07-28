@@ -1,9 +1,9 @@
 {
   "label": "Game rules",
-  "position": 2,
+  "position": 3,
   "link": {
     "type": "generated-index",
     "title": "Game rules",
-    "description": "The complete public rules for Arena Hero v0.1."
+    "description": "How the world, economy, movement, combat, and respawning work."
   }
 }

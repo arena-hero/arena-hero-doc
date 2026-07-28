@@ -1,7 +1,7 @@
 ---
-sidebar_position: 9
+sidebar_position: 5
 title: Commands and priority
-description: Complete source plans, Manual and Agent precedence, replacement, validation, idempotency, receipts, and dynamic failures.
+description: How Agent and Manual plans combine, replace each other, validate, and report results.
 ---
 
 # Commands and priority
@@ -14,18 +14,17 @@ Every player has one `AGENT` plan slot and one `MANUAL` plan slot per Tick.
 Manual explicit action > Agent explicit action > WAIT
 ```
 
-- An Agent plan is the complete automated plan. Objects omitted by the Agent
-  resolve to `WAIT` unless Manual supplies an explicit action.
-- A Manual plan is the complete set of human overrides. Objects omitted by
-  Manual fall back to Agent.
-- Manual must send an explicit `WAIT` to force an object not to act.
+- The Agent plan contains automated actions. An omitted object uses `WAIT`
+  unless Manual supplies an action.
+- The Manual plan contains human overrides. An omitted object falls back to Agent.
+- Manual sends an explicit `WAIT` when the player wants to stop an Agent action.
 - All Agent clients for one player share the same Agent slot.
 - Several browser tabs share the same Manual slot.
 
-## Complete replacement
+## A new plan replaces the old one
 
-Every successful POST replaces the entire earlier plan from that same source.
-Plans are never patched or merged server-side.
+Every successful POST replaces the earlier plan from that source. The server
+does not patch or merge it with the previous plan.
 
 ```mermaid
 flowchart TD
@@ -36,16 +35,16 @@ flowchart TD
   M2 --> E
 ```
 
-If an Agent wants to change one Unit while preserving all other actions, it must
-resend the full desired Agent plan.
+To change one Unit and keep the others acting, the Agent must send those other
+actions again.
 
 ## Static and dynamic validation
 
 Static validation happens before persistence:
 
-- strict JSON object and no unknown fields;
+- one JSON object with no unknown fields;
 - positive Tick;
-- canonical lowercase Unit UUID keys;
+- lowercase, hyphenated Unit UUID keys;
 - every referenced acting Unit is owned by the player;
 - action type is allowed for that Unit;
 - required fields are present;
@@ -69,7 +68,7 @@ Dynamic failure does not invalidate the POST. It appears in the next
 ## Ordering and rate limit
 
 Valid requests for the same `(player, tick, source)` serialize in gate-entry
-order. A later persisted full plan replaces an earlier one. The protocol has no
+order. A later stored plan replaces an earlier one. The protocol has no
 client-supplied version number.
 
 Each source slot processes at most 64 new submissions per Tick after idempotency
@@ -84,10 +83,10 @@ Every command request has an `Idempotency-Key`.
 - Same key + different body returns `IDEMPOTENCY_CONFLICT`.
 - A replay does not broadcast a second `received`.
 
-On new successful persistence:
+After the server stores a new plan:
 
 1. HTTP returns minimal `202 Accepted` receipt metadata.
-2. Every live connection for that player receives a canonical full
+2. Every live connection for that player receives the stored plan in
    `received.plan`.
 3. Reconnecting during the same OPEN Tick restores the latest receipt from each
    source.

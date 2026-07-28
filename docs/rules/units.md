@@ -1,7 +1,7 @@
 ---
 sidebar_position: 4
 title: Units
-description: Worker, Vanguard, and Ranger stats, actions, costs, and exact constraints.
+description: Worker, Vanguard, and Ranger stats, actions, costs, and limits.
 ---
 
 # Units
@@ -13,12 +13,12 @@ one cardinal cell per Tick, and performs at most one action.
 
 | Unit | HP | Vision | Cost | Attack | Special role |
 |---|---:|---:|---:|---:|---|
-| Worker | 2 | 3 | 5 | — | Harvest and deposit |
+| Worker | 2 | 3 | 5 | - | Harvest and deposit |
 | Vanguard | 4 | 4 | 10 | 1 sweep damage | Adjacent area pressure |
-| Ranger | 2 | 5 | 12 | 1 shot damage | Range 1–3 precision attack |
+| Ranger | 2 | 5 | 12 | 1 shot damage | Range 1-3 precision attack |
 
-All Units may `MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, and `WAIT`. Unit-specific
-actions are strictly validated.
+All Units may `MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, and `WAIT`. The other
+actions depend on Unit type.
 
 ## Worker
 
@@ -106,6 +106,6 @@ private `SHOT_MISSED` event.
 }
 ```
 
-Action unions are strict. Supplying unrelated fields—even `null`, an empty
-string, or the zero UUID—rejects the entire plan with
-`UNEXPECTED_ACTION_FIELDS`.
+An action may contain only the fields listed for its `type`. An unrelated field
+rejects the whole plan with `UNEXPECTED_ACTION_FIELDS`, even when its value is
+`null`, an empty string, or the zero UUID.
