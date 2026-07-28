@@ -1,8 +1,8 @@
 {
   "label": "Agent 开发",
-  "position": 3,
+  "position": 4,
   "link": {
     "type": "generated-index",
-    "description": "使用 Arena Hero Agent Skill，或者直接接入游戏 API。"
+    "description": "通过 HTTP 和 WebSocket 直接把 Agent 接入游戏。"
   }
 }

@@ -1,6 +1,6 @@
 ---
-sidebar_position: 2
-title: Agent Skill
+sidebar_position: 1
+title: Use the Skill
 description: Let Codex create a tactic script or play Arena Hero directly.
 ---
 
@@ -98,4 +98,4 @@ If those pages are unavailable, it will not invent costs, ranges, caps,
 population formulas, event names, or stacking behavior.
 
 For the underlying connection and recovery behavior, read
-[Reliable command loop](./command-loop.md).
+[Reliable command loop](../agent/command-loop.md).

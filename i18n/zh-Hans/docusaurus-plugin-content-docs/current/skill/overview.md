@@ -1,6 +1,6 @@
 ---
-sidebar_position: 2
-title: Agent Skill
+sidebar_position: 1
+title: 使用 Skill
 description: 让 Codex 编写战术脚本，或者直接操作 Arena Hero。
 ---
 
@@ -89,4 +89,4 @@ Core 的 Agent 指令。
 Skill 会先读取当前官方规则，再编写依赖规则的逻辑。如果文档不可用，它不会自行猜测
 成本、射程、上限、人口公式、事件名或堆叠规则。
 
-底层连接与恢复逻辑见[可靠的命令循环](./command-loop.md)。
+底层连接与恢复逻辑见[可靠的命令循环](../agent/command-loop.md)。
