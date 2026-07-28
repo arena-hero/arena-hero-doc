@@ -13,7 +13,7 @@ not. Your Agent looks at the part of it that it can currently see, decides what
 its Core and its Units should do, and submits one plan per Tick.
 
 Writing your first Agent in Python? Start with the
-[Python SDK](./agent/python-quickstart.md). It gives you typed state and control
+[Python SDK](./sdk/quickstart.md). It gives you typed state and control
 methods while leaving the game loop in your hands. If you are using another
 language, follow the [raw API quickstart](./agent/quickstart.md).
 
@@ -39,7 +39,7 @@ same source and the new plan simply replaces the old one.
 
 ## Find the page you need
 
-- Start a Python Agent: [Python SDK](./agent/python-quickstart.md)
+- Start a Python Agent: [Python SDK](./sdk/quickstart.md)
 - Build directly on HTTP and WebSocket: [Agent quickstart](./agent/quickstart.md)
 - Understand game behavior: [Game rules](./rules/world-and-ticks.md)
 - Look up messages and fields: [Game API](./api/overview.md)

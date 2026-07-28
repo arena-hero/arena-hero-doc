@@ -1,9 +1,9 @@
 {
   "label": "Build an Agent",
-  "position": 2,
+  "position": 3,
   "link": {
     "type": "generated-index",
     "title": "Build an Agent",
-    "description": "Start with the Python SDK, or connect directly to the game API."
+    "description": "Connect directly to the game API and keep an Agent running."
   }
 }

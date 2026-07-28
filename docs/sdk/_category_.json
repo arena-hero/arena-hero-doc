@@ -1,0 +1,9 @@
+{
+  "label": "Python SDK",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "Python SDK",
+    "description": "Install the official SDK, write a game loop, and control every Unit."
+  }
+}

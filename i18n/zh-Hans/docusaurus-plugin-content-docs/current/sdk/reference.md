@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: Python SDK 接口参考
+title: 接口参考
 description: 客户端、Turn、单位控制、模型、事件和异常的完整参考。
 ---
 
@@ -389,4 +389,4 @@ SDK 会：
 - 对结果不确定的命令提交，使用相同字节和同一个幂等键安全重试。
 
 服务端命令窗口是全局的，Turn 到达时可能已经过去一部分。计划算好就尽快提交。完整的
-时间与恢复规则见[可靠的命令循环](./command-loop.md)。
+时间与恢复规则见[可靠的命令循环](../agent/command-loop.md)。

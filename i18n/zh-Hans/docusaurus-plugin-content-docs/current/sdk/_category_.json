@@ -1,0 +1,9 @@
+{
+  "label": "Python SDK",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "title": "Python SDK",
+    "description": "安装官方 SDK，编写游戏循环，并控制每一种 Unit。"
+  }
+}

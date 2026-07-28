@@ -1,6 +1,6 @@
 ---
 sidebar_position: 2
-title: Python SDK reference
+title: API reference
 description: Complete reference for clients, Turns, Unit controls, models, events, and errors.
 ---
 
@@ -401,5 +401,5 @@ The SDK:
 
 The server's command window is global and may already be partly spent when a
 Turn arrives. Build and submit the plan promptly. Read
-[Reliable command loop](./command-loop.md) for the full timing and recovery
+[Reliable command loop](../agent/command-loop.md) for the full timing and recovery
 rules.

@@ -1,12 +1,12 @@
 ---
 sidebar_position: 3
-title: 不使用 SDK 的 Agent 快速开始
+title: Agent 快速开始
 description: 接入 Agent，读取第一份状态，提交计划，并确认服务端保存的内容。
 ---
 
-# 不使用 SDK 的 Agent 快速开始
+# Agent 快速开始
 
-使用 Python？[官方 Python SDK](./python-quickstart.md) 已经替你处理了这里的连接和恢复
+使用 Python？[官方 Python SDK](../sdk/quickstart.md) 已经替你处理了这里的连接和恢复
 流程。只有在你准备直接使用 HTTP 和 WebSocket API 时，才需要继续读本页。
 
 Agent 只需要两样东西：一条用来收消息的 WebSocket 连接，和一个用来提交的 HTTP 接口。

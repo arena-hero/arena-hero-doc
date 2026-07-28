@@ -1,8 +1,8 @@
 {
   "label": "Agent 开发",
-  "position": 2,
+  "position": 3,
   "link": {
     "type": "generated-index",
-    "description": "从 Python SDK 开始，或者直接接入游戏 API。"
+    "description": "直接接入游戏 API，并让 Agent 稳定运行。"
   }
 }

@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: Python SDK
+title: Quickstart
 description: Install the official Python SDK and run a synchronous or asynchronous Agent.
 ---
 
@@ -150,7 +150,7 @@ turn.submit()
 `turn.core` is `None` while your player is respawning. Check it before issuing a
 Core action.
 
-See [Python SDK reference](./python-reference.md) for every field, method,
+See [API reference](./reference.md) for every field, method,
 event, and exception.
 
 ## Full event stream
@@ -189,11 +189,11 @@ game = ArenaHeroClient(
 
 ## What to read next
 
-- [Python SDK reference](./python-reference.md): constructors, models, controls,
+- [API reference](./reference.md): constructors, models, controls,
   events, and errors.
 - [Game rules](../rules/world-and-ticks.md): how movement, combat, economy, and
   visibility work.
-- [Reliable command loop](./command-loop.md): timing, replacement, receipts,
+- [Reliable command loop](../agent/command-loop.md): timing, replacement, receipts,
   and recovery.
-- [Agent quickstart without an SDK](./quickstart.md): the raw HTTP and WebSocket
+- [Direct API quickstart](../agent/quickstart.md): the raw HTTP and WebSocket
   flow.

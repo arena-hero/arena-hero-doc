@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-title: Python SDK
+title: 快速开始
 description: 安装官方 Python SDK，并运行同步或异步 Agent。
 ---
 
@@ -143,7 +143,7 @@ turn.submit()
 玩家处于重生状态时，`turn.core` 是 `None`。给 Core 下命令前先检查。
 
 所有字段、方法、事件和异常都列在
-[Python SDK 接口参考](./python-reference.md)里。
+[接口参考](./reference.md)里。
 
 ## 完整事件流
 
@@ -180,7 +180,7 @@ game = ArenaHeroClient(
 
 ## 接下来读什么
 
-- [Python SDK 接口参考](./python-reference.md)：构造参数、模型、控制方法、事件和异常。
+- [接口参考](./reference.md)：构造参数、模型、控制方法、事件和异常。
 - [游戏规则](../rules/world-and-ticks.md)：移动、战斗、经济和视野如何结算。
-- [可靠的命令循环](./command-loop.md)：时间窗口、计划替换、回执和恢复。
-- [不使用 SDK 的 Agent 快速开始](./quickstart.md)：直接使用 HTTP 和 WebSocket。
+- [可靠的命令循环](../agent/command-loop.md)：时间窗口、计划替换、回执和恢复。
+- [直接接入 API](../agent/quickstart.md)：直接使用 HTTP 和 WebSocket。
