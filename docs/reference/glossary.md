@@ -8,90 +8,91 @@ description: Terms used throughout the Arena Hero rules and API pages.
 
 **Agent**
 
-A local automated client authenticated as source `AGENT`. It receives state
-over WebSocket and submits plans over HTTP.
+A local automated client authenticated as source `AGENT`. It takes state in over
+the WebSocket and pushes plans out over HTTP.
 
 **Server state**
 
-The current `state` sent by the server. Remembered terrain, planned routes,
-predictions, and UI animation belong to the client and may be stale.
+The current `state` the server sent you. Remembered terrain, planned routes,
+predictions, and UI animation all belong to your client, and any of them can be
+out of date.
 
 **Champion Beacon**
 
-The single indestructible global objective. Its coordinate is always public;
-its visible carrier grants shield-cap and Worker-harvest bonuses.
+The one indestructible global objective. Its coordinate is public at all times,
+and a carrier you can see grants shield-cap and Worker-harvest bonuses.
 
 **Command gate**
 
-The server boundary that accepts correctly received plans only during the
-current OPEN window.
+The server boundary that accepts correctly received plans, and only during the
+window that is currently OPEN.
 
 **Complete plan**
 
-The full desired action map for one source and Tick. A later POST replaces,
-rather than patches, an earlier source plan.
+The full action map one source wants for one Tick. A later POST replaces an
+earlier plan from that source rather than patching it.
 
 **Controlled**
 
-`controlled: true` means an object belongs to the receiving player.
-`controlled: false` means a currently visible enemy.
+`controlled: true` marks an object as belonging to whoever is receiving the state.
+`controlled: false` marks a currently visible enemy.
 
 **Core**
 
-The player's base, resource store, shielded primary life object, Unit producer,
-and slow mobile entity.
+Your base: resource store, shielded primary life object, Unit producer, and — very
+slowly — a mobile entity.
 
 **Dynamic validation**
 
-Checks performed during global resolution, such as occupancy, resources, target
-position, and line of fire. Failure is reported in the next state.
+The checks that only global resolution can make, such as occupancy, resources,
+target position, and line of fire. Failures come back in the next state.
 
 **Exploration memory**
 
-Client-maintained knowledge from older states. Terrain remains correct; entity
-knowledge may be stale.
+What your client remembers from older states. The terrain part stays correct;
+anything you remember about entities may be stale.
 
 **Manual**
 
-The web player's source slot. Explicit Manual actions override Agent actions per
-object. Omission falls back to Agent.
+The web player's source slot. Per object, an explicit Manual action beats the
+Agent action, and leaving an object out falls back to the Agent.
 
 **Occupying entity**
 
-A Core or Unit that consumes one of a cell's two capacity slots. The Beacon and
-terrain do not consume a slot.
+A Core or Unit, taking one of a cell's two capacity slots. The Beacon and terrain
+take none.
 
 **Plan receipt**
 
-The HTTP 202 metadata and WebSocket `received` message created after the server
-stores a source plan.
+The HTTP 202 metadata plus the WebSocket `received` message that follow the server
+storing a source plan.
 
 **Resolution event**
 
-An action result embedded in the next `state.events`. It is not a separate
-realtime message.
+An action result carried inside the next `state.events`, rather than sent as its
+own realtime message.
 
 **Static validation**
 
-Checks that happen before global resolution: JSON shape, ownership of acting
-Units, action fields, required fields, and the current Tick gate.
+The checks that happen before global resolution: JSON shape, ownership of the
+acting Units, action fields, required fields, and the current Tick gate.
 
 **Supercover line**
 
-An integer grid line that includes every touched cell. It prevents diagonal
-corner gaps in obstacle vision blocking.
+An integer grid line that includes every cell it touches, which is what stops
+diagonal corner gaps from opening up in obstacle vision blocking.
 
 **Tick**
 
-One logical decision/resolution cycle. It advances only after one atomic world
-commit and does not catch up during downtime.
+One logical decision-and-resolution cycle. It advances only after an atomic world
+commit, and it never races to catch up after downtime.
 
 **Terrain batch**
 
-One UUID-less `OBSTACLE` or `RESOURCE` object containing a sorted `positions`
-array for all currently visible cells of that kind.
+A single `OBSTACLE` or `RESOURCE` object, with no UUID, holding a sorted
+`positions` array of every currently visible cell of that kind.
 
 **World snapshot**
 
-The immutable input used by one phase of deterministic resolution. Combat uses
-one shared snapshot so all legal attacks are simultaneous.
+The immutable input one phase of deterministic resolution works from. Combat uses
+a single shared snapshot, which is what makes all legal attacks simultaneous.

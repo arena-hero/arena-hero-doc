@@ -6,7 +6,7 @@ description: 提交计划、选择 Unit 和 Core 动作、安全重试，并理�
 
 # 命令 API
 
-每次收到 `state` 后，提交一份计划：
+每收到一条 `state`，就提交一份计划：
 
 ```http
 POST /api/v1/game/commands HTTP/1.1
@@ -33,7 +33,7 @@ Content-Type: application/json
 }
 ```
 
-Agent 请求会替换玩家当前的 `AGENT` 计划。必须等这个 Tick 的 `state` 到达后再提交。
+Agent 的请求会替换这名玩家当前的 `AGENT` 计划。发之前先等到这个 Tick 的 `state`。
 
 ## 请求头
 
@@ -43,8 +43,7 @@ Agent 请求会替换玩家当前的 `AGENT` 计划。必须等这个 Tick 的 `
 | `Content-Type` | 是 | `application/json` | 可以带 `charset=utf-8` 等参数。 |
 | `Idempotency-Key` | 是 | 8-128 字节，ASCII `0x21`-`0x7e` | 标识这次请求及其原始请求体。 |
 
-请求体大小上限由部署配置决定。超过上限会返回
-`413 REQUEST_BODY_TOO_LARGE`。
+请求体大小上限由部署决定。超了就是 `413 REQUEST_BODY_TOO_LARGE`。
 
 ## 计划请求体 {#commandplan-model}
 
@@ -54,30 +53,30 @@ Agent 请求会替换玩家当前的 `AGENT` 计划。必须等这个 Tick 的 `
 | `unit_actions` | object | 否 | Unit UUID 到动作的映射。没有 Unit 行动时建议传 `{}`。 |
 | `core_action` | object | 否 | 一个 Core 动作。Agent 不安排 Core 时可以省略。 |
 
-`unit_actions` 是 object，不是 array。每个 key 必须是该玩家存活 Unit 的小写、
-带连字符 UUID。不要生成重复的 JSON key。
+注意 `unit_actions` 是 object，不是 array。每个 key 都必须是你名下某个存活 Unit 的
+小写带连字符 UUID，而且绝对不要生成重复的 JSON key。
 
 ### 后一次 POST 会替换前一次
 
-假设当前 Agent 计划是：
+假设当前存着的 Agent 计划是：
 
 ```text
 Unit A: MOVE
 Unit B: HARVEST
 ```
 
-下一次请求只发送：
+而下一次请求只发了：
 
 ```text
 Unit A: WAIT
 ```
 
-新的 Agent 计划只剩 Unit A 的 `WAIT`。Unit B 不再有 Agent 动作，如果 Manual
-也没有给它动作，它会按 `WAIT` 结算。服务端不会从旧 Agent 计划里补回缺失动作。
+那么现在存的就是 Unit A 的 `WAIT`，Unit B 什么都没有。Unit B 同样按 `WAIT` 结算，
+除非 Manual 给了它动作——服务端不会从旧的 Agent 计划里把缺的动作补回来。
 
 ## Unit 动作
 
-先看 `type`，然后只发送该行列出的字段。
+先看 `type`，然后只发这一行列出的字段。
 
 | `type` | 可用 Unit | JSON | 结算时会发生什么 |
 |---|---|---|---|
@@ -94,49 +93,49 @@ Unit A: WAIT
 
 `direction` 只能是 `UP`、`DOWN`、`LEFT` 或 `RIGHT`。
 
-地形、其他移动、占位、交换、依赖关系和格子容量都在结算时检查。移动失败后，
-下一份状态会带上 `UNIT_MOVE_FAILED`。
+地形、其他移动、占位、交换、依赖关系和格子容量，全都是在结算时才检查，提交时不管。
+移动失败的话，下一份状态里会带上 `UNIT_MOVE_FAILED`。
 
 ### 采集和存入
 
 这两个动作只有 Worker 能用。
 
-- `HARVEST` 要求 Worker 没有货物，并站在 `RESOURCE` 格。
+- `HARVEST` 要求 Worker 空载，并且站在 `RESOURCE` 格上。
 - 资源格不会枯竭。
-- `DEPOSIT` 要求 Worker 有货物，并和己方 Core 在同一格。
-- Core 处于迁移限制 Tick 时不能接收存入。
-- 存入失败不会清空 Worker 的货物。
+- `DEPOSIT` 要求 Worker 有货，并且和自己的 Core 同格。
+- Core 处在迁移受限的 Tick 时收不了货。
+- 存入失败，货还在 Worker 身上，不会丢。
 
 ### 横扫
 
-`SWEEP` 攻击 `direction` 指向的相邻格。该格内每个敌方 Unit 和 Core 都会受到
-1 伤害。目标格为空也算成功，此时返回 `targets_hit: 0`。
+`SWEEP` 打 `direction` 指的那一格相邻格，格子里每个敌方 Unit 和 Core 各受 1 伤害。
+就算那格是空的也算成功，只不过返回 `targets_hit: 0`。
 
 ### 射击
 
-射击需要两个字段：
+射击要两个字段：
 
 | 字段 | 格式 | 含义 |
 |---|---|---|
 | `target_id` | UUID | Ranger 要攻击的 Unit 或 Core。 |
 | `expected_cell` | `[x, y]` | Agent 预计目标结算时所在的格子。 |
 
-结算时，目标必须仍是敌方，仍在 `expected_cell`，与 Ranger 位于同一行或同一列，
-距离为 1-3。Ranger 与目标之间不能有障碍或其他实体。
+到结算时，目标必须还是敌方、还在 `expected_cell`、和 Ranger 同行或同列、距离在
+1-3 之间，而且中间不能有障碍或其他实体。
 
-所有动态失败都会返回同一个事件：
-`{"event_type":"SHOT_MISSED","reason_code":"SHOT_MISSED"}`。你无法通过结果判断目标
-是否移动、是否属于己方、是否超出射程，或中间是否有遮挡。
+所有动态失败返回的都是同一个事件：
+`{"event_type":"SHOT_MISSED","reason_code":"SHOT_MISSED"}`。你从结果里看不出目标是
+移开了、其实是友军、超出了射程，还是被什么东西挡住了。
 
 ### 拾取和放下 Beacon
 
-所有 Unit 都能使用这两个动作。
+两个 Beacon 动作所有 Unit 都能用。
 
-- 拾取时，地面 Beacon 必须和 actor 在同一格。
-- 只有当前携带者能放下 Beacon。
-- 不能直接从存活携带者身上抢走 Beacon。
-- 多个 actor 同时拾取时，原始 UUID 字节序最小者成功。
-- Tick 开始时已被携带的 Beacon，不能在同一个 Tick 中先放下再被拾取。
+- 要拾取，地面上的 Beacon 必须和 actor 在同一格。
+- 只有当前携带者能放下它。
+- 活着的携带者手里抢不走。
+- 好几个 actor 同时去拿时，原始 UUID 字节序最小的那个成功。
+- Tick 开始时就已经被携带的 Beacon，不能在同一个 Tick 里先放下再被捡起来。
 
 ## Core 动作
 
@@ -150,16 +149,16 @@ Unit A: WAIT
 | `PICKUP_BEACON` | `{"type":"PICKUP_BEACON"}` | 普通状态的 Core 尝试拾取同格 Beacon。 |
 | `DROP_BEACON` | `{"type":"DROP_BEACON"}` | 携带 Beacon 的 Core 尝试放下它。 |
 
-`unit_type` 只能是 `WORKER`、`VANGUARD` 或 `RANGER`，当前费用分别是
-5、10 和 12 资源。
+`unit_type` 只能是 `WORKER`、`VANGUARD` 或 `RANGER`，目前的价格分别是 5、10 和 12
+资源。
 
-移动中的 Core 可以用 `WAIT` 继续，或用 `CANCEL_MOVE` 停止。其他 Core 动作会返回
-`CORE_ALREADY_MOVING`。普通状态下使用 `CANCEL_MOVE` 会返回
+迁移中的 Core 可以用 `WAIT` 接着走，或者用 `CANCEL_MOVE` 停下来；换成别的动作就是
+`CORE_ALREADY_MOVING`。反过来，对一个没在迁移的 Core 用 `CANCEL_MOVE`，会拿到
 `CORE_NOT_MOVING`。
 
 ## 多余字段会让动作无效
 
-动作只能包含对应 `type` 所需的字段。下面四个例子都会让整份计划被拒绝：
+动作只能带它自己 `type` 需要的字段。下面这四个例子，每一个都会让整份计划被拒：
 
 ```json
 {"type":"WAIT","direction":"UP"}
@@ -168,7 +167,7 @@ Unit A: WAIT
 {"type":"SPAWN","unit_type":"WORKER","direction":""}
 ```
 
-这类错误通常返回 `UNEXPECTED_ACTION_FIELDS`。
+这类错误一般返回 `UNEXPECTED_ACTION_FIELDS`。
 
 ## 接受响应
 
@@ -186,16 +185,15 @@ Content-Type: application/json; charset=utf-8
 }
 ```
 
-`202` 只表示计划已保存，不表示动作已经成功。WebSocket
-[`received`](./websocket.md#received) 会带回服务端实际保存的计划，下一份
-[`state.events`](./resolution-results.md) 才包含动作结果。
+`202` 的意思是「存下了」，不是「成功了」。WebSocket 的
+[`received`](./websocket.md#received) 会带回服务端实际存下的那份计划，动作结果要到
+下一份 [`state.events`](./resolution-results.md) 才有。
 
-请求被拒绝时，最后一份有效计划仍然保留。
+请求被拒的话什么都不会变，最后那份有效计划照旧。
 
 ## 安全重试
 
-幂等键可以包含 8-128 个可见 ASCII 字节（`0x21`-`0x7e`），不能有空格、
-Tab 或换行。
+幂等键是 8-128 个可见 ASCII 字节（`0x21`-`0x7e`），不能有空格、Tab 和换行。
 
 | 你发送的内容 | 服务端行为 |
 |---|---|
@@ -204,8 +202,8 @@ Tab 或换行。
 | 相同 key，数据不同 | 返回 `409 IDEMPOTENCY_CONFLICT`。 |
 | 新 key | 作为新的计划替换请求处理。 |
 
-如果上传后断线，无法确定结果，请用同一个 key 重试逐字节相同的请求体。只有重新做出
-一份计划后才使用新 key。
+如果上传之后断线、你也不知道到底发出去没有，就用同一个 key 把完全一样的字节再发
+一次。只有当你真的重新做了一份计划，才换新 key。
 
 ## 服务端检查顺序
 
@@ -222,15 +220,15 @@ Tab 或换行。
 -> 在下一份 state.events 中发送结果
 ```
 
-保存前发生的任何错误都会拒绝整份请求。游戏结算中的动作失败不会恢复旧计划，
-也不会改变之前返回的 `202`。
+保存这一步之前出的任何错，都会拒掉整份请求。而之后在游戏结算里失败，既不会把旧计划
+找回来，也不会改变你已经拿到的那个 `202`。
 
 ## 并发和频率限制
 
-- 同一 `(player, credential kind)` 最多同时读取四个命令请求体。多出的请求返回
-  `429 COMMAND_CONCURRENCY_LIMIT`，并带 `Retry-After: 1`。
-- 同一 `(player, Tick, source)` 在幂等检查后最多接收 64 个新请求。无效命令也计数。
-  多出的请求返回 `429 COMMAND_RATE_LIMITED`。
-- 同一计划槽的有效请求按进入 gate 的顺序处理。最后成功的计划替换前一份。
+- 同一个 `(player, credential kind)` 最多同时读四个命令请求体。多出来的会拿到
+  `429 COMMAND_CONCURRENCY_LIMIT`，带 `Retry-After: 1`。
+- 同一个 `(player, Tick, source)` 在幂等检查之后最多接收 64 个新请求，无效命令也算
+  在里面。再多就是 `429 COMMAND_RATE_LIMITED`。
+- 同一个计划槽里的有效请求按进入 gate 的顺序处理，最后成功的那份替换前一份。
 
-所有 HTTP 错误和校验原因见[错误与恢复](./errors.md)。
+所有 HTTP 错误和校验原因，见[错误与恢复](./errors.md)。

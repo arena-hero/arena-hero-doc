@@ -8,8 +8,8 @@ toc_max_heading_level: 3
 
 # State model
 
-`state.data` is what this player can see right now. Each message replaces the
-previous state.
+`state.data` is everything this player can see right now, and each message
+replaces the one before it.
 
 <nav className="api-model-nav" aria-label="State model sections">
   <strong>Jump to</strong>
@@ -64,7 +64,8 @@ previous state.
 }
 ```
 
-For machine-readable definitions, use the [AsyncAPI schema](/asyncapi.yaml).
+If you want machine-readable definitions, use the
+[AsyncAPI schema](/asyncapi.yaml).
 
 ## PlayerState {#playerstate}
 
@@ -80,13 +81,14 @@ For machine-readable definitions, use the [AsyncAPI schema](/asyncapi.yaml).
 | `objects` | array | Yes | Owned entities plus currently visible terrain and enemies. |
 | `events` | array | Yes | Resolution results addressed to this player. |
 
-`objects` and `events` are empty arrays when there are no entries. While
-`RESPAWNING`, the resource and population fields remain present, but there may
-be no owned Core until `CORE_RESPAWNED`.
+When there is nothing to report, `objects` and `events` come through as empty
+arrays rather than going missing. While you are `RESPAWNING` the resource and
+population fields are still there, but you may have no Core of your own until
+`CORE_RESPAWNED` arrives.
 
 ## Champion Beacon {#champion-beacon}
 
-The Beacon position is always public. The other fields depend on visibility.
+The position is always public. Everything else depends on what you can see.
 
 ### Outside vision
 
@@ -96,8 +98,8 @@ The Beacon position is always public. The other fields depend on visibility.
 }
 ```
 
-Only the position is known. The state does not tell you whether the Beacon is
-on the ground or being carried.
+You know where it is and nothing more — not whether it is lying on the ground or
+riding along with someone.
 
 ### Visible on the ground
 
@@ -108,7 +110,7 @@ on the ground or being carried.
 }
 ```
 
-`carrier_id` is absent.
+There is no `carrier_id` here.
 
 ### Visible and carried
 
@@ -120,12 +122,13 @@ on the ground or being carried.
 }
 ```
 
-`carrier_id` identifies the carrying Core or Unit. If the next state omits
-`status` or `carrier_id`, discard the previous value.
+`carrier_id` names the Core or Unit doing the carrying. If the next state leaves
+`status` or `carrier_id` out, throw the old value away rather than keeping it
+around.
 
 ## World objects {#world-objects}
 
-Every entry in `objects` starts with `kind`.
+Every entry in `objects` begins with `kind`.
 
 | `kind` | Represents | Identity |
 |---|---|---|
@@ -156,9 +159,9 @@ for (const object of state.objects) {
 | `kind` | `"OBSTACLE"` or `"RESOURCE"` | Terrain type. |
 | `positions` | non-empty array of `[x, y]` | Visible cells, sorted by `x` and then `y`. |
 
-All visible cells of one terrain kind are grouped into one entry. A missing
-kind means no cell of that kind is currently visible. Terrain has no `id`,
-`controlled`, HP, or resource quantity.
+All visible cells of one terrain kind arrive in a single entry. If a kind is
+missing altogether, none of its cells are currently visible. Terrain carries no
+`id`, no `controlled`, no HP, and no resource quantity.
 
 ### Core
 
@@ -204,8 +207,8 @@ kind means no cell of that kind is currently visible. Terrain has no `id`,
 | `move_required_ticks` | integer ≥ 1 | Moving only; currently `4` |
 | `destination` | `[x, y]` | Moving only |
 
-For a normal Core, all movement fields are absent. A visible enemy Core exposes
-the same movement fields.
+A normal Core has none of the movement fields. A visible enemy Core exposes the
+same ones you would see on your own.
 
 ### Unit
 
@@ -231,8 +234,8 @@ the same movement fields.
 | `unit_type` | `"WORKER"`, `"VANGUARD"`, or `"RANGER"` | Yes |
 | `cargo` | integer ≥ 0 | Owned Worker only |
 
-Enemy Worker cargo is hidden. Vanguard and Ranger never contain `cargo`,
-including owned ones.
+An enemy Worker's cargo is hidden from you. Vanguards and Rangers never carry a
+`cargo` field at all, not even your own.
 
 ## Visibility {#visibility}
 
@@ -244,12 +247,12 @@ including owned ones.
 | Beacon position | Always | None |
 | Beacon status and carrier | Beacon cell is currently visible | Both fields outside vision |
 
-There is no last-seen timestamp. Keep remembered terrain separately from the
-current server state.
+Nothing here carries a last-seen timestamp, so keep whatever terrain you remember
+in its own store, apart from current server state.
 
 ## Updating state {#updating-state}
 
-Rebuild entity maps from every new state:
+Rebuild your entity maps from each new state:
 
 ```js
 const entities = new Map();
@@ -261,7 +264,7 @@ for (const object of nextState.objects) {
 }
 ```
 
-The server emits objects in deterministic order:
+The server emits objects in a deterministic order:
 
 1. obstacle batch;
 2. resource batch;
@@ -270,4 +273,5 @@ The server emits objects in deterministic order:
 5. visible enemy Cores by UUID;
 6. visible enemy Units by UUID.
 
-Missing groups are skipped. Array index is never object identity.
+Groups with nothing in them are skipped, which is exactly why an array index is
+never an object's identity.

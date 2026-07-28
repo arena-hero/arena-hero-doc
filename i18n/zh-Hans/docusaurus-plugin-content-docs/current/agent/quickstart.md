@@ -6,12 +6,12 @@ description: 接入 Agent，读取第一份状态，提交计划，并确认服�
 
 # Agent 快速开始
 
-Agent 需要一条连接和一个 HTTP 接口：
+Agent 只需要两样东西：一条用来收消息的 WebSocket 连接，和一个用来提交的 HTTP 接口。
 
-- WebSocket 接收 `tick`、`state` 和 `received`。
-- HTTP `POST /api/v1/game/commands` 提交 Agent 计划。
+- WebSocket 负责推送 `tick`、`state` 和 `received`。
+- `POST /api/v1/game/commands` 负责提交 Agent 计划。
 
-下面示例里的 `<token>` 需要替换为你的 Agent Token。
+下面示例里凡是写 `<token>` 的地方，都换成你自己的 Agent Token。
 
 ## 端点
 
@@ -22,7 +22,7 @@ WebSocket：wss://api.arenahero.io/api/v1/game/ws
 
 ## 1. 打开 WebSocket
 
-使用能够在 HTTP Upgrade 中设置请求头的 WebSocket 客户端：
+你需要一个能在 HTTP Upgrade 阶段自定义请求头的 WebSocket 客户端：
 
 ```http
 GET /api/v1/game/ws HTTP/1.1
@@ -32,17 +32,18 @@ Connection: Upgrade
 Authorization: Bearer <token>
 ```
 
-凭据只能放在请求头里，不要放进 URL 查询参数。非浏览器 Agent 可以不发送 `Origin`。
+凭据放在请求头里，不要放进 URL 查询参数。如果你的 Agent 不是浏览器，`Origin` 可以
+干脆不发。
 
 ## 2. 等待 `state`
 
-服务器先宣布 Tick：
+服务器会先宣布 Tick：
 
 ```json
 {"type": "tick", "data": 10583}
 ```
 
-记住这个数字，然后等待。`state` 到达后再开始计算：
+把这个数字记下来，然后等着——此时还没有任何东西可以操作。世界在下一条消息里：
 
 ```json
 {
@@ -79,6 +80,8 @@ Authorization: Bearer <token>
 }
 ```
 
+看到它，就可以开始算了。
+
 ## 3. 构造计划
 
 ```json
@@ -97,8 +100,8 @@ Authorization: Bearer <token>
 }
 ```
 
-Agent 计划没写某个对象时，该对象使用 `WAIT`，除非 Manual 给了动作。同一个 Tick
-后提交成功的计划会替换前一份 Agent 计划。
+计划里没写到的对象一律按 `WAIT` 处理，除非 Manual 给了它动作。同一个 Tick 每次
+POST 成功都会顶掉你上一份 Agent 计划，所以窗口关闭之前你可以一直改。
 
 ## 4. 在当前窗口内 POST
 
@@ -119,11 +122,11 @@ curl --request POST \
   }'
 ```
 
-HTTP `202` 表示计划已保存，动作还没有结算。
+HTTP `202` 只说明计划已经存下来了，不代表任何动作已经发生。
 
 ## 5. 确认 `received`
 
-该玩家的所有在线连接都会收到：
+这名玩家所有在线的连接都会收到：
 
 ```json
 {
@@ -145,7 +148,8 @@ HTTP `202` 表示计划已保存，动作还没有结算。
 }
 ```
 
-这就是该来源和 Tick 当前保存的计划。其他标签页和客户端也会收到同一条消息。
+它就是这个来源、这个 Tick 当前存的计划，以它为准。你其他的标签页和客户端收到的是
+同一条消息，它们就是靠这个保持同步的。
 
 ## 最小循环
 
@@ -165,12 +169,12 @@ HTTP `202` 表示计划已保存，动作还没有结算。
   其他情况使用带随机抖动的指数退避重连
 ```
 
-## 长期运行前检查
+## 让它长期跑之前
 
-- 严格根据 `type` 解析消息。
-- 收到 `state` 时替换整个世界视图，不要打补丁。
-- 把地形记忆和当前状态分开保存。
-- 决策耗时必须明显短于剩余的全局窗口。
-- 每个逻辑计划生成唯一的幂等键。
-- 覆盖所有 HTTP 与 WebSocket 恢复分支。
-- 把通用动态失败当作未知结果，它不会透露隐藏状态。
+- 严格按 `type` 分发，不要靠消息长什么样去猜它是什么。
+- 收到 `state` 时整体替换世界视图，不要在旧的上面打补丁。
+- 地形记忆单独存一份，别和当前状态混在一起。
+- 决策要在全局窗口用完之前留出充足余量。
+- 每个逻辑计划用一个独立的幂等键。
+- 把 HTTP 和 WebSocket 的恢复分支都写全，别只顾着顺利的那条路。
+- 遇到笼统的动态失败就当作「不知道」，它不会泄露任何隐藏状态。

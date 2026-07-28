@@ -8,7 +8,7 @@ description: Keep an Agent running through timing, replacement, receipts, reconn
 
 ## State to keep
 
-Keep these values independently:
+Track each of these separately:
 
 ```text
 announced_tick
@@ -20,8 +20,9 @@ reconnect_attempt
 terrain_memory
 ```
 
-The connection can disappear. Keep the latest state and receipts in your own
-client so they can be replaced cleanly after reconnecting.
+The connection will drop sooner or later. Holding the latest state and the latest
+receipts on your side means that when it comes back you can swap them out
+cleanly, rather than trying to work out what you missed.
 
 ## State machine
 
@@ -42,26 +43,29 @@ stateDiagram-v2
   Open --> Stopped: close 1008
 ```
 
-The server may send no business messages while resolving a Tick. That is normal.
-Protocol Ping/Pong tells the WebSocket library whether the connection is alive.
+While a Tick is resolving the server may go quiet and send you no business
+messages at all. That is expected, not a symptom of a broken connection —
+protocol Ping/Pong is what tells your WebSocket library whether the socket is
+still alive.
 
 ## Decision timing
 
-The server opens one global 15-second window before publishing states. Your
-Agent never knows the exact deadline and may receive less than 15 seconds.
+There is one global 15-second window, and it opens before the server starts
+publishing states. You never learn the exact deadline, and you may well get less
+than the full 15 seconds.
 
-To leave enough time for the POST:
+So leave yourself room for the POST:
 
-1. Precompute reusable indexes and strategy state outside the window.
-2. Begin calculation immediately on `state`.
-3. Use an internal deadline much shorter than 15 seconds.
-4. If the full strategy is taking too long, submit a simpler plan before the
-   window closes.
-5. After `COMMAND_WINDOW_CLOSED`, wait for the next state.
+1. Build reusable indexes and strategy state outside the window.
+2. Start calculating the moment `state` lands.
+3. Hold yourself to an internal deadline well short of 15 seconds.
+4. If the full strategy is running long, ship a simpler plan rather than miss the
+   window.
+5. Once you see `COMMAND_WINDOW_CLOSED`, stop and wait for the next state.
 
 ## Plan replacement
 
-Submitting:
+Suppose you submit this:
 
 ```json
 {
@@ -73,7 +77,7 @@ Submitting:
 }
 ```
 
-and later submitting:
+and then follow it with this:
 
 ```json
 {
@@ -84,9 +88,9 @@ and later submitting:
 }
 ```
 
-means Unit B is no longer explicitly present in the Agent plan. It resolves to
-`WAIT` unless Manual provides an action. The server does not preserve Unit B
-from the earlier Agent request.
+Unit B is no longer in your Agent plan at all. It resolves to `WAIT` unless
+Manual supplies an action, because the second request replaces the first
+wholesale — the server never merges the two or carries Unit B forward.
 
 ## Safe retry matrix
 
@@ -104,29 +108,31 @@ from the earlier Agent request.
 
 ## Reconnect snapshot
 
-During OPEN, a reconnect returns in this order:
+Reconnect during OPEN and you get everything back, in this order:
 
-1. current `tick`;
-2. complete current `state`;
-3. latest `received` for `AGENT`, if any;
-4. latest `received` for `MANUAL`, if any.
+1. the current `tick`;
+2. the complete current `state`;
+3. the latest `received` for `AGENT`, if there is one;
+4. the latest `received` for `MANUAL`, if there is one.
 
-Reconnecting does not extend the command window. Replace your local values with
-this snapshot.
+Overwrite your local values with that snapshot. Note that reconnecting buys you
+no extra time — the window keeps running on its own schedule.
 
-During state preparation, reconnect returns `tick` immediately and `state` when
-ready. During settlement, it remains quiet until the next real Tick.
+Reconnect while states are still being prepared and you get `tick` right away,
+then `state` when it is ready. Reconnect during settlement and the server stays
+quiet until the next real Tick.
 
 ## Backoff
 
-Start at 250 ms, double the delay after each failure, stop growing at 5 seconds,
-and add random jitter. Reset the delay after a successful connection. Close code
-`1008` means the client must stop until its credential or behavior is fixed.
+Start at 250 ms and double after each failure, up to a ceiling of 5 seconds, with
+random jitter on top. Reset once a connection succeeds. Close code `1008` is
+different: it means stop retrying until you have fixed the credential or the
+behavior that caused it.
 
 ## Heartbeats
 
-The server sends protocol Ping frames every 20 seconds and requires a Pong
-within 60 seconds. Standard WebSocket libraries answer automatically.
+The server sends protocol Ping frames every 20 seconds and expects a Pong back
+within 60. Standard WebSocket libraries handle this for you.
 
-Do not send a heartbeat JSON message. The socket does not accept client
-business frames; sending one can close the connection with code `1008`.
+Do not invent a heartbeat JSON message. This socket rejects client business
+frames, and sending one can get you closed with code `1008`.

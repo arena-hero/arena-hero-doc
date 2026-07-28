@@ -6,11 +6,12 @@ description: 读取错误响应，判断能否重试，并修复命令或 WebSoc
 
 # 错误与恢复
 
-程序应根据 HTTP 状态码和 `error` 分支。可选的 `message` 只用于日志和人工阅读。
+程序按 HTTP 状态码和 `error` 分支。可选的 `message` 是写给日志和人看的，别拿它做
+逻辑判断。
 
 ## 先看响应长什么样
 
-请求还没进入命令处理时，错误通常是：
+请求还没进到命令处理，错误通常就这么简单：
 
 ```json
 {
@@ -18,7 +19,7 @@ description: 读取错误响应，判断能否重试，并修复命令或 WebSoc
 }
 ```
 
-请求已经到达命令 gate 后，拒绝响应会带上 `"accepted": false`：
+一旦请求进了命令 gate，拒绝响应会多带一个 `"accepted": false`：
 
 ```json
 {
@@ -29,7 +30,7 @@ description: 读取错误响应，判断能否重试，并修复命令或 WebSoc
 }
 ```
 
-计划内容无效时，还会给出一个或多个原因：
+而计划本身不合法时，还会附上一条或多条原因：
 
 ```json
 {
@@ -47,8 +48,8 @@ description: 读取错误响应，判断能否重试，并修复命令或 WebSoc
 }
 ```
 
-传输、身份验证、JSON、并发和服务端内部错误没有 `accepted` 字段。字段缺失不代表
-命令已被接受。
+传输、身份验证、JSON、并发和服务端内部错误压根没有 `accepted` 字段——而它不出现，
+从来不代表命令被接受了。
 
 ## HTTP 错误
 
@@ -69,7 +70,8 @@ description: 读取错误响应，判断能否重试，并修复命令或 WebSoc
 | 500 | `INTERNAL_ERROR` | 无 | 服务端没能完成请求。 |
 | 503 | `TICK_NOT_READY` | `accepted: false` | Tick 尚未初始化、玩家状态未准备好，或 Tick 处理失败。 |
 
-请求体上限属于部署配置，不属于协议。尽量保持计划精简，只会表达 `WAIT` 的动作可以省略。
+请求体上限是部署配置，不属于协议。计划尽量小一点，那些只会表达 `WAIT` 的动作直接
+别写。
 
 ## 该不该重试
 
@@ -86,16 +88,16 @@ description: 读取错误响应，判断能否重试，并修复命令或 WebSoc
 | `429 COMMAND_RATE_LIMITED` | 该来源和 Tick 不再提交新请求 | 保留最后一份有效计划，等待下一份状态。 |
 | `400`、`401`、`403`、`413`、`415` | 不能原样重试 | 先修正请求或凭据。 |
 
-服务端保留已完成的幂等响应七天。在这段时间内，即使命令窗口已经关闭，相同 key 和
-逐字节相同的请求体仍会返回原状态码和响应体。重放之前的 `202` 不会再次保存计划，
-也不会再次发送 `received`。
+已完成的幂等响应会保留七天。在这七天里，同一个 key 配上逐字节相同的请求体，还是会
+返回当初那个状态码和响应体，哪怕命令窗口早就关了。重放一个旧的 `202` 不会再存一次
+计划，也不会再发一条 `received`。
 
 ## 校验原因
 
-Unit 动作出错时，`details[].unit_id` 会指出对应 Unit。整份计划或 Core 动作出错时，
-该字段不会出现。
+问题出在某个 Unit 动作上时，`details[].unit_id` 会点名是哪个 Unit；问题出在整份计划
+或 Core 动作上时，这个字段就不出现。
 
-原因顺序固定：Tick 问题在前，然后按 UUID 字节序列出 Unit 问题，最后是 Core 问题。
+顺序是固定的：先 Tick 的问题，再按 UUID 字节序排的 Unit 问题，最后是 Core 的问题。
 
 | `reason` | 适用于 | 怎么修 |
 |---|---|---|
@@ -117,11 +119,11 @@ Unit 动作出错时，`details[].unit_id` 会指出对应 Unit。整份计划�
 | `WORKER_CANNOT_SHOOT` | Unit | Worker 选择了 `SHOOT`。 |
 | `VANGUARD_CANNOT_SHOOT` | Unit | Vanguard 选择了 `SHOOT`。 |
 
-`INVALID_COMMAND` 不会改动最后一份有效计划。
+`INVALID_COMMAND` 不会动你最后那份有效计划。
 
 ## 请求在哪一步停下
 
-服务端按以下顺序检查新请求：
+一个新请求会按这个顺序过检查：
 
 1. Bearer 身份验证，以及浏览器 Manual 请求的 CSRF；
 2. 每个玩家和凭据类型的请求体并发限制；
@@ -131,20 +133,22 @@ Unit 动作出错时，`details[].unit_id` 会指出对应 Unit。整份计划�
 6. 当前玩家、Unit 和动作字段；
 7. 幂等存储和计划替换。
 
-这个顺序解释了看起来相似的错误。格式错误的 UUID 返回 `INVALID_JSON`。属于其他玩家的
-合法 UUID 会进入动作校验，返回 `INVALID_COMMAND` 和 `UNIT_NOT_OWNED`。
+知道了这个顺序，那些看着差不多的错误就分得清了。格式错误的 UUID 过不了第 4 步，
+所以是 `INVALID_JSON`；而一个格式正确、但属于别人的 UUID 能活到第 6 步，于是返回的
+是 `INVALID_COMMAND` 加 `UNIT_NOT_OWNED`。
 
 ## WebSocket 错误
 
-WebSocket 握手可能返回：
+握手阶段可能返回：
 
 - `401 UNAUTHORIZED`
 - `403 WEBSOCKET_ORIGIN_INVALID`
 - `409 PLAYER_NOT_READY`
 - `429 REALTIME_CONNECTION_LIMIT`，并带 `Retry-After: 1`
 
-升级成功后的关闭码见 [WebSocket 协议](./websocket.md#close-codes)。临时故障使用带随机
-抖动的指数退避，从 250 ms 增长到 5 秒。收到 `1008` 后停止重试，先修复凭据或客户端行为。
+升级成功之后，看 [WebSocket 协议](./websocket.md#close-codes)里的关闭码表。临时故障
+用带随机抖动的指数退避，从 250 ms 涨到 5 秒；收到 `1008` 就停下来，先把凭据或客户端
+行为修好。
 
-重连后，用服务端发来的快照替换本地状态和已保存回执。不要发送自定义心跳消息，也不要
-把 `SHOT_MISSED` 当成探测隐藏目标的手段。
+重连之后，用服务端发来的快照替换本地状态和已存的回执。不要自己发明心跳消息。也不要
+把 `SHOT_MISSED` 当成探测隐藏目标的手段——它就是一次「不知道为什么没打中」。

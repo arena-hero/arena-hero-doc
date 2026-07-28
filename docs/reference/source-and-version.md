@@ -19,45 +19,45 @@ description: The server version covered by these docs and which changes affect c
 
 ## If the docs and server disagree
 
-These pages describe the public rules and game API. The server code, database
-constraints, and tests decide what actually happens at runtime.
+These pages describe the public rules and game API, but what actually happens at
+runtime is decided by the server code, the database constraints, and the tests.
 
-If published prose and released implementation differ:
+So when published prose and released implementation part ways:
 
-1. do not exploit the discrepancy as an implied rule;
-2. capture the exact server version and observed behavior;
+1. do not treat the discrepancy as an implied rule and exploit it;
+2. write down the exact server version and what you observed;
 3. open an issue in the documentation or server repository;
-4. update both repositories when the intended behavior is decided.
+4. update both repositories once the intended behavior has been decided.
 
 ## Changes that affect compatibility
 
-Changing any of these may break an existing client and needs an explicit
-contract-version decision:
+Touch any of these and you may break an existing client, so each one needs an
+explicit contract-version decision:
 
-- 15-second global command window and `state` as action trigger;
+- the 15-second global command window, and `state` as the action trigger;
 - deterministic resolution phases and atomic commit;
 - complete source-plan replacement and Manual precedence;
 - action field rules and idempotency;
-- WebSocket message types and reconnect snapshot;
-- fog-of-war privacy boundary;
-- map generator contract;
+- WebSocket message types and the reconnect snapshot;
+- the fog-of-war privacy boundary;
+- the map generator contract;
 - core balance rules that determine replayed outcomes.
 
-Copy, layout, diagrams, examples, and explanatory ordering may improve without
-changing the game contract.
+Everything else — copy, layout, diagrams, examples, the order things are explained
+in — can improve freely, because none of it changes the game contract.
 
 ## Why there is no version picker yet
 
-The public API is still v0.1, so this site publishes one current version in
-English and Simplified Chinese. After the first stable compatibility release,
-older contracts can be kept as Docusaurus versions.
+The public API is still v0.1, so this site publishes exactly one current version,
+in English and Simplified Chinese. Once there is a first stable compatibility
+release, older contracts can be kept around as Docusaurus versions.
 
 ## What a protocol change must update
 
-A gameplay or game API change must include:
+Any gameplay or game API change has to bring all of this with it:
 
 - implementation and tests in the server repository;
 - updated English and Simplified Chinese pages here;
-- updated OpenAPI or AsyncAPI schema where applicable;
+- an updated OpenAPI or AsyncAPI schema, where one applies;
 - verified bilingual production builds;
-- a clear compatibility note when existing clients may break.
+- a clear compatibility note whenever existing clients may break.

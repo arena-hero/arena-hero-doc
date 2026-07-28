@@ -6,8 +6,8 @@ description: Read an error response, decide whether to retry, and fix command or
 
 # Errors and recovery
 
-Use the HTTP status and `error` code in your program. The optional `message`
-field is for logs and people, not branching logic.
+Branch on the HTTP status and the `error` code. The optional `message` field is
+written for logs and for people, so do not build logic on it.
 
 ## Read the response
 
@@ -19,7 +19,7 @@ A request rejected before command handling usually looks like this:
 }
 ```
 
-Once the request reaches the command gate, a rejection includes
+Once it has reached the command gate, a rejection also carries
 `"accepted": false`:
 
 ```json
@@ -31,7 +31,7 @@ Once the request reaches the command gate, a rejection includes
 }
 ```
 
-An invalid plan includes one or more reasons:
+And an invalid plan comes with one or more reasons:
 
 ```json
 {
@@ -49,8 +49,8 @@ An invalid plan includes one or more reasons:
 }
 ```
 
-`accepted` is absent from transport, authentication, JSON, concurrency, and
-internal errors. Its absence does not mean the command was accepted.
+Transport, authentication, JSON, concurrency, and internal errors have no
+`accepted` field at all — and its absence never means the command was accepted.
 
 ## HTTP errors
 
@@ -71,8 +71,8 @@ internal errors. Its absence does not mean the command was accepted.
 | 500 | `INTERNAL_ERROR` | none | The server could not finish the request. |
 | 503 | `TICK_NOT_READY` | `accepted: false` | The Tick is not initialized, the player's state is not ready, or Tick processing failed. |
 
-The maximum request body size is deployment configuration, not part of the
-protocol. Keep plans small and omit actions that would only say `WAIT`.
+Maximum body size is deployment configuration rather than part of the protocol.
+Keep plans small, and leave out actions that would only have said `WAIT`.
 
 ## Should you retry?
 
@@ -89,17 +89,17 @@ protocol. Keep plans small and omit actions that would only say `WAIT`.
 | `429 COMMAND_RATE_LIMITED` | No new requests for that source and Tick | Keep the last valid plan and wait for the next state. |
 | `400`, `401`, `403`, `413`, `415` | Not unchanged | Fix the request or credential first. |
 
-The server keeps completed idempotent responses for seven days. During that
-time, the same key and byte-for-byte identical body returns the original status
-and body, even after the command window closes. Replaying an earlier `202` does
-not store the plan again and does not send another `received` message.
+Completed idempotent responses are kept for seven days. Within that window, the
+same key with a byte-for-byte identical body returns the original status and
+body, even long after the command window closed. Replaying an earlier `202`
+stores nothing again and sends no second `received`.
 
 ## Validation reasons
 
-For a Unit action problem, `details[].unit_id` identifies the Unit. It is absent
-for a whole-plan or Core action problem.
+When the problem is with a Unit action, `details[].unit_id` names the Unit. It
+is absent when the problem is with the whole plan or with the Core action.
 
-The list order is stable: Tick problem first, then Unit problems in UUID byte
+The list order is stable: the Tick problem first, then Unit problems in UUID byte
 order, then the Core problem.
 
 | `reason` | Applies to | What to fix |
@@ -122,11 +122,11 @@ order, then the Core problem.
 | `WORKER_CANNOT_SHOOT` | Unit | A Worker selected `SHOOT`. |
 | `VANGUARD_CANNOT_SHOOT` | Unit | A Vanguard selected `SHOOT`. |
 
-`INVALID_COMMAND` leaves the last valid plan unchanged.
+`INVALID_COMMAND` leaves your last valid plan alone.
 
 ## Where the request stopped
 
-The server checks a new request in this order:
+A new request is checked in this order:
 
 1. bearer authentication and, for browser Manual calls, CSRF;
 2. the per-player and credential-kind body concurrency limit;
@@ -136,24 +136,25 @@ The server checks a new request in this order:
 6. the current player, Unit, and action fields;
 7. idempotency storage and plan replacement.
 
-The order explains similar-looking errors. A malformed UUID is `INVALID_JSON`.
-A valid UUID belonging to another player reaches action validation and returns
+Knowing the order explains errors that otherwise look interchangeable. A
+malformed UUID never gets past step 4, so it is `INVALID_JSON`. A well-formed
+UUID belonging to someone else survives to step 6 and comes back as
 `INVALID_COMMAND` with `UNIT_NOT_OWNED`.
 
 ## WebSocket failures
 
-The WebSocket handshake can return:
+The handshake can return:
 
 - `401 UNAUTHORIZED`
 - `403 WEBSOCKET_ORIGIN_INVALID`
 - `409 PLAYER_NOT_READY`
 - `429 REALTIME_CONNECTION_LIMIT` with `Retry-After: 1`
 
-After the upgrade, use the close-code table in
+After the upgrade, work from the close-code table in
 [WebSocket protocol](./websocket.md#close-codes). Retry temporary failures with
-randomized exponential backoff from 250 ms to 5 seconds. Stop retrying after
-`1008` until you fix the credential or client behavior.
+randomized exponential backoff from 250 ms up to 5 seconds, and stop retrying
+after `1008` until the credential or the client behavior is fixed.
 
-After reconnecting, replace your local state and saved receipts with the
-snapshot sent by the server. Do not send custom heartbeat messages. Treat
-`SHOT_MISSED` as an unknown miss, not as a way to test hidden targets.
+Once reconnected, replace your local state and saved receipts with the snapshot
+the server sends. Do not invent heartbeat messages. And treat `SHOT_MISSED` as an
+unknown miss rather than as a way to probe for hidden targets.

@@ -8,16 +8,16 @@ description: What a player loses when the Core is destroyed and how respawning w
 
 ## Core destruction
 
-When Core HP reaches zero:
+When Core HP hits zero, all of this happens at once:
 
 - the Core is removed;
-- all stored resources are lost;
-- every Unit owned by that player is removed;
-- any remaining plan for those objects becomes irrelevant;
+- every stored resource is lost;
+- every Unit that player owns is removed;
+- whatever plan those objects had stops mattering;
 - a carried Champion Beacon drops according to the Beacon rule;
 - the player enters `RESPAWNING`.
 
-The account and Agent access remain valid. The next state contains:
+The account and its Agent access are untouched. Your next state looks like this:
 
 ```json
 {
@@ -35,16 +35,16 @@ The account and Agent access remain valid. The next state contains:
 
 ## Delay
 
-The default delay is 20 logical Ticks. Downtime does not consume the delay
-because the world clock pauses.
+The wait is 20 logical Ticks by default. Downtime does not count against it,
+because the world clock is paused too.
 
-At the due Tick, the deterministic spawn resolver attempts to place the player.
-If no legal location can be found, it postpones the attempt by one Tick and
-uses the next deterministic candidate set.
+When the due Tick arrives, the deterministic spawn resolver tries to place you. If
+it cannot find a legal spot, it pushes the attempt back one Tick and works through
+the next deterministic set of candidates.
 
 ## Restored assets
 
-A successful respawn grants:
+A successful respawn hands you:
 
 | Asset | Value |
 |---|---:|
@@ -53,20 +53,20 @@ A successful respawn grants:
 | Workers | 1 |
 | Spawn protection | None |
 
-The new Core and Worker receive new UUIDs. Destroyed UUIDs are never reused.
+The new Core and Worker get fresh UUIDs. Destroyed UUIDs never come back.
 
 ## Spawn placement
 
-The target distance from the nearest living Core is normally:
+The resolver aims for this distance from the nearest living Core:
 
 | Constraint | Distance |
 |---|---:|
 | Minimum | 20 Manhattan cells |
 | Maximum | 30 Manhattan cells |
 
-Among legal passable candidates, the resolver prefers lower local entity
-density. A Core spawns on legal empty terrain with at least two passable
-adjacent cells.
+Among the legal passable candidates it prefers somewhere with fewer entities
+nearby. A Core always lands on legal empty terrain with at least two passable
+neighbors.
 
-The same Tick, world, account, and respawn count always produce the same
-candidate sequence, preserving crash replay determinism.
+Given the same Tick, world, account, and respawn count, the candidate sequence
+comes out the same every time — which is what keeps crash replay deterministic.

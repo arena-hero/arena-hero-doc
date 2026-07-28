@@ -8,25 +8,26 @@ hide_table_of_contents: true
 
 # Arena Hero
 
-Arena Hero 是一个持续运行的网格世界。Agent 读取自己当前看到的世界，为 Core 和
-Unit 选择动作，然后在每个 Tick 提交一份计划。
+Arena Hero 是一个一直在跑的网格世界，你在不在线它都照常推进。你的 Agent 读取自己
+当前能看到的那部分，决定 Core 和各个 Unit 分别做什么，然后每个 Tick 提交一份计划。
 
-第一次写 Agent，直接从 [Agent 快速开始](./agent/quickstart.md) 开始。它会带你完成
-第一次连接、读取状态、提交命令和确认回执。
+第一次写 Agent，就从 [Agent 快速开始](./agent/quickstart.md) 看起。它会带你走完
+第一次连接、第一份状态、提交命令，以及确认服务端到底存下了什么。
 
-想先弄懂游戏，可以先看[世界与 Tick](./rules/world-and-ticks.md)，再把
-[规则速查](./reference/numbers.md)放在手边。
+如果你想先弄懂游戏再动手写代码，先读[世界与 Tick](./rules/world-and-ticks.md)，
+再另开一个标签页放着[规则速查](./reference/numbers.md)。
 
 ## 每个 Tick 会发生什么
 
-1. WebSocket 发来 [`tick`](./api/websocket.md#tick)。记住这个数字，先不要提交。
-2. WebSocket 发来 [`state`](./api/websocket.md#state)。替换旧状态，然后决定动作。
+1. WebSocket 发来 [`tick`](./api/websocket.md#tick)。记下这个数字，但先别动作。
+2. 接着是 [`state`](./api/websocket.md#state)。把旧的世界视图整个换掉，然后决定要做什么。
 3. 为这个 Tick POST [一份计划](./api/commands.md#commandplan-model)。
-4. [`received`](./api/websocket.md#received) 会告诉所有在线客户端，服务端保存了哪份计划。
-5. 下一条 [`state.events`](./api/resolution-results.md) 会说明这些动作如何结算。
+4. [`received`](./api/websocket.md#received) 会告诉你所有在线的客户端，服务端最后
+   存下的是哪一份。
+5. 下一条 [`state.events`](./api/resolution-results.md) 告诉你这些动作结算成了什么样。
 
-所有玩家共用一个 15 秒命令窗口。窗口在你的 `state` 到达前就已开始，所以计划算好后
-尽快提交。同一来源后提交成功的计划会替换前一份。
+命令窗口是全服共用的 15 秒，而且在你的 `state` 到达之前就已经开始计时了，所以计划
+一算好就发出去。同一来源再提交一次，新计划会直接顶掉旧的。
 
 ## 按问题找文档
 
@@ -36,5 +37,5 @@ Unit 选择动作，然后在每个 Tick 提交一份计划。
 - 处理请求失败：[错误与恢复](./api/errors.md)
 - 生成客户端：[OpenAPI](pathname:///openapi.yaml) 和 [AsyncAPI](pathname:///asyncapi.yaml)
 
-本文档对应公开契约 v0.1，并已对照服务端提交
-[`d66476a`](https://github.com/arena-hero/arena-hero/commit/d66476a) 检查。
+本文档对应公开契约 v0.1，已对照服务端提交
+[`d66476a`](https://github.com/arena-hero/arena-hero/commit/d66476a) 核对。

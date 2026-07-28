@@ -8,28 +8,34 @@ hide_table_of_contents: true
 
 # Arena Hero
 
-Arena Hero is a persistent grid world. Your Agent reads its current view of the
-world, chooses actions for its Core and Units, and submits one plan each Tick.
+Arena Hero is a single grid world that keeps running whether you are watching or
+not. Your Agent looks at the part of it that it can currently see, decides what
+its Core and its Units should do, and submits one plan per Tick.
 
-Writing an Agent for the first time? Start with the
-[Agent quickstart](./agent/quickstart.md). It takes you through the first
-connection, state message, command request, and receipt.
+Writing your first Agent? Start with the
+[Agent quickstart](./agent/quickstart.md). It walks you through the first
+connection, the first state message, the command request, and the receipt that
+confirms what the server kept.
 
-If you want to understand the game before writing code, read
-[World and Ticks](./rules/world-and-ticks.md), then keep
-[Rules at a glance](./reference/numbers.md) nearby.
+If you would rather understand the game before writing any code, read
+[World and Ticks](./rules/world-and-ticks.md) first, and keep
+[Rules at a glance](./reference/numbers.md) open in another tab.
 
 ## What happens each Tick
 
-1. The WebSocket sends [`tick`](./api/websocket.md#tick). Save the number and wait.
-2. It sends [`state`](./api/websocket.md#state). Replace your old state and choose your actions.
-3. POST [one plan](./api/commands.md#commandplan-model) for that Tick.
-4. [`received`](./api/websocket.md#received) tells every connected client which plan the server stored.
-5. The next [`state.events`](./api/resolution-results.md) explains how those actions resolved.
+1. The WebSocket sends [`tick`](./api/websocket.md#tick). Note the number, but
+   do not act on it yet.
+2. Then comes [`state`](./api/websocket.md#state). Throw away your old world
+   view, put this one in its place, and decide what to do.
+3. POST [a single plan](./api/commands.md#commandplan-model) for that Tick.
+4. [`received`](./api/websocket.md#received) tells every client you have
+   connected which plan the server actually stored.
+5. The next [`state.events`](./api/resolution-results.md) tells you how it all
+   played out.
 
-The command window lasts 15 seconds for everyone. It opens before your `state`
-arrives, so submit as soon as your plan is ready. A later successful POST from
-the same source replaces the earlier plan.
+Everyone shares the same 15-second command window, and it opens before your
+`state` arrives, so send your plan as soon as it is ready. POST again from the
+same source and the new plan simply replaces the old one.
 
 ## Find the page you need
 
@@ -39,5 +45,5 @@ the same source replaces the earlier plan.
 - Handle a failed request: [Errors and recovery](./api/errors.md)
 - Generate a client: [OpenAPI](pathname:///openapi.yaml) and [AsyncAPI](pathname:///asyncapi.yaml)
 
-These pages cover public contract v0.1 and were checked against server commit
+These pages describe public contract v0.1, checked against server commit
 [`d66476a`](https://github.com/arena-hero/arena-hero/commit/d66476a).

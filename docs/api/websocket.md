@@ -8,14 +8,14 @@ toc_max_heading_level: 3
 
 # WebSocket
 
-Connect when the Agent starts and keep the connection open:
+Connect when the Agent starts, and keep that connection open:
 
 ```text
 wss://api.arenahero.io/api/v1/game/ws
 ```
 
-This socket receives game state and plan receipts. Send commands through
-[`POST /api/v1/game/commands`](./commands.md), not through the socket.
+This socket is for receiving game state and plan receipts. Commands go through
+[`POST /api/v1/game/commands`](./commands.md) instead.
 
 <nav className="api-model-nav" aria-label="WebSocket sections">
   <strong>Jump to</strong>
@@ -45,9 +45,9 @@ tick(N)
   → state containing results for N
 ```
 
-The command window is globally fixed at 15 seconds and opens before player
-states are published. Act as soon as `state` arrives, but do not assume a full
-15 seconds remain.
+The command window is fixed at 15 seconds for everyone, and it opens before
+player states go out. Act as soon as `state` arrives, and never assume you have
+the full 15 seconds to work with.
 
 ## Messages {#messages}
 
@@ -59,8 +59,8 @@ Every server message is one UTF-8 JSON text frame with two fields:
 | `"state"` | [`PlayerState`](./state-model.md) | Replace local state. You can now submit a plan. |
 | `"received"` | stored plan receipt | The server replaced the plan for one source. |
 
-Parse `type` first. There are no incremental patches, cursors, replay offsets,
-or client-to-server business messages.
+Parse `type` first. There are no incremental patches, no cursors, no replay
+offsets, and no client-to-server business messages of any kind.
 
 ### `tick`
 
@@ -71,11 +71,11 @@ or client-to-server business messages.
 }
 ```
 
-Save `10583` as the current Tick. The following `state` belongs to this Tick;
+Save `10583` as the current Tick. The `state` that follows belongs to it, since
 `state.data` does not repeat the number.
 
-Wait for `state` before submitting. The server is still preparing player views
-when it sends `tick`.
+Do not submit yet — when `tick` goes out the server is still building each
+player's view.
 
 ### `state`
 
@@ -119,11 +119,11 @@ When `state` arrives:
 1. replace the previous state;
 2. associate it with the most recent `tick`;
 3. compute a plan;
-4. POST the plan before the current window closes.
+4. POST it before the current window closes.
 
-All owned entities are included. Enemy entities and terrain are included only
-while visible. See the [State model](./state-model.md) for every field and
-[Resolution results](./resolution-results.md) for `events`.
+Everything you own is in there. Enemy entities and terrain appear only while
+they are visible. For every field, see the [State model](./state-model.md); for
+`events`, see [Resolution results](./resolution-results.md).
 
 ### `received`
 
@@ -155,20 +155,20 @@ while visible. See the [State model](./state-model.md) for every field and
 | `received_at` | RFC3339Nano UTC string | Time the plan was written to the database. |
 | `plan` | [`CommandPlan`](./commands.md#commandplan-model) | Plan currently stored for this source. |
 
-A successful new plan broadcasts `received` to every live connection owned by
-that player. This includes other tabs and clients.
+A successful new plan broadcasts `received` to every live connection that player
+owns, other tabs and clients included.
 
-Keep the latest receipt for each source. A newer `AGENT` receipt replaces only
-the previous `AGENT` receipt; the `MANUAL` receipt remains independent.
+Keep the latest receipt per source. A newer `AGENT` receipt replaces only the
+previous `AGENT` one — the `MANUAL` receipt lives its own life.
 
-No `received` message is broadcast for:
+You will not get a `received` for:
 
 - rejected requests;
-- implicit default `WAIT`;
-- an idempotent replay of an already completed request.
+- an implicit default `WAIT`;
+- an idempotent replay of a request that already completed.
 
-The receipt confirms storage, not action success. Read the next
-`state.data.events` for the result.
+And remember the receipt confirms storage, not success. Read the next
+`state.data.events` for what actually happened.
 
 ### Dispatch example
 
@@ -182,12 +182,12 @@ function onMessage(frame) {
 }
 ```
 
-Check `type` before reading `data`. If your client ignores unknown message
-types, make that an explicit compatibility choice.
+Check `type` before you touch `data`. If your client ignores unknown message
+types, make that a deliberate compatibility decision rather than an accident.
 
 ## Connect {#connect}
 
-Non-browser Agents send the credential in the upgrade request:
+Agents that are not browsers send the credential in the upgrade request:
 
 ```http
 GET /api/v1/game/ws HTTP/1.1
@@ -202,11 +202,11 @@ Connection: Upgrade
 | Non-browser Agent | `Authorization: Bearer <token>` | May be omitted. If present, it must be allowed. |
 | Arena Hero web client | Secure Session Cookie | Required and must exactly match an allowed public origin. |
 
-Credentials in the URL or query string are not supported.
+Credentials in the URL or query string are not supported at all.
 
 ### Handshake errors
 
-Before the connection upgrades, errors use normal HTTP JSON:
+Until the connection upgrades, errors come back as ordinary HTTP JSON:
 
 | Status | `error` | Recovery |
 |---:|---|---|
@@ -217,7 +217,7 @@ Before the connection upgrades, errors use normal HTTP JSON:
 
 ## Reconnect {#reconnect}
 
-Reconnect data depends on the current server phase:
+What you get back depends on which phase the server is in:
 
 | Phase | Messages after reconnect |
 |---|---|
@@ -226,8 +226,8 @@ Reconnect data depends on the current server phase:
 | Resolving | Nothing stale; wait for the next `tick`. |
 | Recovered `OPEN` after crash | Same Tick, rebuilt state, restored receipts, and a new full 15-second window. |
 
-This is a current snapshot, not message history. Replace local state and receipt
-assumptions with what arrives after reconnect.
+This is a snapshot of right now, not a replay of message history. Replace your
+local state and receipt assumptions with whatever arrives.
 
 ```text title="Recommended retry loop"
 delay = 250ms
@@ -243,11 +243,11 @@ otherwise:
   delay = min(delay × 2, 5s)
 ```
 
-Reconnecting never extends a normal in-progress command window.
+Reconnecting never extends a normal command window that is already running.
 
 ## Limits and heartbeat {#connection-policy}
 
-The socket carries server-to-client business messages only.
+This socket carries server-to-client business messages and nothing else.
 
 | Property | Value |
 |---|---|
@@ -258,7 +258,7 @@ The socket carries server-to-client business messages only.
 | Client inbound frame limit | 1024 bytes |
 | Compression | Disabled |
 
-Normal WebSocket libraries answer protocol Ping automatically. Do not send
+Ordinary WebSocket libraries answer protocol Ping on their own. Do not push
 heartbeat JSON, command JSON, or binary business frames through this socket.
 
 ### Close codes {#close-codes}
@@ -271,5 +271,6 @@ heartbeat JSON, command JSON, or binary business frames through this socket.
 | 1011 | Internal stream or credential-check failure | Reconnect with backoff. |
 | 1013 | Slow-client queue overflow | Discard delivery assumptions and rebuild from reconnect snapshot. |
 
-A socket close does not mean an HTTP command was rejected. If an HTTP response
-was lost, retry the exact request body with the same `Idempotency-Key`.
+A closed socket says nothing about whether an HTTP command was rejected. If you
+lost an HTTP response, retry the exact request body under the same
+`Idempotency-Key`.

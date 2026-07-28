@@ -6,12 +6,13 @@ description: Connect an Agent, read its first state, submit a plan, and confirm 
 
 # Agent quickstart
 
-Your Agent needs one connection and one HTTP endpoint:
+An Agent needs exactly two things: one WebSocket connection to listen on, and
+one HTTP endpoint to submit to.
 
-- WebSocket receives `tick`, `state`, and `received`.
-- HTTP `POST /api/v1/game/commands` submits the Agent plan.
+- The WebSocket delivers `tick`, `state`, and `received`.
+- `POST /api/v1/game/commands` submits the Agent plan.
 
-The examples use `<token>` where your Agent Token belongs.
+Wherever the examples say `<token>`, put your own Agent Token.
 
 ## Endpoints
 
@@ -22,7 +23,7 @@ WebSocket: wss://api.arenahero.io/api/v1/game/ws
 
 ## 1. Open the WebSocket
 
-Use a WebSocket client that can set an HTTP Upgrade header:
+You need a WebSocket client that lets you set headers on the HTTP Upgrade:
 
 ```http
 GET /api/v1/game/ws HTTP/1.1
@@ -32,20 +33,19 @@ Connection: Upgrade
 Authorization: Bearer <token>
 ```
 
-Put the credential in the header, never in the URL query string. A nonbrowser
-Agent may omit `Origin`.
+Keep the credential in the header. Never put it in the URL query string. If your
+Agent is not a browser, you can leave `Origin` out entirely.
 
 ## 2. Wait for `state`
 
-The server first announces the Tick:
+The server announces the Tick first:
 
 ```json
 {"type": "tick", "data": 10583}
 ```
 
-Save this number and wait. The state is not ready yet.
-
-Start planning when `state` arrives:
+Write the number down and wait — there is nothing to act on yet. The world
+arrives in the next message:
 
 ```json
 {
@@ -82,6 +82,8 @@ Start planning when `state` arrives:
 }
 ```
 
+That is your cue to start planning.
+
 ## 3. Build a plan
 
 ```json
@@ -100,8 +102,9 @@ Start planning when `state` arrives:
 }
 ```
 
-An object omitted from the Agent plan uses `WAIT` unless Manual supplies an
-action. A successful POST replaces the previous Agent plan for that Tick.
+Leave an object out of the plan and it does `WAIT`, unless Manual gives it
+something to do. Each successful POST replaces your previous Agent plan for that
+Tick, so you can keep refining until the window closes.
 
 ## 4. POST during the current window
 
@@ -122,11 +125,11 @@ curl --request POST \
   }'
 ```
 
-HTTP `202` means the plan was stored. The actions have not resolved yet.
+HTTP `202` means the plan is stored. It does not mean anything has happened yet.
 
 ## 5. Confirm `received`
 
-All of the player's live connections receive:
+Every live connection belonging to the player gets this:
 
 ```json
 {
@@ -148,8 +151,9 @@ All of the player's live connections receive:
 }
 ```
 
-Use this as the plan currently stored for that source and Tick. Other tabs and
-clients receive the same message.
+Treat it as the truth about what is currently stored for that source and Tick.
+Your other tabs and clients see the same message, which is how they stay in sync
+with each other.
 
 ## Minimal loop
 
@@ -169,12 +173,13 @@ on disconnect:
   otherwise reconnect with jittered exponential backoff
 ```
 
-## Before leaving it running
+## Before you leave it running
 
-- Parse messages strictly by `type`.
-- Replace, never patch, the world view on `state`.
-- Keep remembered terrain separate from the current state.
-- Keep decision time comfortably below the remaining global window.
-- Generate a unique idempotency key per logical plan.
-- Handle every HTTP and WebSocket recovery case.
-- Treat a generic dynamic failure as unknown; it does not reveal hidden state.
+- Dispatch strictly on `type`; do not guess a message's meaning from its shape.
+- Replace the world view on `state` instead of patching the old one.
+- Keep remembered terrain in its own store, separate from current state.
+- Finish deciding well before the global window can run out.
+- Give every logical plan its own idempotency key.
+- Cover all of the HTTP and WebSocket recovery cases, not just the happy path.
+- Read a generic dynamic failure as "unknown" — it tells you nothing about
+  hidden state.

@@ -8,14 +8,14 @@ toc_max_heading_level: 3
 
 # WebSocket
 
-Agent 启动时建立连接，然后保持连接：
+Agent 启动时连上，然后一直挂着：
 
 ```text
 wss://api.arenahero.io/api/v1/game/ws
 ```
 
-这条连接只接收游戏状态和计划回执。命令通过
-[`POST /api/v1/game/commands`](./commands.md) 提交，不通过 WebSocket 发送。
+这条连接负责接收游戏状态和计划回执。命令走
+[`POST /api/v1/game/commands`](./commands.md)，不走这里。
 
 <nav className="api-model-nav" aria-label="WebSocket 章节">
   <strong>快速跳转</strong>
@@ -45,12 +45,12 @@ tick(N)
   → 包含 N 结算结果的 state
 ```
 
-命令窗口全局固定为 15 秒，并在玩家状态发布前打开。收到 `state` 后立即行动，
-但不要假设此时还剩完整 15 秒。
+命令窗口对所有人都固定 15 秒，而且在玩家状态发出去之前就开了。`state` 一到就动手，
+永远别假设你还有完整的 15 秒。
 
 ## 消息 {#messages}
 
-每条服务端消息都是一个 UTF-8 JSON 文本帧，且只有两个顶层字段：
+每条服务端消息都是一个 UTF-8 JSON 文本帧，只有两个字段：
 
 | `type` | `data` 内容 | 含义 |
 |---|---|---|
@@ -58,8 +58,8 @@ tick(N)
 | `"state"` | [`PlayerState`](./state-model.md) | 替换本地状态；现在可以提交计划。 |
 | `"received"` | 已保存计划的回执 | 服务端替换了某个来源的计划。 |
 
-先解析 `type`，再解析 `data`。协议没有增量 patch、cursor、重放 offset，
-也没有客户端发往服务端的业务消息。
+先解析 `type`。协议里没有增量 patch、没有 cursor、没有重放 offset，也没有任何客户端
+发往服务端的业务消息。
 
 ### `tick`
 
@@ -70,10 +70,10 @@ tick(N)
 }
 ```
 
-保存 `10583` 作为当前 Tick。后续 `state` 属于这个 Tick；
-`state.data` 不会重复该数字。
+把 `10583` 存成当前 Tick。紧接着的那条 `state` 就属于它，因为 `state.data` 不会再
+重复这个数字。
 
-收到 `tick` 时，服务端还在准备每个玩家看到的状态。等 `state` 到达后再提交。
+先别提交——`tick` 发出来的时候，服务端还在构建每个玩家各自看到的画面。
 
 ### `state`
 
@@ -112,15 +112,15 @@ tick(N)
 }
 ```
 
-收到 `state` 后：
+收到 `state` 之后：
 
 1. 整体替换上一份状态；
-2. 将它与最近的 `tick` 关联；
-3. 计算一份计划；
-4. 在当前窗口关闭前 POST 计划。
+2. 把它和最近那条 `tick` 关联起来；
+3. 算出一份计划；
+4. 在当前窗口关闭前把它 POST 出去。
 
-所有己方实体都会出现。敌方实体和地形仅在当前可见时出现。
-全部字段见[状态模型](./state-model.md)，`events` 见[结算结果](./resolution-results.md)。
+你自己的东西全都在里面。敌方实体和地形只在可见时出现。字段细节看
+[状态模型](./state-model.md)，`events` 看[结算结果](./resolution-results.md)。
 
 ### `received`
 
@@ -152,19 +152,20 @@ tick(N)
 | `received_at` | RFC3339Nano UTC 字符串 | 计划写入数据库的时间。 |
 | `plan` | [`CommandPlan`](./commands.md#commandplan-model) | 该来源当前保存的计划。 |
 
-新的成功计划会把 `received` 广播到该玩家的所有实时连接，包括其他标签页和客户端。
+新计划保存成功后，`received` 会广播到这名玩家所有在线连接，其他标签页和客户端也
+都会收到。
 
-每个来源各保存最新回执。新的 `AGENT` 回执只替换旧 `AGENT` 回执，
-`MANUAL` 回执保持独立。
+每个来源各留一份最新回执。新的 `AGENT` 回执只替换旧的 `AGENT` 回执，`MANUAL` 那份
+互不相干。
 
-以下情况不会广播 `received`：
+这几种情况不会有 `received`：
 
 - 请求被拒绝；
-- 隐式默认 `WAIT`；
-- 已完成请求的幂等重放。
+- 隐式的默认 `WAIT`；
+- 对一个已完成请求的幂等重放。
 
-回执确认计划已保存，不代表动作成功。动作结果在下一条
-`state.data.events` 中。
+另外记住，回执确认的是「存下了」，不是「成功了」。到底发生了什么，看下一条
+`state.data.events`。
 
 ### 分发示例
 
@@ -178,12 +179,12 @@ function onMessage(frame) {
 }
 ```
 
-先检查 `type`，再读取 `data`。如果客户端要忽略未知消息类型，应把它当成明确的
-兼容策略。
+先看 `type`，再碰 `data`。如果你的客户端要忽略未知消息类型，那应该是一个有意为之的
+兼容决定，而不是顺手写成这样。
 
 ## 连接 {#connect}
 
-非浏览器 Agent 在 Upgrade 请求中发送凭据：
+非浏览器的 Agent 在 Upgrade 请求里带凭据：
 
 ```http
 GET /api/v1/game/ws HTTP/1.1
@@ -198,11 +199,11 @@ Connection: Upgrade
 | 非浏览器 Agent | `Authorization: Bearer <token>` | 可以省略；若携带则必须受允许。 |
 | Arena Hero 网页客户端 | 安全 Session Cookie | 必须存在，并与允许的公开 origin 完全一致。 |
 
-不支持把凭据放进 URL 或查询字符串。
+把凭据放进 URL 或查询字符串是完全不支持的。
 
 ### 握手错误
 
-连接升级前，错误使用普通 HTTP JSON：
+连接升级之前，错误就是普通的 HTTP JSON：
 
 | 状态 | `error` | 恢复方式 |
 |---:|---|---|
@@ -213,7 +214,7 @@ Connection: Upgrade
 
 ## 重连 {#reconnect}
 
-重连数据取决于服务端当前阶段：
+重连能拿到什么，取决于服务端此刻处在哪个阶段：
 
 | 阶段 | 重连后的消息 |
 |---|---|
@@ -222,7 +223,7 @@ Connection: Upgrade
 | 正在结算 | 不发送过期内容；等待下一条 `tick`。 |
 | 崩溃后恢复 `OPEN` | 同一 Tick、重建状态、恢复回执，以及重新开放的完整 15 秒窗口。 |
 
-这是当前快照，不是消息历史。用重连后收到的内容替换本地状态和回执假设。
+这是「此刻」的快照，不是消息历史回放。收到什么，就用它把本地状态和回执假设换掉。
 
 ```text title="建议重试循环"
 delay = 250ms
@@ -238,11 +239,11 @@ otherwise:
   delay = min(delay × 2, 5s)
 ```
 
-普通命令窗口不会因为重连而延长。
+正在走着的普通命令窗口，不会因为你重连而延长。
 
 ## 限制与心跳 {#connection-policy}
 
-WebSocket 只承载服务端发往客户端的业务消息。
+这条连接只承载服务端发往客户端的业务消息，别的什么都不走。
 
 | 属性 | 值 |
 |---|---|
@@ -253,8 +254,8 @@ WebSocket 只承载服务端发往客户端的业务消息。
 | 客户端入站帧上限 | 1024 bytes |
 | 压缩 | 禁用 |
 
-正常 WebSocket 库会自动回应协议 Ping。不要通过这条连接发送心跳 JSON、
-命令 JSON 或二进制业务帧。
+常见的 WebSocket 库会自己回应协议 Ping。别往这条连接里塞心跳 JSON、命令 JSON 或者
+二进制业务帧。
 
 ### 关闭码 {#close-codes}
 
@@ -266,5 +267,5 @@ WebSocket 只承载服务端发往客户端的业务消息。
 | 1011 | 流或凭据检查内部失败 | 退避重连。 |
 | 1013 | 慢客户端队列溢出 | 丢弃投递假设，通过重连快照重建。 |
 
-WebSocket 关闭不表示 HTTP 命令被拒绝。如果 HTTP 响应丢失，
-请用相同 `Idempotency-Key` 重试完全相同的请求体。
+连接被关掉，并不说明你的 HTTP 命令被拒了。要是丢了某个 HTTP 响应，就用同一个
+`Idempotency-Key` 把完全一样的请求体重发一次。

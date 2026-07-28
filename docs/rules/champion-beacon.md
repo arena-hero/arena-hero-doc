@@ -6,64 +6,65 @@ description: How the Champion Beacon is seen, carried, dropped, and used for bon
 
 # Champion Beacon
 
-There is exactly one indestructible Champion Beacon. It begins at `[0, 0]` and
-persists across restarts.
+There is exactly one Champion Beacon in the world, it cannot be destroyed, and it
+starts at `[0, 0]`. Restarts do not move it or reset it.
 
 ## Visibility
 
-The Beacon coordinate is globally public in every `state`. Its `GROUND` or
-`CARRIED` status and ownerless `carrier_id` are disclosed only when its cell is
-currently visible.
+Every `state` includes the Beacon's coordinate, for everybody, always. What you
+only learn when its cell happens to be visible is whether it is `GROUND` or
+`CARRIED`, plus an ownerless `carrier_id`.
 
-The Beacon:
+The Beacon itself is unobtrusive:
 
-- occupies no cell-capacity slot;
-- blocks neither movement, vision, nor Ranger fire;
-- can share a cell with occupying entities;
-- does not move merely because a browser route crosses it.
+- it takes up no cell-capacity slot;
+- it blocks nothing — not movement, not vision, not Ranger fire;
+- it can sit in a cell alongside occupying entities;
+- it does not get picked up just because a browser route happens to cross it.
 
 ## Pickup and drop
 
-Any Unit or a normal, non-moving Core may spend its full action on
-`PICKUP_BEACON` when colocated with the ground Beacon. Only the current carrier
-may use `DROP_BEACON`.
+Any Unit, or a normal Core that is not migrating, can spend its whole action on
+`PICKUP_BEACON` while sharing a cell with the Beacon on the ground. Only whoever
+is carrying it can `DROP_BEACON`.
 
-Several simultaneous pickups are ordered by carrier UUID raw bytes; the lowest
-UUID wins. A living carrier cannot be robbed directly.
+If several objects reach for it in the same Tick, the raw bytes of their carrier
+UUIDs decide, and the lowest wins. You cannot take it straight from a carrier
+that is still alive.
 
-Beacon actions resolve before Worker harvesting, so:
+Beacon actions resolve before Worker harvesting, which has a convenient
+consequence:
 
-- a successful pickup grants the harvest bonus immediately in that Tick;
-- a successful drop removes the bonus immediately in that Tick.
+- pick it up successfully and you get the harvest bonus in that same Tick;
+- drop it successfully and you lose the bonus in that same Tick.
 
 ## Shield bonus
 
-While a player holds the Beacon, that player's Core shield cap increases from 5
-to 10.
+Holding the Beacon raises that player's Core shield cap from 5 to 10.
 
-- Pickup grants no shield and performs no repair.
-- `REPAIR_SHIELD` is still required, 1 resource for 1 shield.
-- Losing the Beacon immediately clamps shield above 5 down to 5.
+- Picking it up grants no shield and repairs nothing.
+- You still have to spend `REPAIR_SHIELD`, 1 resource per 1 shield.
+- The moment you lose the Beacon, any shield above 5 is clamped back down to 5.
 
 ## Worker bonus
 
-An eligible empty Worker normally collects 1 resource. While its owner holds the
-Beacon, it collects and carries 2.
+An eligible empty Worker normally brings back 1 resource. While its owner holds
+the Beacon, it collects and carries 2.
 
-Already-carried bonus cargo remains 2 after the Beacon is lost and can be
-deposited together. Infinite resource points allow every eligible colocated
-Worker to collect its full amount.
+Bonus cargo already on board stays at 2 even after the Beacon is gone, and can be
+deposited in one go. And because resource points are infinite, every eligible
+Worker sharing the cell still collects its full amount.
 
 ## Movement and drop-on-death
 
-The Beacon follows its carrier's successful movement. A migrating Core carries
-it at the Core's current logical position until the fourth-Tick real move
-succeeds.
+The Beacon travels with its carrier whenever the carrier moves successfully. A
+migrating Core keeps it at the Core's current logical position until the
+fourth-Tick real move goes through.
 
-If the Beacon was carried at the start of a Tick and is then dropped, the
-carrier dies, or the owner's Core is destroyed, the Beacon lands at the
-carrier's final actual position. It cannot be picked up again in the same Tick;
-the earliest new pickup is the next Tick.
+Suppose the Beacon was being carried at the start of a Tick, and then it is
+dropped, or the carrier dies, or the owner's Core is destroyed. In all three cases
+the Beacon lands at the carrier's final actual position, and nobody can pick it up
+again until the next Tick.
 
-This rule prevents a single Tick from chaining ownership through multiple
-carriers.
+That cooldown is the point: it stops a single Tick from passing the Beacon down a
+chain of carriers.

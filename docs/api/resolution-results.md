@@ -6,10 +6,10 @@ description: Read action results from state.events and look up every event and r
 
 # Resolution results
 
-HTTP `202` means the server stored a plan. The actions have not resolved yet.
-Their results arrive in the next `state.data.events` array.
+HTTP `202` means the server stored a plan, nothing more — the actions have not
+resolved yet. Their results turn up in the next `state.data.events` array.
 
-Start with `event_type`, then read the fields listed for that event:
+Start from `event_type`, then read the fields listed for that event:
 
 ```json
 {
@@ -43,7 +43,7 @@ Start with `event_type`, then read the fields listed for that event:
 | `position` | Cell relevant to the resolved result. Its exact meaning is stated in each catalog row. |
 | `values` | Event-specific object. Keys are stable per event row; the object is omitted when no values apply. |
 
-Missing optional fields are omitted, not `null`.
+Optional fields that do not apply are left out rather than sent as `null`.
 
 ## Economy and Core events
 
@@ -60,8 +60,8 @@ Missing optional fields are omitted, not `null`.
 | `CORE_SPAWN_FAILED` | `DETERMINISTIC_ID_COLLISION` | `actor_id`: Core; `position`: Core cell | absent | Defensive collision check rejected the deterministic spawn ID. |
 | `CORE_SPAWN_SUCCEEDED` | absent | `actor_id`: Core; `target_id`: new Unit; `position`: Core cell | `{unit_type: UnitType, cost: int}` | One Unit was created on the Core cell. |
 
-`destroyed_by` contains participant usernames, ordered deterministically. It is
-present only for an attack when at least one participant can be named.
+`destroyed_by` lists participant usernames in a deterministic order. You only see
+it for an attack, and only when at least one participant can be named.
 
 ## Worker events
 
@@ -86,13 +86,13 @@ present only for an attack when at least one participant can be named.
 | `UNIT_DAMAGED` | `ATTACK` | `target_id`: damaged Unit; `position`: Unit cell | `{damage: int, hp: int}` | Aggregated damage and HP after damage, clamped to `0`. `hp: 0` means the Unit was destroyed. |
 | `DESTRUCTION_PARTICIPATION` | `UNIT` or `CORE` | `target_id`: destroyed object; `position`: destruction cell | absent | This player contributed at least one damage to the destroyed object. |
 
-There is no separate `UNIT_DESTROYED` event for the victim. Detect destruction
-from `UNIT_DAMAGED.values.hp === 0` and from the Unit's absence in the new
+The victim never gets a separate `UNIT_DESTROYED` event. Detect a kill from
+`UNIT_DAMAGED.values.hp === 0`, together with the Unit's absence from the new
 complete state.
 
-Every dynamic Ranger failure uses the same `SHOT_MISSED` reason. This includes
-a missing or moved target, a friendly target, invalid range, and a blocked
-line. The result does not reveal hidden state.
+Every dynamic Ranger failure carries the same `SHOT_MISSED` reason — a missing or
+moved target, a friendly target, bad range, a blocked line, all of them. The
+result is designed to reveal nothing about hidden state.
 
 ## Movement events
 
@@ -161,5 +161,6 @@ function applyEvent(event) {
 }
 ```
 
-Replace your old objects with the new `state.objects`. Events explain how the
-new state was reached. Do not replay them as patches against the old state.
+Replace your old objects with the new `state.objects`. Events are there to
+explain how the new state came about — do not replay them as patches against the
+old one.

@@ -6,14 +6,14 @@ description: 两个游戏端点、一次 Tick 流程、身份验证、JSON 规�
 
 # API 概览
 
-Agent 通过 WebSocket 接收状态，通过 HTTP 发送计划：
+Agent 用 WebSocket 收状态，用 HTTP 发计划：
 
 | 用途 | 地址 | 方向 |
 |---|---|---|
 | 接收 `tick`、`state` 和 `received` | `wss://api.arenahero.io/api/v1/game/ws` | 服务端到客户端 |
 | 提交计划 | `POST https://api.arenahero.io/api/v1/game/commands` | 客户端到服务端 |
 
-不要用 HTTP 轮询状态，也不要通过 WebSocket 发送命令。
+这个分工是死的：别用 HTTP 轮询状态，也别想着从 WebSocket 发命令。
 
 ## 一个 Tick 怎么走完
 
@@ -30,47 +30,47 @@ WebSocket received
   -> state.events 包含动作结果
 ```
 
-这几个确认不是一回事：
+这几个确认各说各的事，别混起来看：
 
-- `tick` 只公布数字，此时还不能提交。
-- `state` 到达后，Agent 才开始处理这个 Tick。
-- HTTP `202` 确认计划已保存，不代表动作成功。
-- `received` 显示服务端当前保存了哪份计划。
-- 下一条 `state.events` 才报告移动、战斗、资源和 Core 结果。
+- `tick` 只公布数字，这时候还轮不到你提交。
+- `state` 到了，Agent 这个 Tick 的活才算开始。
+- HTTP `202` 确认的是「存下了」，不是「成功了」。
+- `received` 告诉你服务端当前存的是哪一份。
+- 移动、战斗、资源和 Core 的结果，要到下一条 `state.events` 才出现。
 
 ## 身份验证
 
-在 HTTP 请求或 WebSocket Upgrade 请求头中发送 Agent Token：
+Agent Token 放在 HTTP 请求头里，或者 WebSocket Upgrade 的请求头里：
 
 ```http
 Authorization: Bearer <token>
 ```
 
-不要把 Token 放进 URL、查询参数、JSON 请求体、日志或 `Idempotency-Key`。
+别把它放进 URL、查询参数、JSON 请求体、日志或者 `Idempotency-Key`。
 
-非浏览器 Agent 在 WebSocket 握手时可以省略 `Origin`。如果发送了 `Origin`，它必须和
-允许的公开 Origin 完全一致。
+不是浏览器的 Agent，握手时可以干脆不发 `Origin`。真要发，值就必须和允许的公开
+Origin 完全一致。
 
-浏览器 WebSocket API 不能设置 `Authorization`。Arena Hero 网页客户端使用自己的
-安全 Session。
+浏览器的 WebSocket API 根本设不了 `Authorization`，所以 Arena Hero 网页客户端走的是
+自己的安全 Session。
 
 ## JSON 请求
 
-- 命令请求体只能包含一个 JSON object。
-- `Content-Type` 必须能解析为 `application/json`。
-- 未知字段会被拒绝。
-- 每个动作先写 `type`，然后只发送该动作需要的字段。
-- 可选字段没有值时直接省略，不要传 `null`。
+- 命令请求体就是一个 JSON object。
+- `Content-Type` 必须能解析成 `application/json`。
+- 未知字段一律拒绝。
+- 每个动作都以 `type` 开头，并且只带该动作列出的字段。
+- 可选字段没值就省略，别传 `null`。
 - 字段名和枚举值区分大小写。
-- 每次成功请求都会替换该来源之前保存的计划。
+- 每次请求成功，都会把该来源之前存的那份换掉。
 
 ## WebSocket 数据
 
 - 每条业务消息都是一个 UTF-8 JSON 文本帧。
-- 空数组仍然会发送为 `[]`。
-- 因视野不可见的字段会被省略，不会发送为 `null`。
-- 每条 `state` 都会替换前一条状态，不要合并对象数组。
-- 协议不会公开截止时间、事件 cursor、重放 ID、计划版本或提交序号。
+- 空数组照样发成 `[]`。
+- 因视野而隐藏的字段是整个不发，而不是发成 `null`。
+- 每条 `state` 都顶替上一条，别去合并它的对象数组。
+- 协议里没有截止时间戳、事件 cursor、重放 ID、计划版本和提交序号，一个都没有。
 
 ## 常用字段格式
 
@@ -93,23 +93,23 @@ Authorization: Bearer <token>
 | `LEFT` | `[-1, 0]` |
 | `RIGHT` | `[1, 0]` |
 
-Tick 和坐标都是 int64。如果你的运行时无法用普通 number 精确表示所有 int64，
-应拒绝超出安全范围的值，不要静默舍入。
+Tick 和坐标都是 int64。如果你的运行时用普通 number 表示不了全部 int64，就把超出安全
+范围的值直接拒掉，别偷偷四舍五入。
 
 ## Agent 和 Manual 同时操作时
 
-服务端为每个 `(player, Tick, source)` 保存一份当前计划。
+服务端给每个 `(player, Tick, source)` 存一份当前计划，然后逐对象合并：
 
 ```text
 MANUAL 明确动作 > AGENT 明确动作 > WAIT
 ```
 
 - 同一来源后提交成功的计划会替换前一份。
-- Agent 计划没写某个对象时，该对象使用 `WAIT`，除非 Manual 给了动作。
-- Manual 计划没写某个对象时，该对象回退到 Agent 动作。
-- Manual 明确写 `WAIT` 时，会覆盖 Agent 动作。
-- 同一玩家的所有 Agent 凭据共享一个 `AGENT` 计划槽。
-- 该玩家的所有在线连接都会收到 `received`，包括其他客户端提交的计划。
+- Agent 计划里没写的对象按 `WAIT` 处理，除非 Manual 给了动作。
+- Manual 计划里没写的对象回退到它的 Agent 动作。
+- Manual 显式写 `WAIT`，会盖过 Agent 的动作。
+- 同一玩家的所有 Agent 凭据共用一个 `AGENT` 计划槽。
+- 该玩家所有在线连接都会收到 `received`，别的客户端提交的计划也会广播过来。
 
 ## 接下来查什么
 

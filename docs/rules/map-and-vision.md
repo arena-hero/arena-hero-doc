@@ -8,7 +8,7 @@ description: How terrain, visibility, resources, and fog of war work.
 
 ## Terrain
 
-A cell has exactly one terrain kind:
+Every cell has exactly one terrain kind:
 
 | Kind | Passable by Units | Passable by a moving Core | Blocks vision | Blocks Ranger fire |
 |---|---:|---:|---:|---:|
@@ -16,21 +16,22 @@ A cell has exactly one terrain kind:
 | `RESOURCE` | Yes | No | No | No |
 | `OBSTACLE` | No | No | Yes | Yes |
 
-Core and Unit objects occupy cells but are not terrain. Resources are permanent,
-infinite resource points; harvesting never depletes or changes the cell.
+Cores and Units occupy cells but are not terrain. Resource cells are permanent and
+infinite; harvesting one never drains it or changes what it is.
 
 ## Central resource gradient
 
-The center is `[0, 0]`. Manhattan distance and richness are:
+The center of the world is `[0, 0]`. Richness falls off with Manhattan distance:
 
 ```text
 d = abs(x) + abs(y)
 richness(d) = 1 + 256 / (256 + d)
 ```
 
-The center has twice the base resource-cell density. Density decreases smoothly
-toward the permanent base-density floor. The gradient changes only resource
-density; obstacle density remains constant.
+At the center, resource cells are twice as dense as the baseline. Density then
+falls smoothly outward until it settles at the permanent base floor. Note that the
+gradient only touches resource density — obstacle density stays constant
+everywhere.
 
 ## Vision values
 
@@ -41,55 +42,57 @@ density; obstacle density remains constant.
 | Vanguard | 4 |
 | Ranger | 5 |
 
-The current private view is the union of all living owned objects' vision.
-Obstacles use an integer supercover line. The obstacle cell itself is visible,
-but cells behind it are not. When a line passes exactly through a corner shared
-by two cells, both cells count; an obstacle on either side blocks the line.
+Your current private view is the union of what all your living objects can see.
+Obstacles are traced with an integer supercover line: you can see the obstacle
+cell itself, but nothing behind it. Where a line runs exactly through a corner
+shared by two cells, both cells count, and an obstacle on either side blocks it.
 
-Units, Cores, and resource cells do not block **vision**. Units and Cores do
-block a Ranger's **shot**, which is a separate rule.
+Units, Cores, and resource cells do not block **vision** at all. Units and Cores do
+block a Ranger's **shot** — that is a separate rule, and it is easy to conflate the
+two.
 
 ## What the server sends
 
-Each `state` contains:
+Each `state` carries:
 
-- every owned Core and Unit, even if outside all current vision;
-- enemy Core and Unit objects only when currently visible;
+- all of your own Cores and Units, even ones nothing of yours can currently see;
+- enemy Cores and Units, but only while they are visible;
 - visible terrain, grouped into one `OBSTACLE` object and one `RESOURCE` object;
-- the globally public Champion Beacon coordinate;
-- Beacon status and carrier ID only when the Beacon cell is currently visible.
+- the Champion Beacon coordinate, which is public to everyone;
+- Beacon status and carrier ID, but only while the Beacon's cell is visible.
 
-Enemy objects have `controlled: false` and omit owner information. Worker cargo
-is private and appears only on an owned Worker.
+Enemy objects come with `controlled: false` and no owner information. Worker cargo
+is private, so it appears only on your own Workers.
 
 ## Exploration memory
 
-The server sends the current view, not the player's exploration history. The
-web client keeps a local cache. An Agent that needs memory must save previously
-seen terrain and objects itself. A new device starts with only the current view.
+The server sends you the current view and nothing else — it does not replay where
+you have been. The web client caches that locally. An Agent that wants a map has
+to save the terrain and objects it has seen itself, which is why a fresh device
+starts out with only the current view.
 
 :::warning Stale knowledge
 
-Remembered terrain stays valid because terrain is permanent. A remembered Unit,
-Core, or Beacon carrier may already have moved.
+Remembered terrain stays true, because terrain is permanent. A remembered Unit,
+Core, or Beacon carrier may well have moved since you last saw it.
 
 :::
 
 ## Champion Beacon information boundary
 
-The coordinate is always present:
+The coordinate is always there:
 
 ```json
 {"position": [0, 0]}
 ```
 
-When visible on the ground:
+When you can see it on the ground:
 
 ```json
 {"position": [0, 0], "status": "GROUND"}
 ```
 
-When a visible carrier holds it:
+When you can see the carrier holding it:
 
 ```json
 {
@@ -99,4 +102,4 @@ When a visible carrier holds it:
 }
 ```
 
-`carrier_id` does not reveal an owner.
+`carrier_id` still tells you nothing about who owns the carrier.

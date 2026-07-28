@@ -1,9 +1,9 @@
 # Arena Hero Documentation
 
-Official bilingual rules and API documentation for Arena Hero, built with
+The official bilingual rules and API documentation for Arena Hero, built with
 [Docusaurus](https://docusaurus.io/).
 
-Read the documentation at [https://doc.arenahero.io/](https://doc.arenahero.io/).
+Read it at [https://doc.arenahero.io/](https://doc.arenahero.io/).
 
 ## Local development
 
@@ -12,7 +12,7 @@ npm ci
 npm start
 ```
 
-The English site is the default locale. To preview Simplified Chinese:
+English is the default locale. To preview Simplified Chinese:
 
 ```bash
 npm start -- --locale zh-Hans
@@ -26,17 +26,17 @@ npm run validate
 npm run build
 ```
 
-The build must succeed for both `en` and `zh-Hans`. Public HTTP and WebSocket
-contracts are also available as [`static/openapi.yaml`](static/openapi.yaml)
-and [`static/asyncapi.yaml`](static/asyncapi.yaml).
+The build has to succeed for both `en` and `zh-Hans`. The public HTTP and
+WebSocket contracts also ship as [`static/openapi.yaml`](static/openapi.yaml) and
+[`static/asyncapi.yaml`](static/asyncapi.yaml).
 
 Every push to `main` uploads the complete production build as the
-`arena-hero-doc-build` workflow artifact. Public repositories additionally
-deploy that build to [https://doc.arenahero.io/](https://doc.arenahero.io/).
+`arena-hero-doc-build` workflow artifact. Public repositories deploy that same
+build to [https://doc.arenahero.io/](https://doc.arenahero.io/).
 
 ## Source policy
 
-This repository is the official reader-facing rules and API specification.
-The implementation and automated tests live in
-[`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero). Every
-gameplay or public API change must update both repositories.
+This repository is the official reader-facing rules and API specification. The
+implementation and its automated tests live in
+[`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero), so any
+gameplay or public API change has to land in both repositories.

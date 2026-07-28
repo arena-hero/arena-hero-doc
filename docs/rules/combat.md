@@ -8,20 +8,23 @@ description: How sweeps, shots, simultaneous damage, and destruction resolve.
 
 ## One immutable snapshot
 
-Combat starts after movement, Beacon actions, Worker actions, production, and
-shield repair. The engine freezes one immutable combat snapshot.
+Combat runs last, after movement, Beacon actions, Worker actions, production, and
+shield repair are all done. At that point the engine freezes a single immutable
+snapshot and works from it:
 
-1. Validate every locked attack against that same snapshot.
+1. Validate every locked attack against that one snapshot.
 2. Accumulate damage from every legal attack.
-3. Apply all accumulated damage simultaneously.
-4. Remove dead Units and destroyed Cores only after damage is applied.
+3. Apply all of the accumulated damage simultaneously.
+4. Only then remove dead Units and destroyed Cores.
 
-An object killed during combat still completes its own already-locked legal
-attack. Mutual destruction is possible. Request arrival order, HTTP completion
-order, database row order, and Manual/Agent source do not grant initiative.
+Because validation and damage happen against a frozen picture, an object killed
+during combat still lands the legal attack it had already locked in, and mutual
+destruction is a normal outcome. Nothing grants initiative — not the order
+requests arrived, not the order they completed, not database row order, not
+whether the plan came from Manual or Agent.
 
-There is no random damage, dodge, critical hit, armor, automatic retaliation,
-stamina, level, or equipment in v0.1.
+v0.1 has no random damage, dodge, critical hits, armor, automatic retaliation,
+stamina, levels, or equipment.
 
 ## Vanguard sweep
 
@@ -29,13 +32,13 @@ stamina, level, or equipment in v0.1.
 {"type": "SWEEP", "direction": "UP"}
 ```
 
-The adjacent cell is inspected in the combat snapshot:
+The engine looks at the adjacent cell as it appears in the combat snapshot:
 
 - every enemy Unit in that cell takes 1 damage;
 - an enemy Core in that cell takes 1 damage;
-- friendly objects take no damage.
+- friendly objects take none.
 
-Several sweeps can hit the same target and their damage adds.
+Point several sweeps at the same target and their damage adds.
 
 ## Ranger shot
 
@@ -47,36 +50,36 @@ Several sweeps can hit the same target and their damage adds.
 }
 ```
 
-The Ranger attacks one exact object at distance 1-3 on a horizontal or vertical
-line. Every intermediate obstacle, Unit, or Core blocks the shot. The target
-cell itself can contain another colocated object without creating a front/back
-ordering.
+A Ranger attacks one specific object 1-3 cells away, along a horizontal or
+vertical line. Anything in between — obstacle, Unit, or Core — blocks the shot.
+The target cell itself may hold another colocated object without that creating any
+front/back ordering.
 
-The endpoint performs only static schema checks. The engine later converts all
-dynamic failures into `SHOT_MISSED`, including:
+The endpoint checks the schema and nothing more. Every dynamic failure is deferred
+to resolution, where it becomes `SHOT_MISSED`:
 
-- target absent;
-- target friendly;
-- target moved away from `expected_cell`;
-- diagonal or out-of-range target;
-- blocked line of fire.
+- the target is gone;
+- the target is friendly;
+- the target moved off `expected_cell`;
+- the target is diagonal or out of range;
+- the line of fire is blocked.
 
-This deliberate ambiguity prevents the command API from becoming a fog-of-war
-oracle.
+The ambiguity is deliberate. It stops the command API from doubling as a
+fog-of-war oracle.
 
 ## Core damage
 
-All damage removes shield first, then HP. If a Core reaches zero HP after all
-combat damage is combined, its fleet is removed after its living Units'
-snapshot attacks have contributed.
+Damage always eats shield first, then HP. If a Core is at zero HP once all combat
+damage has been combined, its fleet goes away — but not before the snapshot
+attacks made by its still-living Units have counted.
 
-No attacker receives exclusive last-hit authority. When several players damage
-the same destroyed target in one Tick, the destruction is shared rather than
-assigned by input order.
+There is no last-hit authority to claim. When several players damage the same
+doomed target in one Tick, they share the destruction rather than having it
+awarded by input order.
 
 ## Information returned to the player
 
-Combat results arrive in the next `state.events`, for example:
+Combat results show up in the next `state.events`, like this:
 
 ```json
 {
@@ -89,6 +92,6 @@ Combat results arrive in the next `state.events`, for example:
 }
 ```
 
-Enemy objects still omit usernames and owner IDs. A destroyed Core's owner may
-receive a private `CORE_DESTROYED` result identifying participating attacker
-usernames, but ordinary visible state never exposes them.
+Enemy objects still arrive without usernames or owner IDs. The owner of a
+destroyed Core may get a private `CORE_DESTROYED` result naming the attackers who
+took part, but ordinary visible state never exposes them.

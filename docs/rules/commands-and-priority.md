@@ -8,23 +8,26 @@ description: How Agent and Manual plans combine, replace each other, validate, a
 
 ## Two independent source slots
 
-Every player has one `AGENT` plan slot and one `MANUAL` plan slot per Tick.
+Each player gets one `AGENT` plan slot and one `MANUAL` plan slot per Tick, and
+they are merged per object:
 
 ```text
 Manual explicit action > Agent explicit action > WAIT
 ```
 
-- The Agent plan contains automated actions. An omitted object uses `WAIT`
-  unless Manual supplies an action.
-- The Manual plan contains human overrides. An omitted object falls back to Agent.
-- Manual sends an explicit `WAIT` when the player wants to stop an Agent action.
-- All Agent clients for one player share the same Agent slot.
-- Several browser tabs share the same Manual slot.
+- The Agent plan holds automated actions. Leave an object out and it does `WAIT`,
+  unless Manual has something for it.
+- The Manual plan holds human overrides. Leave an object out and it falls back to
+  the Agent.
+- To stop an Agent action, Manual has to send an explicit `WAIT` — omitting the
+  object is not enough.
+- All of one player's Agent clients share a single Agent slot.
+- All of one player's browser tabs share a single Manual slot.
 
 ## A new plan replaces the old one
 
-Every successful POST replaces the earlier plan from that source. The server
-does not patch or merge it with the previous plan.
+Each successful POST replaces whatever that source sent before. The server never
+patches or merges the two.
 
 ```mermaid
 flowchart TD
@@ -35,60 +38,60 @@ flowchart TD
   M2 --> E
 ```
 
-To change one Unit and keep the others acting, the Agent must send those other
-actions again.
+So if an Agent wants to change one Unit and leave the others doing what they were
+doing, it has to send those other actions again too.
 
 ## Static and dynamic validation
 
-Static validation happens before persistence:
+Static validation runs before anything is persisted, and checks that:
 
-- one JSON object with no unknown fields;
-- positive Tick;
-- lowercase, hyphenated Unit UUID keys;
-- every referenced acting Unit is owned by the player;
-- action type is allowed for that Unit;
+- the body is one JSON object with no unknown fields;
+- the Tick is positive;
+- Unit UUID keys are lowercase and hyphenated;
+- every acting Unit referenced belongs to the player;
+- the action type is allowed for that Unit;
 - required fields are present;
 - unrelated action fields are absent.
 
-One static issue rejects the full request atomically. The previous valid plan
-remains unchanged.
+A single problem rejects the whole request atomically, and your previous valid plan
+is left exactly as it was.
 
-Dynamic conditions resolve later:
+Dynamic conditions are a different matter — they can only be settled later, at
+resolution:
 
-- target moved;
-- destination became occupied;
-- movement was contested;
-- resources became insufficient;
-- Beacon was won by a lower UUID;
-- Ranger line became blocked.
+- the target moved;
+- the destination filled up;
+- the movement was contested;
+- resources ran short;
+- a lower UUID won the Beacon;
+- the Ranger's line got blocked.
 
-Dynamic failure does not invalidate the POST. It appears in the next
-`state.events`.
+None of these invalidate the POST. They show up in the next `state.events`.
 
 ## Ordering and rate limit
 
-Valid requests for the same `(player, tick, source)` serialize in gate-entry
-order. A later stored plan replaces an earlier one. The protocol has no
-client-supplied version number.
+Valid requests for the same `(player, tick, source)` are serialized in the order
+they enter the gate, and each stored plan replaces the one before it. There is no
+client-supplied version number in the protocol.
 
-Each source slot processes at most 64 new submissions per Tick after idempotency
-precheck; both valid and statically invalid new requests count. Additional
-requests return `429 COMMAND_RATE_LIMITED` and preserve the last valid plan.
+Each source slot accepts at most 64 new submissions per Tick, counted after the
+idempotency precheck — valid and statically invalid requests both count. Anything
+beyond that gets `429 COMMAND_RATE_LIMITED`, and your last valid plan stands
+untouched.
 
 ## Idempotency and receipts
 
-Every command request has an `Idempotency-Key`.
+Every command request carries an `Idempotency-Key`.
 
-- Same key + same body returns the original HTTP response.
-- Same key + different body returns `IDEMPOTENCY_CONFLICT`.
+- Same key, same body: you get the original HTTP response back.
+- Same key, different body: `IDEMPOTENCY_CONFLICT`.
 - A replay does not broadcast a second `received`.
 
-After the server stores a new plan:
+Once the server has stored a new plan:
 
-1. HTTP returns minimal `202 Accepted` receipt metadata.
-2. Every live connection for that player receives the stored plan in
-   `received.plan`.
+1. HTTP returns a minimal `202 Accepted` with receipt metadata.
+2. Every live connection for that player gets the stored plan in `received.plan`.
 3. Reconnecting during the same OPEN Tick restores the latest receipt from each
    source.
 
-Receipts clear at the next Tick and are not a plan-history service.
+Receipts are cleared at the next Tick. This is not a plan-history service.
