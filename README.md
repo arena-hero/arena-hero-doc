@@ -44,3 +44,7 @@ official SDK lives in
 The official Codex skill lives in
 [`arena-hero/arena-hero-skill`](https://github.com/arena-hero/arena-hero-skill).
 Gameplay or public API changes must keep all four repositories in sync.
+
+## License
+
+[Apache License 2.0](LICENSE)
