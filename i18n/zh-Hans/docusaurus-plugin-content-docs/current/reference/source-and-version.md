@@ -14,8 +14,8 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 | 游戏规则 | v0.4 |
 | 服务器仓库 | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
 | 已审查服务器提交 | `f98e22e74486d3d51a30fd38a708da1716b3b454` |
-| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.2.0 |
-| 已审查 SDK 提交 | `9cc5a2054d2375d80a83c67d6da12df3bb2bb149` |
+| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.2.2 |
+| 已审查 SDK 提交 | `d886848937e65a2c8b36b7507b008f9b0d112073` |
 | 服务端审查日期 | 2026 年 7 月 29 日 |
 | SDK 审查日期 | 2026 年 7 月 29 日 |
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
