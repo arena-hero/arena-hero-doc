@@ -269,8 +269,9 @@ components:
       additionalProperties: false
       description: |
         A visible map-feature batch. OBSTACLE positions are permanent terrain.
-        RESOURCE positions are currently available consumable points and may
-        disappear or be replenished between states.
+        RESOURCE positions are natural points or dropped Worker cargo piles.
+        Pile amounts are not exposed, so a position may remain after a partial
+        recovery.
       required: [kind, positions]
       properties:
         kind:
@@ -408,6 +409,7 @@ components:
       type: string
       enum:
         - UNIT_SELF_DESTRUCTED
+        - WORKER_CARGO_DROPPED
         - UPKEEP_PAID
         - CORE_DAMAGED
         - CORE_DESTROYED
@@ -489,9 +491,10 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Attempts to consume the resource point under an empty Worker. When
-        eligible Workers contest one point, only the lowest UUID succeeds; the
-        others receive HARVEST_FAILED with RESOURCE_DEPLETED after resolution.
+        Attempts to recover dropped Worker cargo or consume the natural
+        resource point under an empty Worker. When eligible Workers contest one
+        cell, only the lowest UUID succeeds; the others receive HARVEST_FAILED
+        with RESOURCE_DEPLETED after resolution.
       required: [type]
       properties:
         type:
@@ -540,7 +543,9 @@ components:
     SelfDestructAction:
       type: object
       additionalProperties: false
-      description: Removes the Unit before upkeep, without refund or area damage.
+      description: |
+        Removes the Unit before upkeep, without refund or area damage. A
+        Worker's cargo becomes a resource pile on its final cell.
       required: [type]
       properties:
         type:

@@ -63,6 +63,9 @@ resource_quota = max(2, floor(16 * 8 / (8 + ring)))
 一个点让普通 Worker 得到 1 资源，让 Beacon 玩家的 Worker 得到 2 资源；两种情况都只
 消耗一个点。同点竞争由最低的合格 Worker UUID 获胜。
 
+Worker 死亡时会把全部 Cargo 掉在最后所在格。普通回收一次取 1 点，有 Beacon 时最多
+取 2 点，但不会超过资源堆剩余量。Cargo 资源堆不计入区块自然资源配额。
+
 ```text
 population = Worker + Vanguard + Ranger
 tier = floor(population / 20)

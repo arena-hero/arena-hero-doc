@@ -55,6 +55,6 @@ same source and the new plan simply replaces the old one.
 - Handle a failed request: [Errors and recovery](./api/errors.md)
 - Generate a client: [OpenAPI](pathname:///openapi.yaml) and [AsyncAPI](pathname:///asyncapi.yaml)
 
-These pages describe HTTP and WebSocket API v0.1 and gameplay rules v0.3,
+These pages describe HTTP and WebSocket API v0.1 and gameplay rules v0.4,
 checked against server commit
 [`16b152b`](https://github.com/arena-hero/arena-hero/commit/16b152b).

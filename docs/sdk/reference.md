@@ -202,10 +202,12 @@ Extra controls:
 | `harvest()` | Try to consume the resource point on the current cell. |
 | `deposit()` | Deposit cargo while sharing a cell with the Core. |
 
-One successful harvest consumes one point. A normal winner carries 1 resource;
-a winner whose player holds the Beacon carries 2 from the same point. If several
-eligible Workers harvest one point, only the lowest UUID succeeds and the others
-receive `HARVEST_FAILED` with `RESOURCE_DEPLETED`.
+One successful natural harvest consumes one point. A normal winner carries
+1 resource; a winner whose player holds the Beacon carries 2 from that same
+point. Cargo piles dropped by dead Workers are recovered first and never yield
+more than their remaining amount. If several eligible Workers harvest one cell,
+only the lowest UUID succeeds and the others receive `HARVEST_FAILED` with
+`RESOURCE_DEPLETED`.
 
 ### Vanguard
 
@@ -294,13 +296,19 @@ views over controlled objects. Enemy objects remain immutable `UnitView` or
 | `target_id` | `UUID | None` |
 | `position` | `Position | None` |
 | `values` | `dict[str, Any] | None` |
+| `resource_amount` | `int | None` |
+| `harvest_source` | `HarvestSource | None` |
 
 Event names and reason codes stay as strings so newer server values do not
 break an older SDK. See [Resolution results](../api/resolution-results.md) for
 their meanings.
 
 In particular, `HARVEST_FAILED` with `RESOURCE_DEPLETED` means a lower-UUID
-eligible Worker consumed the contested point in that Tick.
+eligible Worker consumed the contested point in that Tick. For cargo events,
+`resource_amount` safely reads the dropped or recovered amount.
+`harvest_source is HarvestSource.DROPPED_CARGO` identifies a recovery;
+`HarvestSource.RESOURCE_NODE` identifies an ordinary natural harvest. Unknown
+or inapplicable values return `None`.
 
 ### `Tick`, `Received`, and `Accepted`
 
@@ -373,6 +381,7 @@ Public action models:
 | `CoreState` | `NORMAL`, `MOVING` |
 | `CommandSource` | `AGENT`, `MANUAL` |
 | `BeaconStatus` | `GROUND`, `CARRIED` |
+| `HarvestSource` | `RESOURCE_NODE`, `DROPPED_CARGO` |
 
 `Direction.delta` returns the corresponding `(dx, dy)` tuple.
 

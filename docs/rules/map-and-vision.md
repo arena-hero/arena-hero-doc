@@ -9,7 +9,7 @@ description: How terrain, visibility, resources, and fog of war work.
 ## Terrain and resource points
 
 Every cell has permanent base terrain, and a passable cell may additionally hold
-one currently available resource point:
+a natural resource point or cargo dropped by a dead Worker:
 
 | Visible `kind` | Passable by Units | Passable by a moving Core | Blocks vision | Blocks Ranger fire |
 |---|---:|---:|---:|---:|
@@ -18,8 +18,9 @@ one currently available resource point:
 | `OBSTACLE` | No | No | Yes | Yes |
 
 Cores and Units occupy cells but are not terrain. Obstacles and chunk backbone
-passages are permanent. A `RESOURCE` position is different: one successful
-`HARVEST` consumes that point and exposes the passable ground underneath.
+passages are permanent. One successful `HARVEST` consumes a natural point.
+Dropped cargo can take several harvests; the cell stays `RESOURCE` until both
+the pile and any natural point there are gone.
 
 ## Resource quotas
 
@@ -61,6 +62,11 @@ its quota `x`.
 - A replacement must be on passable, non-obstacle ground, outside the chunk's
   backbone passages, and not occupied by a Core after resolution.
 - A replacement may appear under a Unit or under the ground Champion Beacon.
+
+Worker cargo piles are separate from this quota. Every Worker death—self-
+destruction, combat, or fleet removal after Core destruction—adds its complete
+cargo amount to the final cell. Piles persist until recovered and do not reduce
+or increase the chunk's natural replenishment quota.
 
 The versioned world contract makes the selection replayable: the same world,
 resolved Tick, chunk state, and missing slots produce the same replacement
@@ -114,10 +120,11 @@ A remembered Unit, Core, or Beacon carrier may also have moved.
 
 :::
 
-When a visible point is consumed, it is removed from the authoritative resource
-layer immediately and the next complete `state` omits it unless replenishment
-placed a point there again. There is no hidden resource quantity: a position is
-either currently available and included, or unavailable and absent.
+When a visible natural point is consumed, the next complete `state` omits it
+unless a cargo pile remains or replenishment placed a point there again.
+`state.objects` deliberately exposes only the `RESOURCE` position, not the
+remaining cargo-pile amount, so the position may remain visible after a partial
+recovery.
 
 ## Champion Beacon information boundary
 

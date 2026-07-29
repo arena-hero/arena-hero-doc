@@ -64,6 +64,10 @@ One point yields 1 resource to a normal Worker or 2 to a Beacon player's Worker.
 Either harvest consumes exactly one point. A same-point tie goes to the lowest
 eligible Worker UUID.
 
+A dead Worker drops its complete cargo amount on its final cell. Recovery takes
+1 resource normally or up to 2 with the Beacon, never more than the pile holds.
+Cargo piles do not count toward the chunk's natural-resource quota.
+
 ```text
 population = Worker + Vanguard + Ranger
 tier = floor(population / 20)

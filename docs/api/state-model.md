@@ -164,8 +164,10 @@ altogether, none of its positions are currently visible. These batches carry no
 `id`, no `controlled`, no HP, and no resource quantity.
 
 `OBSTACLE` positions are permanent terrain. `RESOURCE` positions are current
-availability, not permanent terrain memory: one successful harvest consumes a
-point, and replenishment may later create a replacement elsewhere in the chunk.
+availability, not permanent terrain memory. They may be natural points or cargo
+piles left by dead Workers. One successful harvest consumes a natural point;
+a partially recovered cargo pile keeps the same position present. Replenishment
+may later create a natural replacement elsewhere in the chunk.
 
 ### Core
 

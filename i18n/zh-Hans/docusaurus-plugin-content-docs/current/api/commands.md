@@ -146,8 +146,9 @@ Unit A: WAIT
 ### 自毁 Unit
 
 `SELF_DESTRUCT` 不带其他字段。它在维护费之前结算，移除 Unit，并占用该 Unit 本 Tick
-的动作。它不返还资源，也不伤害附近对象。Worker 携带的资源会丢失。Unit 携带 Beacon
+的动作。它不返还资源，也不伤害附近对象。Worker 携带的资源会掉在当前格。Unit 携带 Beacon
 时，Beacon 掉在当前格，并且要到下一 Tick 才能再次拾取。
+Worker 的拥有者还会收到带掉落数量的 `WORKER_CARGO_DROPPED`。
 
 ## Core 动作
 

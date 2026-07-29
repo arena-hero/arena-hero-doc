@@ -85,7 +85,8 @@ with commands still closed. `state` is the one and only signal to act.
 This order is part of the protocol, not an implementation detail:
 
 1. Lock the final valid Agent and Manual plans.
-2. Resolve every `SELF_DESTRUCT` and remove those Units.
+2. Resolve every `SELF_DESTRUCT`, remove those Units, and drop any Worker cargo
+   on their final cells.
 3. Charge upkeep from the remaining population and apply unpaid upkeep damage.
 4. Resolve Unit movement, and Core migrations that reach their fourth Tick.
 5. Validate new Core `START_MOVE` actions.
@@ -136,7 +137,7 @@ existing world. It does not reset the world clock, players, Cores, Units,
 inventories, respawn status, or Champion Beacon state. Resource positions switch
 to the new per-chunk quota and replenishment contract as a map-layer migration.
 
-Rules v0.3 add Unit self-destruction before upkeep. Existing v0.1 and v0.2 worlds
-upgrade at an `OPEN` or `COMMITTED` boundary without resetting game state. A
-server stopped in `LOCKED` or `RESOLVING` must finish that Tick under its old
-rules before upgrading.
+Rules v0.4 preserve Worker cargo as recoverable resource piles whenever a Worker
+dies. Existing v0.1, v0.2, and v0.3 worlds upgrade at an `OPEN` or `COMMITTED`
+boundary without resetting game state. A server stopped in `LOCKED` or
+`RESOLVING` must finish that Tick under its old rules before upgrading.

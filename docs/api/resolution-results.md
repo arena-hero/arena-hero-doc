@@ -51,6 +51,7 @@ Optional fields that do not apply are left out rather than sent as `null`.
 | `event_type` | `reason_code` | IDs and position | `values` | Meaning |
 |---|---|---|---|---|
 | `UNIT_SELF_DESTRUCTED` | absent | `actor_id`: removed Unit; `position`: its final cell | absent | The owner deliberately removed the Unit before upkeep. |
+| `WORKER_CARGO_DROPPED` | absent | `actor_id`: dead Worker; `position`: its final cell | `{amount: int}` | The Worker's complete cargo amount was added to the resource pile on this cell. |
 
 Self-destruction also increments the owner's `units_lost`. It creates no attack
 damage or destruction participation. A Beacon carrier additionally receives
@@ -85,7 +86,7 @@ it for an attack, and only when at least one participant can be named.
 | `HARVEST_FAILED` | `NOT_RESOURCE_CELL` | `actor_id`: Worker; `position`: Worker cell | absent | Current terrain is not a resource cell. |
 | `HARVEST_FAILED` | `CARGO_FULL` | `actor_id`: Worker; `position`: Worker cell | absent | Worker already carries resources. |
 | `HARVEST_FAILED` | `RESOURCE_DEPLETED` | `actor_id`: Worker; `position`: consumed point | absent | Another eligible empty Worker with a lower UUID won this same point in the Tick. |
-| `HARVEST_SUCCEEDED` | absent | `actor_id`: Worker; `position`: consumed point | `{amount: int}` | One point was consumed and 1 resource, or 2 with the Beacon, was loaded into Worker cargo. |
+| `HARVEST_SUCCEEDED` | absent | `actor_id`: Worker; `position`: resource cell | `{amount: int, source: "RESOURCE_NODE" or "DROPPED_CARGO"}` | Cargo was loaded from a natural point or recovered from a Worker cargo pile. |
 | `BEACON_HARVEST_BONUS` | absent | `actor_id`: Worker; `position`: Worker cell | `{amount: int}` | Bonus portion of the harvest granted by carrying the Beacon. |
 
 For every resource position, all eligible empty Workers are ordered by UUID raw
@@ -93,6 +94,9 @@ bytes. Only the lowest UUID succeeds and consumes the point. All other contender
 receive `RESOURCE_DEPLETED`, even if their player holds the Beacon. Replenishment
 does not create player events; later complete states expose newly available
 points only when they are visible.
+
+Recovering `DROPPED_CARGO` never takes more than the pile contains and does not
+increment `resources_harvested` or `beacon_bonus_resources_harvested`.
 
 ## Combat events
 

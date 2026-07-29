@@ -22,6 +22,11 @@ out of date.
 The one indestructible global objective. Its coordinate is public at all times,
 and a carrier you can see grants shield-cap and Worker-harvest bonuses.
 
+**Cargo pile**
+
+Resources left on a Worker's final cell when it dies. The amount persists
+independently from the chunk's natural-resource quota until Workers recover it.
+
 **Command gate**
 
 The server boundary that accepts correctly received plans, and only during the

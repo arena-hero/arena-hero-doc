@@ -156,8 +156,9 @@ Any Unit can use both Beacon actions.
 
 `SELF_DESTRUCT` has no other fields. It resolves before upkeep, removes the Unit,
 and consumes its action for the Tick. There is no resource refund and no damage
-to nearby objects. Worker cargo is lost. If the Unit carries the Beacon, it
+to nearby objects. Worker cargo drops on that cell. If the Unit carries the Beacon, it
 drops on that cell and remains unavailable for pickup until the next Tick.
+The Worker owner also receives `WORKER_CARGO_DROPPED` with the dropped amount.
 
 ## Core actions
 

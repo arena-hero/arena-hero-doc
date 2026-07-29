@@ -50,8 +50,9 @@ with ArenaHeroClient(api_key=api_key) as game:
 2. `turn.submit()` 才会一次性提交完整计划。同一个对象提交前又调用了别的动作方法，
    后一次会顶掉前一次。
 
-`turn.resource_cells` 只包含本 Turn 可见且可用的资源点。成功采集会消耗一个点；多个
-合格 Worker 抢同一个点时，只有最低 UUID 成功，其余 Worker 会在下一份 Turn 收到
+`turn.resource_cells` 包含本 Turn 可见的自然资源点和死亡 Worker 留下的 Cargo
+资源堆，但不公开资源堆数量。自然资源点成功采集一次后消失；多个合格 Worker 抢同一格
+时，只有最低 UUID 成功，其余 Worker 会在下一份 Turn 收到
 `HARVEST_FAILED`/`RESOURCE_DEPLETED`。
 
 退出 `with` 时，HTTP 和 WebSocket 连接会自动关闭。
@@ -125,6 +126,18 @@ turn.events
 只补回缺少的槽位；视野外新增或消失的点，要等重新看到那格才知道。
 
 `turn.events` 是上一个 Tick 的私有结算结果。之前的命令到底发生了什么，看这里。
+
+Cargo 掉落和回收可以直接读取类型化属性：
+
+```python
+from arena_hero import HarvestSource
+
+for event in turn.events:
+    if event.event_type == "WORKER_CARGO_DROPPED":
+        print("掉落", event.resource_amount, "位置", event.position)
+    elif event.harvest_source is HarvestSource.DROPPED_CARGO:
+        print("回收", event.resource_amount, "位置", event.position)
+```
 
 ## 控制所有对象
 

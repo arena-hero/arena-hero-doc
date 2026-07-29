@@ -122,7 +122,7 @@ When `state` arrives:
 4. POST it before the current window closes.
 
 Everything you own is in there. Enemy entities, obstacles, and currently
-available resource points appear only while they are visible. Resource
+available natural points or cargo piles appear only while they are visible. Resource
 observations can become stale outside vision. For every field, see the
 [State model](./state-model.md); for `events`, see
 [Resolution results](./resolution-results.md).

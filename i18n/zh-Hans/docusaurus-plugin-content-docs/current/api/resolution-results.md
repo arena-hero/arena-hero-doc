@@ -51,6 +51,7 @@ HTTP `202` 只说明服务端把计划存下来了，动作还没结算。结果
 | `event_type` | `reason_code` | ID 与位置 | `values` | 含义 |
 |---|---|---|---|---|
 | `UNIT_SELF_DESTRUCTED` | 无 | `actor_id`：被移除的 Unit；`position`：最后所在格 | 无 | 玩家主动在维护费前移除了这个 Unit。 |
+| `WORKER_CARGO_DROPPED` | 无 | `actor_id`：死亡 Worker；`position`：最后所在格 | `{amount: int}` | Worker 的全部 Cargo 已累加到该格资源堆。 |
 
 自毁也会让该玩家的 `units_lost` 加 1，但不会产生攻击伤害或摧毁参与。携带 Beacon 的
 Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
@@ -84,12 +85,15 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `HARVEST_FAILED` | `NOT_RESOURCE_CELL` | `actor_id`：Worker；`position`：Worker 格 | 无 | 当前地形不是资源格。 |
 | `HARVEST_FAILED` | `CARGO_FULL` | `actor_id`：Worker；`position`：Worker 格 | 无 | Worker 身上已经有资源了。 |
 | `HARVEST_FAILED` | `RESOURCE_DEPLETED` | `actor_id`：Worker；`position`：已消耗的资源点 | 无 | 同 Tick 另一个 UUID 更低的合格空载 Worker 赢走了这个点。 |
-| `HARVEST_SUCCEEDED` | 无 | `actor_id`：Worker；`position`：已消耗的资源点 | `{amount: int}` | 一个点被消耗，Worker 装载 1 资源；有 Beacon 时装载 2。 |
+| `HARVEST_SUCCEEDED` | 无 | `actor_id`：Worker；`position`：资源格 | `{amount: int, source: "RESOURCE_NODE" 或 "DROPPED_CARGO"}` | Worker 从自然点装载资源，或从死亡 Cargo 资源堆回收资源。 |
 | `BEACON_HARVEST_BONUS` | 无 | `actor_id`：Worker；`position`：Worker 格 | `{amount: int}` | 因为持有 Beacon 而多采到的那部分。 |
 
 每个资源坐标上的合格空载 Worker 按 UUID 原始字节排序，只有最低 UUID 成功并消耗该点。
 其他竞争者都收到 `RESOURCE_DEPLETED`，即使它们的玩家持有 Beacon 也一样。资源补充
 不会生成玩家事件；后续完整状态只会在新点可见时暴露它。
+
+回收 `DROPPED_CARGO` 不会拿走超过资源堆实际剩余量的资源，也不会增加
+`resources_harvested` 或 `beacon_bonus_resources_harvested`。
 
 ## 战斗事件 {#combat-events}
 

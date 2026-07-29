@@ -77,7 +77,7 @@ sequenceDiagram
 下面这个顺序属于协议的一部分，不是实现细节：
 
 1. 锁定最终有效的 Agent 与 Manual 计划。
-2. 结算所有 `SELF_DESTRUCT`，立即移除这些 Unit。
+2. 结算所有 `SELF_DESTRUCT`，立即移除这些 Unit，并把 Worker Cargo 掉在最后所在格。
 3. 按剩余人口扣维护费，并应用欠费伤害。
 4. 结算 Unit 移动，以及走到第 4 个 Tick 的 Core 迁移。
 5. 检查新提交的 Core `START_MOVE`。
@@ -121,6 +121,6 @@ sequenceDiagram
 库存、重生状态或 Champion Beacon 状态。资源位置作为地图层迁移到新的区块配额与补充
 协议。
 
-规则 v0.3 在维护费之前加入 Unit 自毁。现有 v0.1 / v0.2 世界可以在 `OPEN` 或
-`COMMITTED` 边界升级，不会重置游戏状态。如果旧服务停在 `LOCKED` 或
-`RESOLVING`，必须先用旧规则完成该 Tick，才能升级。
+规则 v0.4 让 Worker 死亡时的 Cargo 作为可回收资源堆留在原地。现有 v0.1 / v0.2 /
+v0.3 世界可以在 `OPEN` 或 `COMMITTED` 边界升级，不会重置游戏状态。如果旧服务停在
+`LOCKED` 或 `RESOLVING`，必须先用旧规则完成该 Tick，才能升级。

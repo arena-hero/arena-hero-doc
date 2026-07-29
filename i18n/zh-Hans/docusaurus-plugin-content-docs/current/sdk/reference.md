@@ -198,8 +198,9 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | `harvest()` | 尝试消耗当前格的资源点。 |
 | `deposit()` | 与 Core 同格时，把携带资源存入 Core。 |
 
-一次成功采集消耗一个点。普通赢家携带 1 资源；所属玩家持有 Beacon 的赢家从同一个点
-携带 2。多个合格 Worker 采同一个点时，只有最低 UUID 成功，其他人收到
+一次成功采集消耗一个自然资源点。普通赢家携带 1 资源；所属玩家持有 Beacon 的赢家
+从同一个点携带 2。死亡 Worker 留下的 Cargo 资源堆会被优先回收，而且不会取得超过
+实际剩余量的资源。多个合格 Worker 采同一格时，只有最低 UUID 成功，其他人收到
 `HARVEST_FAILED`，reason 是 `RESOURCE_DEPLETED`。
 
 ### Vanguard
@@ -285,12 +286,17 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 | `target_id` | `UUID | None` |
 | `position` | `Position | None` |
 | `values` | `dict[str, Any] | None` |
+| `resource_amount` | `int | None` |
+| `harvest_source` | `HarvestSource | None` |
 
 事件名和原因码保留为字符串，这样服务端以后新增值时，旧版 SDK 不会直接崩掉。具体
 含义见[结算结果](../api/resolution-results.md)。
 
 其中 `HARVEST_FAILED`/`RESOURCE_DEPLETED` 表示同 Tick 有 UUID 更低的合格 Worker
-消耗了被竞争的资源点。
+消耗了被竞争的资源点。Cargo 事件可以直接通过 `resource_amount` 读取掉落或回收数量。
+`harvest_source is HarvestSource.DROPPED_CARGO` 表示正在回收掉落资源；
+`HarvestSource.RESOURCE_NODE` 表示普通自然资源采集。不适用或无法识别的值会返回
+`None`。
 
 ### `Tick`、`Received` 和 `Accepted`
 
@@ -362,6 +368,7 @@ accepted = game.submit(plan)
 | `CoreState` | `NORMAL`、`MOVING` |
 | `CommandSource` | `AGENT`、`MANUAL` |
 | `BeaconStatus` | `GROUND`、`CARRIED` |
+| `HarvestSource` | `RESOURCE_NODE`、`DROPPED_CARGO` |
 
 `Direction.delta` 会返回对应的 `(dx, dy)`。
 

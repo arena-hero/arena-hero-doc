@@ -32,23 +32,25 @@ Allowed actions:
 - `SELF_DESTRUCT`
 - `WAIT`
 
-`HARVEST` needs an empty-cargo Worker standing on a `RESOURCE` cell. It picks up
-1 resource, or 2 while its owner holds the Champion Beacon, and consumes that
-one resource point.
+`HARVEST` needs an empty-cargo Worker standing on a `RESOURCE` cell. Natural
+points yield 1 resource, or 2 while the owner holds the Champion Beacon, and are
+then consumed. Cargo dropped by a dead Worker is recovered first: a normal
+Worker takes 1, while a Beacon Worker takes at most 2 without exceeding the
+pile's actual remainder.
 
 If several eligible empty Workers harvest the same point in one Tick, only the
 Worker with the lowest UUID in raw-byte order succeeds. The point is consumed
 once. Every other contender receives `HARVEST_FAILED` with
 `RESOURCE_DEPLETED`; Beacon ownership does not change the tie-break.
 
-Cargo capacity is really just however much the last successful harvest brought
-in: 1 normally, 2 with the Beacon bonus. Losing the Beacon does not delete bonus
-cargo a Worker is already carrying.
+Cargo capacity is really just however much the last successful harvest or
+recovery brought in: normally 1, and at most 2 with the Beacon. Losing the
+Beacon does not delete cargo a Worker is already carrying.
 
 `DEPOSIT` needs the Worker to share a cell with its own Core, and that Core has to
 be normal and receptive — one that is migrating or recovering from a migration
-cannot take delivery. A failed deposit leaves the cargo alone; only the Worker's
-death destroys it.
+cannot take delivery. A failed deposit leaves the cargo alone. If the Worker
+dies for any reason, all cargo becomes a resource pile on its final cell.
 
 Workers cannot attack at all.
 
@@ -106,8 +108,8 @@ Every Unit can send:
 
 It removes that Unit before upkeep is charged, so upkeep for the current Tick
 uses the smaller population. The Unit performs no other action, gives no refund,
-deals no area damage, and awards no destruction participation. Worker cargo is
-lost. A carried Beacon drops on the Unit's cell and cannot be picked up again
+deals no area damage, and awards no destruction participation. Worker cargo
+drops on the Unit's cell. A carried Beacon also drops there and cannot be picked up again
 until the next Tick. The owner receives `UNIT_SELF_DESTRUCTED`, and
 `units_lost` increases by one.
 

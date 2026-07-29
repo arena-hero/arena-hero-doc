@@ -123,3 +123,4 @@ Upkeep comes out automatically and costs the Core no action. If you cannot cover
 your inventory drops to zero and every resource you were short deals 1 damage to
 the Core, shield first. A Core destroyed during upkeep loses its fleet and its
 locked plan right there — those objects take no part in the rest of the Tick.
+Cargo carried by removed Workers remains on their final cells as resource piles.

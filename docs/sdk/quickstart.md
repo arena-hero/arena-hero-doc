@@ -52,9 +52,10 @@ There are two important details:
 2. `turn.submit()` sends the complete plan once. Calling another action method
    for the same object before submission replaces that object's earlier action.
 
-`turn.resource_cells` contains only resource points visible and available in this
-Turn. A successful harvest consumes one point. If several eligible Workers target
-the same point, only the lowest UUID succeeds; the rest receive
+`turn.resource_cells` contains visible natural points and cargo piles left by
+dead Workers; pile amounts are not exposed. One successful harvest consumes a
+natural point. If several eligible Workers target the same cell, only the
+lowest UUID succeeds; the rest receive
 `HARVEST_FAILED`/`RESOURCE_DEPLETED` in the next Turn.
 
 The context manager closes the HTTP and WebSocket connections when the loop
@@ -135,6 +136,18 @@ again.
 
 `turn.events` contains the private resolution results from the previous Tick.
 It tells you what actually happened to your earlier commands.
+
+Cargo drops and recovery have typed helpers:
+
+```python
+from arena_hero import HarvestSource
+
+for event in turn.events:
+    if event.event_type == "WORKER_CARGO_DROPPED":
+        print("dropped", event.resource_amount, "at", event.position)
+    elif event.harvest_source is HarvestSource.DROPPED_CARGO:
+        print("recovered", event.resource_amount, "at", event.position)
+```
 
 ## Control every object
 

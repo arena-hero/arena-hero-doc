@@ -24,19 +24,21 @@ description: Worker、Vanguard 和 Ranger 能做什么，需要多少资源。
 允许的动作：`MOVE`、`HARVEST`、`DEPOSIT`、`PICKUP_BEACON`、`DROP_BEACON`、
 `SELF_DESTRUCT`、`WAIT`。
 
-`HARVEST` 要求一个空载 Worker 站在 `RESOURCE` 格上。通常一次采 1 点资源，所属玩家
-持有 Champion Beacon 时采 2 点；无论哪种情况，都会消耗这一个资源点。
+`HARVEST` 要求一个空载 Worker 站在 `RESOURCE` 格上。自然资源点通常产出 1 点，
+所属玩家持有 Champion Beacon 时产出 2 点，随后该点被消耗。若同格有死亡 Worker
+留下的 Cargo 资源堆，则优先回收：普通 Worker 一次拿 1 点，Beacon Worker 最多拿
+2 点，但不会超过资源堆实际剩余量。
 
 如果同一个 Tick 有多个合格的空载 Worker 采同一个点，只有 UUID 原始字节序最小的
 Worker 成功。资源点只消耗一次，其他竞争者都收到 `HARVEST_FAILED`，reason 是
 `RESOURCE_DEPLETED`。Beacon 不会改变这个胜负顺序。
 
-所谓载重上限，其实就是上一次成功采集拿到的量：平时是 1，有 Beacon 加成时是 2。
+所谓载重上限，其实就是上一次成功采集或回收拿到的量：平时是 1，有 Beacon 时最多是 2。
 Beacon 丢了也不会把 Worker 身上已经背着的那点加成资源抹掉。
 
 `DEPOSIT` 要求 Worker 和自己的 Core 同格，而且这个 Core 必须处于正常、可接收的
-状态——正在迁移或者刚迁移完还在恢复的 Core 收不了货。交付失败不会动 cargo，只有
-Worker 死了 cargo 才会消失。
+状态——正在迁移或者刚迁移完还在恢复的 Core 收不了货。交付失败不会动 cargo。
+Worker 不管因为什么死亡，全部 cargo 都会变成最后所在格的资源堆。
 
 Worker 完全不能攻击。
 
@@ -80,7 +82,7 @@ POST 接口故意接受你没见过、甚至根本不存在的 UUID，就是不�
 
 它会在扣维护费之前移除这个 Unit，因此本 Tick 按自毁后的实际人口计费。Unit 不再执行
 其他动作，不返还生产费用，不造成范围伤害，也不给任何玩家摧毁参与。Worker 携带的资源
-会丢失。携带 Beacon 的 Unit 会把 Beacon 掉在当前格，而且本 Tick 不能再次拾取。玩家
+会掉在当前格。携带 Beacon 的 Unit 也会把 Beacon 掉在这里，而且本 Tick 不能再次拾取。玩家
 会收到 `UNIT_SELF_DESTRUCTED`，`units_lost` 同时增加 1。
 
 ## 动作示例
