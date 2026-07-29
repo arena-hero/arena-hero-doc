@@ -25,7 +25,7 @@ toc_max_heading_level: 3
 |---|---|
 | 收到新消息 | 替换上一份 `PlayerState`，不要合并数组。 |
 | 读取对象 | 先看 `kind`，再按该类型读取字段。 |
-| 判断归属 | `controlled: true` 表示己方，`false` 表示当前可见的敌方。 |
+| 判断归属 | Core 用 `owner_username` 表示所属玩家；Core 和 Unit 的 `controlled` 表示你是否能控制它。 |
 | 某个字段缺失 | 它的值未知或不适用。服务端不会发送 `null`。 |
 
 ```json title="最小状态消息"
@@ -42,6 +42,7 @@ toc_max_heading_level: 3
       {
         "kind": "CORE",
         "id": "2ea3c3dc-42b0-4b92-9754-7558bd4ff834",
+        "owner_username": "arena_hero",
         "controlled": true,
         "position": [12, 8],
         "hp": 5,
@@ -167,6 +168,7 @@ for (const object of state.objects) {
 {
   "kind": "CORE",
   "id": "2ea3c3dc-42b0-4b92-9754-7558bd4ff834",
+  "owner_username": "arena_hero",
   "controlled": true,
   "position": [12, 8],
   "hp": 5,
@@ -179,6 +181,7 @@ for (const object of state.objects) {
 {
   "kind": "CORE",
   "id": "2ea3c3dc-42b0-4b92-9754-7558bd4ff834",
+  "owner_username": "arena_hero",
   "controlled": true,
   "position": [12, 8],
   "hp": 5,
@@ -195,6 +198,7 @@ for (const object of state.objects) {
 |---|---|---:|
 | `kind` | `"CORE"` | 是 |
 | `id` | UUID | 是 |
+| `owner_username` | 3–24 位小写字母、数字或下划线 | 是 |
 | `controlled` | boolean | 是 |
 | `position` | `[x, y]` | 是；迁移期间仍是起点 |
 | `hp` | 非负整数 | 是 |
@@ -205,7 +209,9 @@ for (const object of state.objects) {
 | `move_required_ticks` | 正整数 | 仅迁移中；当前为 `4` |
 | `destination` | `[x, y]` | 仅迁移中 |
 
-正常状态的 Core 一个移动字段都没有。看得见的敌方 Core，暴露的字段和你自己的一样。
+`owner_username` 是没有 `@` 前缀的原始值；界面显示时写成
+`@${owner_username}`。正常状态的 Core 一个移动字段都没有。看得见的敌方 Core
+也会公开同样的 `owner_username`，但不会公开内部 owner UUID、邮箱或其他账号资料。
 
 ### Unit
 
@@ -238,8 +244,9 @@ for (const object of state.objects) {
 
 | 数据 | 何时出现 | 隐藏字段 |
 |---|---|---|
-| 己方 Core 和 Unit | 始终 | 对象格式里的字段全都可见 |
-| 敌方 Core 和 Unit | 所在格当前可见 | 所有者身份；敌方 Worker 的 cargo |
+| 己方 Core 和 Unit | 始终 | Core 有公开的 `owner_username`；Unit 不带 owner 字段 |
+| 敌方 Core | 所在格当前可见 | `owner_username` 公开；内部 owner UUID 和账号资料隐藏 |
+| 敌方 Unit | 所在格当前可见 | 所属玩家；敌方 Worker 的 cargo |
 | 障碍与资源点 | 所在格当前可见 | 资源数量 |
 | Beacon 位置 | 始终 | 无 |
 | Beacon 状态和携带者 | Beacon 所在格当前可见 | 视野外时两个字段都没有 |

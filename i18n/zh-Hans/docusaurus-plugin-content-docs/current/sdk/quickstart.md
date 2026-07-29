@@ -127,6 +127,16 @@ turn.events
 
 `turn.events` 是上一个 Tick 的私有结算结果。之前的命令到底发生了什么，看这里。
 
+每个自己或可见敌方的 `CoreView` 都带原始 `owner_username`。界面上可以这样显示：
+
+```python
+for enemy in turn.visible_enemies:
+    if enemy.kind == "CORE":
+        print(f"@{enemy.owner_username}")
+```
+
+协议值本身不带 `@`。Unit 不公开所属玩家。
+
 Cargo 掉落和回收可以直接读取类型化属性：
 
 ```python

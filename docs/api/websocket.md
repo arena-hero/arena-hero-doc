@@ -94,6 +94,7 @@ player's view.
         "kind": "CORE",
         "id": "2ea3c3dc-42b0-4b92-9754-7558bd4ff834",
         "controlled": true,
+        "owner_username": "arena_hero",
         "position": [12, 8],
         "hp": 5,
         "shield": 5,

@@ -230,6 +230,7 @@ ranger.shoot(target_id, expected_cell=(120, 85))
 |---|---|
 | `view` | `CoreView` |
 | `id` | `UUID` |
+| `owner_username` | `str` |
 | `position` | `Position` |
 | `hp` | `int` |
 | `shield` | `int` |
@@ -267,12 +268,15 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 | 模型 | 主要字段 |
 |---|---|
 | `UnitView` | `kind`、`id`、`controlled`、`position`、`hp`、`unit_type`、`cargo` |
-| `CoreView` | `kind`、`id`、`controlled`、`position`、`hp`、`shield`、`state`、移动字段 |
+| `CoreView` | `kind`、`id`、`owner_username`、`controlled`、`position`、`hp`、`shield`、`state`、移动字段 |
 | `TerrainView` | `kind`、`positions`；`RESOURCE` 表示当前可见的可用位置 |
 | `ChampionBeacon` | `position`、`status`、`carrier_id` |
 
 控制类（`Worker`、`Vanguard`、`Ranger`、`Core`）是受控对象的便捷接口。敌方对象仍然是
 不可变的 `UnitView` 或 `CoreView`。
+
+每个 `CoreView` 都有 `owner_username`，值不含 `@`。显示时写成
+`f"@{core.owner_username}"`。Unit 没有这个字段，也不会暴露所属玩家。
 
 ### `ResolutionEvent`
 

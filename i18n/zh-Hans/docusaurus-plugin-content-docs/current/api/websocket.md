@@ -91,6 +91,7 @@ tick(N)
       {
         "kind": "CORE",
         "id": "2ea3c3dc-42b0-4b92-9754-7558bd4ff834",
+        "owner_username": "arena_hero",
         "controlled": true,
         "position": [12, 8],
         "hp": 5,

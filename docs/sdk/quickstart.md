@@ -128,6 +128,8 @@ turn.events
 Use the filtered collections when possible. For example,
 `turn.workers` contains controlled Workers, while
 `turn.visible_enemies` contains visible enemy Units and Cores.
+Every `CoreView` includes `owner_username`; display it as
+`f"@{core.owner_username}"`. Unit owners remain private.
 
 Do not treat an old `resource_cells` value as permanent map data. Consumed points
 disappear, chunks replenish missing slots every four resolved Ticks, and a new or

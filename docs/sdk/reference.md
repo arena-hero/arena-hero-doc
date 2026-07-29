@@ -240,6 +240,7 @@ The `Core` controller exposes:
 | `position` | `Position` |
 | `hp` | `int` |
 | `shield` | `int` |
+| `owner_username` | `str` |
 | `spawn(unit_type)` | Spawn `UnitType.WORKER`, `VANGUARD`, or `RANGER`. |
 | `repair_shield()` | Spend resources to repair shield. |
 | `start_move(direction)` | Start moving the Core. |
@@ -276,13 +277,14 @@ rules.
 | Model | Main fields |
 |---|---|
 | `UnitView` | `kind`, `id`, `controlled`, `position`, `hp`, `unit_type`, `cargo` |
-| `CoreView` | `kind`, `id`, `controlled`, `position`, `hp`, `shield`, `state`, movement fields |
+| `CoreView` | `kind`, `id`, `controlled`, `owner_username`, `position`, `hp`, `shield`, `state`, movement fields |
 | `TerrainView` | `kind`, `positions`; `RESOURCE` positions are current visible availability |
 | `ChampionBeacon` | `position`, `status`, `carrier_id` |
 
 The controller classes (`Worker`, `Vanguard`, `Ranger`, `Core`) are convenient
 views over controlled objects. Enemy objects remain immutable `UnitView` or
-`CoreView` models.
+`CoreView` models. Every Core exposes its owner's public `owner_username`
+without a leading `@`; Unit owners remain private.
 
 ### `ResolutionEvent`
 

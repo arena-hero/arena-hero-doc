@@ -42,6 +42,11 @@ earlier plan from that source rather than patching it.
 `controlled: true` marks an object as belonging to whoever is receiving the state.
 `controlled: false` marks a currently visible enemy.
 
+**Core owner username**
+
+Every Core carries `owner_username` without a leading `@`. It is public while
+that Core is included in the state. Unit owners remain private.
+
 **Core**
 
 Your base: resource store, shielded primary life object, Unit producer, and — very

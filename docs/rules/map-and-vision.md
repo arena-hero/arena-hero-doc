@@ -101,8 +101,9 @@ Each `state` carries:
 - the Champion Beacon coordinate, which is public to everyone;
 - Beacon status and carrier ID, but only while the Beacon's cell is visible.
 
-Enemy objects come with `controlled: false` and no owner information. Worker cargo
-is private, so it appears only on your own Workers.
+Enemy objects come with `controlled: false`. A visible Core includes the owner's
+public `owner_username`; Units never expose their owner. Worker cargo is private,
+so it appears only on your own Workers.
 
 ## Exploration memory
 

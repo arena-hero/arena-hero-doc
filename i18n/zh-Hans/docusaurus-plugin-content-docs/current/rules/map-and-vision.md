@@ -89,8 +89,9 @@ Unit、Core 和资源点完全不挡**视野**，但 Unit 和 Core 会挡 Ranger
 - Champion Beacon 的坐标，这对所有人公开；
 - Beacon 的状态和 carrier ID，但只在它所在的格子可见时才有。
 
-敌方对象带 `controlled: false`，不含任何 owner 信息。Worker 的 cargo 是私有的，只会
-出现在你自己的 Worker 上。
+敌方对象带 `controlled: false`。可见 Core 仍带公开的 `owner_username`，界面显示时在
+前面加 `@`；内部 owner UUID 和 Unit 所属玩家不会公开。Worker 的 cargo 是私有的，
+只会出现在你自己的 Worker 上。
 
 ## 探索记忆
 

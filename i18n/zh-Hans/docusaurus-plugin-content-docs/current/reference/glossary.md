@@ -43,6 +43,11 @@ Worker 回收完。
 
 你的基地：资源仓库、带护盾的主要生命对象、Unit 生产设施，以及一个移动极慢的实体。
 
+**Core 所属 username（Core owner username）**
+
+每个 Core 都公开的 `owner_username`。协议里不带 `@`，客户端显示时再加上；Unit 不公开
+所属玩家。
+
 **动态验证（Dynamic validation）**
 
 只有全局结算才做得了的检查，比如占位、资源、目标坐标和射线。失败结果会在下一份状态

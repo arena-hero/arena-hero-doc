@@ -14,7 +14,8 @@ description: How the shared world advances from one Tick to the next and recover
 - An account owns at most one living Core at a time.
 - Units, and each generation of a Core, get non-enumerable UUIDs. An object keeps
   its ID for as long as it lives, and no ID is ever reused after death.
-- Enemy state never carries account IDs, email addresses, or usernames.
+- Every Core publishes its owner's username. Enemy state still never carries
+  account IDs, email addresses, or Unit owner usernames.
 
 An account that activates while the world is mid-resolution does not get spliced
 into a half-built snapshot. Instead the server records a persistent

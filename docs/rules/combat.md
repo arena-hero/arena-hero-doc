@@ -92,6 +92,7 @@ Combat results show up in the next `state.events`, like this:
 }
 ```
 
-Enemy objects still arrive without usernames or owner IDs. The owner of a
-destroyed Core may get a private `CORE_DESTROYED` result naming the attackers who
-took part, but ordinary visible state never exposes them.
+Visible Cores include `owner_username`, but objects never expose internal owner
+IDs and Units never expose their owner's username. The owner of a destroyed Core
+may also get a private `CORE_DESTROYED` result naming every attacker who took
+part.

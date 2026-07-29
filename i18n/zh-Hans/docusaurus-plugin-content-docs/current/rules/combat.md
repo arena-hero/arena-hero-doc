@@ -82,4 +82,5 @@ Ranger 打的是横线或竖线上距离 1-3 格的某一个具体对象。中�
 }
 ```
 
-普通可见状态里的敌方对象仍然不带 username 和 owner ID。
+普通可见状态里的敌方 Core 会带公开的 `owner_username`，但没有内部 owner ID；
+敌方 Unit 不带所属玩家的 username。
