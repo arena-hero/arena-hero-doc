@@ -28,9 +28,10 @@ Use $arena-hero to create a balanced tactic for Arena Hero.
 ## Complete rules are included
 
 The Skill ships with the
-[complete Arena Hero v0.2 gameplay contract](https://github.com/arena-hero/arena-hero-skill/blob/main/references/game-rules.md).
+[complete Arena Hero v0.3 gameplay contract](https://github.com/arena-hero/arena-hero-skill/blob/main/references/game-rules.md).
 It covers the world, Tick order, vision, economy, every Unit, movement,
-stacking, the Champion Beacon, combat, respawning, and command priority.
+stacking, Unit self-destruction, the Champion Beacon, combat, respawning, and
+command priority.
 
 Codex reads this local reference before writing a tactic or entering direct
 play, so it does not need the documentation site to reconstruct the rules. When
@@ -98,7 +99,7 @@ Agent action for the same Unit or Core in that Tick.
 
 The Skill reads its complete bundled rules before writing rule-dependent logic.
 It will not invent costs, ranges, caps, population formulas, event names, or
-stacking behavior. If the live contract is newer than the bundled v0.2 rules, it
+stacking behavior. If the live contract is newer than the bundled v0.3 rules, it
 stops instead of making assumptions.
 
 For the underlying connection and recovery behavior, read

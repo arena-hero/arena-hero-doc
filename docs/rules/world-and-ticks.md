@@ -85,20 +85,21 @@ with commands still closed. `state` is the one and only signal to act.
 This order is part of the protocol, not an implementation detail:
 
 1. Lock the final valid Agent and Manual plans.
-2. Charge upkeep and apply unpaid upkeep damage.
-3. Resolve Unit movement, and Core migrations that reach their fourth Tick.
-4. Validate new Core `START_MOVE` actions.
-5. Resolve Champion Beacon pickup and drop actions.
-6. Resolve Worker harvest and deposit actions.
-7. Resolve Core spawn and shield repair.
-8. Freeze one immutable combat snapshot and accumulate every legal attack.
-9. Apply damage simultaneously, remove destroyed objects, and resolve any respawns
+2. Resolve every `SELF_DESTRUCT` and remove those Units.
+3. Charge upkeep from the remaining population and apply unpaid upkeep damage.
+4. Resolve Unit movement, and Core migrations that reach their fourth Tick.
+5. Validate new Core `START_MOVE` actions.
+6. Resolve Champion Beacon pickup and drop actions.
+7. Resolve Worker harvest and deposit actions.
+8. Resolve Core spawn and shield repair.
+9. Freeze one immutable combat snapshot and accumulate every legal attack.
+10. Apply damage simultaneously, remove destroyed objects, and resolve any respawns
    that are due.
-10. After every fourth resolved Tick, replenish only the consumed resource slots
+11. After every fourth resolved Tick, replenish only the consumed resource slots
     in each affected chunk back to that chunk's fixed quota.
-11. Atomically commit the world, resource layer, events, statistics, journal, and
+12. Atomically commit the world, resource layer, events, statistics, journal, and
     new clock.
-12. Announce the next Tick and prepare fresh private states.
+13. Announce the next Tick and prepare fresh private states.
 
 The server never skips a Tick to catch up with wall-clock time; downtime simply
 pauses the world. And two Ticks never resolve at the same time.
@@ -134,3 +135,8 @@ The consumable-resource release replaces the legacy resource layout in the
 existing world. It does not reset the world clock, players, Cores, Units,
 inventories, respawn status, or Champion Beacon state. Resource positions switch
 to the new per-chunk quota and replenishment contract as a map-layer migration.
+
+Rules v0.3 add Unit self-destruction before upkeep. Existing v0.1 and v0.2 worlds
+upgrade at an `OPEN` or `COMMITTED` boundary without resetting game state. A
+server stopped in `LOCKED` or `RESOLVING` must finish that Tick under its old
+rules before upgrading.

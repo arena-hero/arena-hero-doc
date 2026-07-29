@@ -24,6 +24,7 @@ HTTP `202` 只说明服务端把计划存下来了，动作还没结算。结果
 
 | 要查什么 | 去哪里 |
 |---|---|
+| Unit 自毁 | [Unit 生命周期事件](#unit-lifecycle-events) |
 | 维护费、Core 伤害、修盾或生产 | [经济与 Core 事件](#economy-and-core-events) |
 | 采集或交付 | [Worker 事件](#worker-events) |
 | 横扫、射击和伤害 | [战斗事件](#combat-events) |
@@ -44,6 +45,15 @@ HTTP `202` 只说明服务端把计划存下来了，动作还没结算。结果
 | `values` | 事件专用对象。每行列出的键是稳定的；没有值时整个对象省略。 |
 
 用不上的可选字段直接不出现，而不是发成 `null`。
+
+## Unit 生命周期事件 {#unit-lifecycle-events}
+
+| `event_type` | `reason_code` | ID 与位置 | `values` | 含义 |
+|---|---|---|---|---|
+| `UNIT_SELF_DESTRUCTED` | 无 | `actor_id`：被移除的 Unit；`position`：最后所在格 | 无 | 玩家主动在维护费前移除了这个 Unit。 |
+
+自毁也会让该玩家的 `units_lost` 加 1，但不会产生攻击伤害或摧毁参与。携带 Beacon 的
+Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 
 ## 经济与 Core 事件 {#economy-and-core-events}
 

@@ -88,6 +88,7 @@ Unit A: WAIT
 | `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | 尝试射击该格的指定目标，正交射程 1-3。 |
 | `PICKUP_BEACON` | 所有 | `{"type":"PICKUP_BEACON"}` | 尝试拾取 actor 同格的地面 Beacon。 |
 | `DROP_BEACON` | 所有 | `{"type":"DROP_BEACON"}` | 当前携带者尝试放下 Beacon。 |
+| `SELF_DESTRUCT` | 所有 | `{"type":"SELF_DESTRUCT"}` | 在计算维护费之前移除这个 Unit。 |
 
 ### 移动
 
@@ -141,6 +142,12 @@ Unit A: WAIT
 - 活着的携带者手里抢不走。
 - 好几个 actor 同时去拿时，原始 UUID 字节序最小的那个成功。
 - Tick 开始时就已经被携带的 Beacon，不能在同一个 Tick 里先放下再被捡起来。
+
+### 自毁 Unit
+
+`SELF_DESTRUCT` 不带其他字段。它在维护费之前结算，移除 Unit，并占用该 Unit 本 Tick
+的动作。它不返还资源，也不伤害附近对象。Worker 携带的资源会丢失。Unit 携带 Beacon
+时，Beacon 掉在当前格，并且要到下一 Tick 才能再次拾取。
 
 ## Core 动作
 

@@ -56,7 +56,7 @@ A Unit that has just been spawned:
 
 Worker deposits resolve before production, so resources delivered this Tick can
 pay for a `SPAWN` or a `REPAIR_SHIELD` in the same Tick. What they cannot do is
-retroactively cover the upkeep already charged at the start of it.
+retroactively cover upkeep already charged after the self-destruct phase.
 
 ## Shield repair
 
@@ -115,7 +115,11 @@ upkeep = tier × (tier + 1) / 2
 | 60-79 | 3 | 6 |
 | 80-99 | 4 | 10 |
 
-Upkeep comes out automatically and costs you no action. If you cannot cover it,
+Unit `SELF_DESTRUCT` resolves first, and upkeep uses the population left after
+those removals. Units spawned later in the Tick start counting next Tick; Units
+destroyed during combat have already paid for the current Tick.
+
+Upkeep comes out automatically and costs the Core no action. If you cannot cover it,
 your inventory drops to zero and every resource you were short deals 1 damage to
 the Core, shield first. A Core destroyed during upkeep loses its fleet and its
 locked plan right there — those objects take no part in the rest of the Tick.

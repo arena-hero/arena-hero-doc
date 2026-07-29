@@ -24,6 +24,7 @@ Start from `event_type`, then read the fields listed for that event:
 
 | Looking for | Go to |
 |---|---|
+| Unit self-destruction | [Unit lifecycle events](#unit-lifecycle-events) |
 | Upkeep, Core damage, repair, or spawning | [Economy and Core events](#economy-and-core-events) |
 | Harvesting or depositing | [Worker events](#worker-events) |
 | Sweeps, shots, and damage | [Combat events](#combat-events) |
@@ -44,6 +45,16 @@ Start from `event_type`, then read the fields listed for that event:
 | `values` | Event-specific object. Keys are stable per event row; the object is omitted when no values apply. |
 
 Optional fields that do not apply are left out rather than sent as `null`.
+
+## Unit lifecycle events
+
+| `event_type` | `reason_code` | IDs and position | `values` | Meaning |
+|---|---|---|---|---|
+| `UNIT_SELF_DESTRUCTED` | absent | `actor_id`: removed Unit; `position`: its final cell | absent | The owner deliberately removed the Unit before upkeep. |
+
+Self-destruction also increments the owner's `units_lost`. It creates no attack
+damage or destruction participation. A Beacon carrier additionally receives
+`BEACON_DROPPED_ON_DEATH`.
 
 ## Economy and Core events
 

@@ -92,6 +92,7 @@ Read `type` first, then send only the fields shown in that row.
 | `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | Tries to hit that target at that cell from cardinal range 1-3. |
 | `PICKUP_BEACON` | Any | `{"type":"PICKUP_BEACON"}` | Tries to pick up the ground Beacon on the actor's cell. |
 | `DROP_BEACON` | Any | `{"type":"DROP_BEACON"}` | The current carrier tries to drop the Beacon. |
+| `SELF_DESTRUCT` | Any | `{"type":"SELF_DESTRUCT"}` | Removes this Unit before upkeep is calculated. |
 
 ### Moving
 
@@ -150,6 +151,13 @@ Any Unit can use both Beacon actions.
 - A living carrier cannot be robbed.
 - When several actors reach for it, the lowest UUID in raw byte order wins.
 - A Beacon that was already carried at the start of a Tick cannot be dropped and picked up again within that same Tick.
+
+### Self-destructing a Unit
+
+`SELF_DESTRUCT` has no other fields. It resolves before upkeep, removes the Unit,
+and consumes its action for the Tick. There is no resource refund and no damage
+to nearby objects. Worker cargo is lost. If the Unit carries the Beacon, it
+drops on that cell and remains unavailable for pickup until the next Tick.
 
 ## Core actions
 

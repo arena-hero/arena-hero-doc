@@ -11,11 +11,11 @@ description: The server version covered by these docs and which changes affect c
 | Item | Value |
 |---|---|
 | HTTP and WebSocket API | v0.1 |
-| Gameplay rules | v0.2 |
+| Gameplay rules | v0.3 |
 | Server repository | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
-| Reviewed server commit | `c6553156d8e4512fd6010a10b6500741f023c9da` |
-| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python), v0.1.0 |
-| Reviewed SDK commit | `8d06cbb93226335d7f605776fb1a8b40460d95b4` |
+| Reviewed server commit | `16b152ba63f5be4fcff2c347d8edddf5324d9558` |
+| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python), v0.2.0 |
+| Reviewed SDK commit | `e01c8c32b1cbc00aa5a60dce607728e42b3c5639` |
 | Server review date | 29 July 2026 |
 | SDK review date | 29 July 2026 |
 | Documentation repository | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
@@ -53,7 +53,7 @@ in — can improve freely, because none of it changes the game contract.
 
 ## Why there is no version picker yet
 
-The public API remains v0.1 and the current gameplay rules are v0.2, so this site
+The public API remains v0.1 and the current gameplay rules are v0.3, so this site
 publishes exactly one current version in English and Simplified Chinese. Once
 there is a first stable compatibility release, older contracts can be kept
 around as Docusaurus versions.

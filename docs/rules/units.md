@@ -17,8 +17,8 @@ moves at most one cardinal cell per Tick, and performs at most one action.
 | Vanguard | 4 | 4 | 10 | 1 sweep damage | Adjacent area pressure |
 | Ranger | 2 | 5 | 12 | 1 shot damage | Range 1-3 precision attack |
 
-`MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, and `WAIT` are available to every Unit.
-Everything else depends on the type.
+`MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, `SELF_DESTRUCT`, and `WAIT` are
+available to every Unit. Everything else depends on the type.
 
 ## Worker
 
@@ -29,6 +29,7 @@ Allowed actions:
 - `DEPOSIT`
 - `PICKUP_BEACON`
 - `DROP_BEACON`
+- `SELF_DESTRUCT`
 - `WAIT`
 
 `HARVEST` needs an empty-cargo Worker standing on a `RESOURCE` cell. It picks up
@@ -59,6 +60,7 @@ Allowed actions:
 - `SWEEP` with one cardinal `direction`
 - `PICKUP_BEACON`
 - `DROP_BEACON`
+- `SELF_DESTRUCT`
 - `WAIT`
 
 `SWEEP` hits the adjacent cell in the direction you choose. Every enemy Unit
@@ -75,6 +77,7 @@ Allowed actions:
 - `SHOOT` with `target_id` and `expected_cell`
 - `PICKUP_BEACON`
 - `DROP_BEACON`
+- `SELF_DESTRUCT`
 - `WAIT`
 
 A shot is legal only when all of the following hold:
@@ -93,10 +96,29 @@ nobody can use it to probe fog of war. At resolution, a missing target, a friend
 target, a target that moved, bad range, and a blocked line all collapse into the
 same private `SHOT_MISSED` event.
 
+## Self-destruct
+
+Every Unit can send:
+
+```json
+{"type": "SELF_DESTRUCT"}
+```
+
+It removes that Unit before upkeep is charged, so upkeep for the current Tick
+uses the smaller population. The Unit performs no other action, gives no refund,
+deals no area damage, and awards no destruction participation. Worker cargo is
+lost. A carried Beacon drops on the Unit's cell and cannot be picked up again
+until the next Tick. The owner receives `UNIT_SELF_DESTRUCTED`, and
+`units_lost` increases by one.
+
 ## Action schema examples
 
 ```json title="Worker harvest"
 {"type": "HARVEST"}
+```
+
+```json title="Any Unit self-destruct"
+{"type": "SELF_DESTRUCT"}
 ```
 
 ```json title="Vanguard sweep right"

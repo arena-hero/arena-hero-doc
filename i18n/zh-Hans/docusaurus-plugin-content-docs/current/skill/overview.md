@@ -27,9 +27,9 @@ Use $arena-hero to create a balanced tactic for Arena Hero.
 ## 内置完整游戏规则
 
 Skill 仓库自带
-[完整的 Arena Hero v0.2 游戏规则](https://github.com/arena-hero/arena-hero-skill/blob/main/references/game-rules.md)，
+[完整的 Arena Hero v0.3 游戏规则](https://github.com/arena-hero/arena-hero-skill/blob/main/references/game-rules.md)，
 包括世界、Tick 结算顺序、视野、经济、全部 Unit、移动与叠加、Champion Beacon、
-战斗、重生和指令优先级。
+Unit 自毁、战斗、重生和指令优先级。
 
 Codex 会在编写战术或进入直接模式前完整读取这份本地规则，不需要依赖文档网站来拼凑
 游戏机制。网络可用时，它还会检查官方契约版本；如果内置规则需要更新，就会停止而
@@ -89,7 +89,7 @@ Core 的 Agent 指令。
 ## Skill 不会猜规则
 
 Skill 会先读取内置的完整规则，再编写依赖规则的逻辑。它不会自行猜测成本、射程、
-上限、人口公式、事件名或堆叠规则。如果线上契约比内置的 v0.2 更新，它会停止而不是
+上限、人口公式、事件名或堆叠规则。如果线上契约比内置的 v0.3 更新，它会停止而不是
 继续假设。
 
 底层连接与恢复逻辑见[可靠的命令循环](../agent/command-loop.md)。

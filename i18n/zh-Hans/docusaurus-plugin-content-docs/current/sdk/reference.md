@@ -177,6 +177,7 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | `move(direction)` | 移动一格。 |
 | `pickup_beacon()` | 拾取当前格的信标。 |
 | `drop_beacon()` | 放下携带的信标。 |
+| `self_destruct()` | 在维护费前移除这个 Unit；不返还资源，也不造成范围伤害。 |
 | `wait()` | 明确提交 `WAIT`。 |
 | `clear_action()` | 把这个 Unit 从待提交计划里移除。 |
 
@@ -336,6 +337,7 @@ accepted = game.submit(plan)
 | `ShootAction` | `target_id`、`expected_cell` |
 | `PickupBeaconAction` | 无 |
 | `DropBeaconAction` | 无 |
+| `SelfDestructAction` | 无 |
 
 | Core 动作 | 必填数据 |
 |---|---|

@@ -180,6 +180,7 @@ All controlled Unit objects expose:
 | `move(direction)` | Queue a one-cell move. |
 | `pickup_beacon()` | Pick up the Beacon on the current cell. |
 | `drop_beacon()` | Drop a carried Beacon. |
+| `self_destruct()` | Remove this Unit before upkeep, with no refund or area damage. |
 | `wait()` | Queue an explicit `WAIT`. |
 | `clear_action()` | Remove this Unit from the queued plan. |
 
@@ -347,6 +348,7 @@ Public action models:
 | `ShootAction` | `target_id`, `expected_cell` |
 | `PickupBeaconAction` | none |
 | `DropBeaconAction` | none |
+| `SelfDestructAction` | none |
 
 | Core action | Required data |
 |---|---|

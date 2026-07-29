@@ -288,6 +288,14 @@ components:
       properties:
         type:
           const: DROP_BEACON
+    SelfDestructAction:
+      type: object
+      additionalProperties: false
+      description: Removes the Unit before upkeep, without refund or area damage.
+      required: [type]
+      properties:
+        type:
+          const: SELF_DESTRUCT
     UnitAction:
       description: |
         Strict discriminator union. A field not listed for the selected type
@@ -301,6 +309,7 @@ components:
         - $ref: '#/components/schemas/ShootAction'
         - $ref: '#/components/schemas/PickupBeaconAction'
         - $ref: '#/components/schemas/DropBeaconAction'
+        - $ref: '#/components/schemas/SelfDestructAction'
     CoreWaitAction:
       type: object
       additionalProperties: false
