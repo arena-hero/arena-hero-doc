@@ -138,7 +138,8 @@ existing world. It does not reset the world clock, players, Cores, Units,
 inventories, respawn status, or Champion Beacon state. Resource positions switch
 to the new per-chunk quota and replenishment contract as a map-layer migration.
 
-Rules v0.4 preserve Worker cargo as recoverable resource piles whenever a Worker
-dies. Existing v0.1, v0.2, and v0.3 worlds upgrade at an `OPEN` or `COMMITTED`
-boundary without resetting game state. A server stopped in `LOCKED` or
+Rules v0.5 retain Worker cargo piles and add a strict Core storage limit of
+`population × 5`. Existing v0.1 through v0.4 worlds upgrade at an `OPEN` or
+`COMMITTED` boundary without resetting game state; the first v0.5 resolution
+destroys inventory above the current capacity. A server stopped in `LOCKED` or
 `RESOLVING` must finish that Tick under its old rules before upgrading.

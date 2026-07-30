@@ -251,6 +251,10 @@ components:
     DepositAction:
       type: object
       additionalProperties: false
+      description: |
+        Deposits only what fits under the Core capacity of population * 5.
+        Any remainder stays on the Worker. A full Core
+        resolves this action as DEPOSIT_FAILED with CORE_RESOURCE_FULL.
       required: [type]
       properties:
         type:

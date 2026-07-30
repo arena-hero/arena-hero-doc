@@ -113,6 +113,8 @@ Each `Turn` is one complete, authoritative state snapshot:
 ```python
 turn.tick
 turn.resources
+turn.resource_capacity
+turn.resource_space
 turn.core
 turn.units
 turn.workers
@@ -124,6 +126,11 @@ turn.obstacle_cells
 turn.beacon
 turn.events
 ```
+
+Core storage accepts 5 resources per living Unit. A partial deposit leaves its
+remainder on the Worker; a full Core rejects the deposit without deleting
+cargo. If population falls, stored resources above the new capacity are
+destroyed immediately. Use `turn.resource_space` before choosing `deposit()`.
 
 Use the filtered collections when possible. For example,
 `turn.workers` contains controlled Workers, while
@@ -139,7 +146,8 @@ again.
 `turn.events` contains the private resolution results from the previous Tick.
 It tells you what actually happened to your earlier commands.
 
-Cargo drops and recovery have typed helpers:
+Deposits, Cargo drops, recovery, and overflow destruction have a typed amount
+helper:
 
 ```python
 from arena_hero import HarvestSource
@@ -147,6 +155,8 @@ from arena_hero import HarvestSource
 for event in turn.events:
     if event.event_type == "WORKER_CARGO_DROPPED":
         print("dropped", event.resource_amount, "at", event.position)
+    elif event.event_type == "CORE_RESOURCE_OVERFLOW_DESTROYED":
+        print("destroyed", event.resource_amount, "excess Core resources")
     elif event.harvest_source is HarvestSource.DROPPED_CARGO:
         print("recovered", event.resource_amount, "at", event.position)
 ```

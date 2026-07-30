@@ -37,8 +37,10 @@ Worker 成功。资源点只消耗一次，其他竞争者都收到 `HARVEST_FAI
 Beacon 丢了也不会把 Worker 身上已经背着的那点加成资源抹掉。
 
 `DEPOSIT` 要求 Worker 和自己的 Core 同格，而且这个 Core 必须处于正常、可接收的
-状态——正在迁移或者刚迁移完还在恢复的 Core 收不了货。交付失败不会动 cargo。
-Worker 不管因为什么死亡，全部 cargo 都会变成最后所在格的资源堆。
+状态——正在迁移或者刚迁移完还在恢复的 Core 收不了货。Core 容量是
+`population × 5`；交付只存入能装下的部分，剩余 Cargo 留在 Worker 身上。Core 已满
+时返回 `CORE_RESOURCE_FULL`。任何交付失败都不会动 Cargo。Worker
+不管因为什么死亡，全部 Cargo 都会变成最后所在格的资源堆。
 
 Worker 完全不能攻击。
 

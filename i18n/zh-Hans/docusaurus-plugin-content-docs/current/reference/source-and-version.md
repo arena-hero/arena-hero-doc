@@ -11,13 +11,13 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 | 项目 | 值 |
 |---|---|
 | HTTP 与 WebSocket API | v0.1 |
-| 游戏规则 | v0.4 |
+| 游戏规则 | v0.5 |
 | 服务器仓库 | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
-| 已审查服务器提交 | `f98e22e74486d3d51a30fd38a708da1716b3b454` |
-| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.2.2 |
-| 已审查 SDK 提交 | `d886848937e65a2c8b36b7507b008f9b0d112073` |
-| 服务端审查日期 | 2026 年 7 月 29 日 |
-| SDK 审查日期 | 2026 年 7 月 29 日 |
+| 已审查服务器提交 | `bc16014cb039c34238bdef0f556219d6638ba4cc` |
+| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.2.3 |
+| 已审查 SDK 提交 | `777c64f1fb357c8c2a8940e5dc7c99b8358f098e` |
+| 服务端审查日期 | 2026 年 7 月 30 日 |
+| SDK 审查日期 | 2026 年 7 月 30 日 |
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | 语言 | 英文、简体中文 |
 
@@ -45,6 +45,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 - 战争迷雾的隐私边界；
 - 地图生成器契约；
 - 有限资源的区块配额、Cargo 掉落、消耗、刷新与竞争规则；
+- `population × 5` 的严格 Core 容量与超额销毁；
 - 决定重放结果的核心平衡规则。
 
 其余的东西——文字、排版、图表、示例、讲解顺序——可以随意改进，因为它们都不改变游戏
@@ -52,7 +53,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 
 ## 为什么现在还没有版本选择器
 
-公开 API 仍是 v0.1，当前游戏规则是 v0.4，所以站点只发布一个当前版本，提供英文和简体
+公开 API 仍是 v0.1，当前游戏规则是 v0.5，所以站点只发布一个当前版本，提供英文和简体
 中文两种语言。等有了第一个稳定的兼容版本，旧协议就可以作为 Docusaurus 版本保留下来。
 
 ## 修改协议时要更新什么

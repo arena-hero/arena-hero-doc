@@ -33,7 +33,7 @@ toc_max_heading_level: 3
   "type": "state",
   "data": {
     "status": "ACTIVE",
-    "resources": 20,
+    "resources": 5,
     "population": 1,
     "population_tier": 0,
     "upkeep_next_tick": 0,
@@ -72,7 +72,7 @@ toc_max_heading_level: 3
 |---|---|---:|---|
 | `status` | `"ACTIVE"` 或 `"RESPAWNING"` | 是 | 玩家有存活的 Core，还是正在等待重生。 |
 | `respawn_at_tick` | 正 int64 | 仅重生中 | 下一次尝试重生的 Tick。 |
-| `resources` | 非负整数 | 是 | Core 里存的资源；Worker 身上的 cargo 另算。 |
+| `resources` | 非负整数 | 是 | Core 里的资源，上限为 `population × 5`；Worker 身上的 cargo 另算。 |
 | `population` | 非负整数 | 是 | 存活的己方 Unit 数，不含 Core。 |
 | `population_tier` | 非负整数 | 是 | `floor(population / 20)`。 |
 | `upkeep_next_tick` | 非负整数 | 是 | 当前人口对应的 `tier × (tier + 1) / 2`。 |

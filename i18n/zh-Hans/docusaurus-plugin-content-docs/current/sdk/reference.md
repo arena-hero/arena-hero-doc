@@ -137,6 +137,8 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | `tick` | `int` | 这份状态和计划所属的 Tick。 |
 | `state` | `PlayerState` | 完整、权威的玩家状态模型。 |
 | `resources` | `int` | 当前存放在 Core 里的资源。 |
+| `resource_capacity` | `int` | 当前容量：`state.population * 5`。 |
+| `resource_space` | `int` | 还能接收多少资源；最小为 0。 |
 | `core` | `Core | None` | 自己控制的 Core；重生期间是 `None`。 |
 | `units` | `tuple[Unit, ...]` | 自己控制的所有 Unit。 |
 | `workers` | `tuple[Worker, ...]` | 自己控制的 Worker。 |
@@ -196,12 +198,15 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | 方法 | 含义 |
 |---|---|
 | `harvest()` | 尝试消耗当前格的资源点。 |
-| `deposit()` | 与 Core 同格时，把携带资源存入 Core。 |
+| `deposit()` | 与 Core 同格时存入能装下的量，剩余 Cargo 留在 Worker 身上。 |
 
 一次成功采集消耗一个自然资源点。普通赢家携带 1 资源；所属玩家持有 Beacon 的赢家
 从同一个点携带 2。死亡 Worker 留下的 Cargo 资源堆会被优先回收，而且不会取得超过
 实际剩余量的资源。多个合格 Worker 采同一格时，只有最低 UUID 成功，其他人收到
 `HARVEST_FAILED`，reason 是 `RESOURCE_DEPLETED`。
+
+Core 已满时，交付结算为 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`。人口下降后，高于
+新容量的资源会立刻销毁，并通过 `CORE_RESOURCE_OVERFLOW_DESTROYED` 返回。
 
 ### Vanguard
 
@@ -297,10 +302,24 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 含义见[结算结果](../api/resolution-results.md)。
 
 其中 `HARVEST_FAILED`/`RESOURCE_DEPLETED` 表示同 Tick 有 UUID 更低的合格 Worker
-消耗了被竞争的资源点。Cargo 事件可以直接通过 `resource_amount` 读取掉落或回收数量。
+消耗了被竞争的资源点。`resource_amount` 可以读取
+`CORE_RESOURCE_OVERFLOW_DESTROYED`、`DEPOSIT_SUCCEEDED`、
+`WORKER_CARGO_DROPPED` 和 `HARVEST_SUCCEEDED` 中的正数 `amount`。
 `harvest_source is HarvestSource.DROPPED_CARGO` 表示正在回收掉落资源；
 `HarvestSource.RESOURCE_NODE` 表示普通自然资源采集。不适用或无法识别的值会返回
 `None`。
+
+## 规则辅助函数
+
+```python
+from arena_hero import (
+    CORE_RESOURCE_CAPACITY_PER_UNIT,
+    core_resource_capacity,
+)
+```
+
+`CORE_RESOURCE_CAPACITY_PER_UNIT` 的值是 `5`。
+`core_resource_capacity(population)` 返回 `population * 5`；人口为负数时会报错。
 
 ### `Tick`、`Received` 和 `Accepted`
 

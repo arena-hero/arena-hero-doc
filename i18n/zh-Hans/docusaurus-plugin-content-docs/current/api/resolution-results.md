@@ -63,6 +63,7 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `UPKEEP_PAID` | 无 | `actor_id`：Core；`position`：Core 格 | `{due: int, paid: int, deficit: int}` | 维护费已扣；deficit 为正时随后作为 Core 伤害应用。 |
 | `CORE_DAMAGED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：Core；`position`：Core 格 | `{damage: int, shield_damage: int, hp_damage: int}` | Core 受到的总伤害，以及护盾和 HP 各分摊多少。 |
 | `CORE_DESTROYED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：被摧毁的 Core；`position`：摧毁格 | 攻击且存在可命名参与者时为 `{destroyed_by: string[]}`，否则无 | Core 和剩余 Unit 被移除，玩家开始等待重生。 |
+| `CORE_RESOURCE_OVERFLOW_DESTROYED` | 无 | `actor_id`：Core；`position`：Core 格 | `{amount: int, capacity: int}` | 人口下降后，高于新容量的资源被销毁。 |
 | `CORE_ACTION_FAILED` | `CORE_NOT_MOVING` 或 `CORE_ALREADY_MOVING` | `actor_id`：Core；`position`：Core 格 | 无 | 对正常 Core 执行了 `CANCEL_MOVE`，或在迁移期间执行了不兼容的动作。 |
 | `CORE_REPAIR_FAILED` | `SHIELD_FULL` 或 `INSUFFICIENT_RESOURCES` | `actor_id`：Core；`position`：Core 格 | 无 | 这一点护盾没能修上。 |
 | `CORE_REPAIR_SUCCEEDED` | 无 | `actor_id`：Core；`position`：Core 格 | `{shield: int, cost: int}` | 修完之后的护盾值和花掉的资源。 |
@@ -81,7 +82,8 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `DEPOSIT_FAILED` | `WORKER_EMPTY` | `actor_id`：Worker；`position`：Worker 格 | 无 | Worker 身上没货。 |
 | `DEPOSIT_FAILED` | `CORE_NOT_PRESENT` | `actor_id`：Worker；`position`：Worker 格 | 无 | 己方 Core 不存在，或者不在同一格。 |
 | `DEPOSIT_FAILED` | `CORE_MOVING` | `actor_id`：Worker；`target_id`：Core；`position`：Worker 格 | 无 | 同格的 Core 本 Tick 受迁移限制。 |
-| `DEPOSIT_SUCCEEDED` | 无 | `actor_id`：Worker；`target_id`：Core；`position`：同格坐标 | `{amount: int}` | Worker 身上的货全部转进 Core 的资源。 |
+| `DEPOSIT_FAILED` | `CORE_RESOURCE_FULL` | `actor_id`：Worker；`target_id`：Core；`position`：同格坐标 | `{capacity: int}` | Core 已达到 `population × 5`，Cargo 不变。 |
+| `DEPOSIT_SUCCEEDED` | 无 | `actor_id`：Worker；`target_id`：Core；`position`：同格坐标 | `{amount: int, capacity: int, remaining: int}` | `amount` 已存入 Core，`remaining` 继续留在 Worker。 |
 | `HARVEST_FAILED` | `NOT_RESOURCE_CELL` | `actor_id`：Worker；`position`：Worker 格 | 无 | 当前地形不是资源格。 |
 | `HARVEST_FAILED` | `CARGO_FULL` | `actor_id`：Worker；`position`：Worker 格 | 无 | Worker 身上已经有资源了。 |
 | `HARVEST_FAILED` | `RESOURCE_DEPLETED` | `actor_id`：Worker；`position`：已消耗的资源点 | 无 | 同 Tick 另一个 UUID 更低的合格空载 Worker 赢走了这个点。 |

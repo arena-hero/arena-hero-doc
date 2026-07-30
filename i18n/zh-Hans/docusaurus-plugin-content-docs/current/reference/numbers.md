@@ -27,8 +27,9 @@ description: 查询当前时序、成本、射程、容量和协议限制。
 | 护盾 | 5 |
 | 携带 Beacon 时护盾上限 | 10 |
 | 视野 | 5 |
-| 初始资源 | 20 |
+| 初始资源 | 5 |
 | 初始 Worker | 1 |
+| 资源容量 | `population × 5` |
 | 护盾修复 | 1 资源 → 1 护盾 |
 
 ## Units
@@ -68,9 +69,12 @@ Worker 死亡时会把全部 Cargo 掉在最后所在格。普通回收一次取
 
 ```text
 population = Worker + Vanguard + Ranger
+resource_capacity = population × 5
 tier = floor(population / 20)
 upkeep = tier × (tier + 1) / 2
 ```
+
+交付只存入能装下的部分。人口下降时，高于新容量的库存会立刻销毁。
 
 | 人口 | 维护费 |
 |---:|---:|

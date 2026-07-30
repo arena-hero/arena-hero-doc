@@ -107,6 +107,8 @@ SDK 不会从环境变量读取 API Key 或接口地址。值从哪里加载、�
 ```python
 turn.tick
 turn.resources
+turn.resource_capacity
+turn.resource_space
 turn.core
 turn.units
 turn.workers
@@ -118,6 +120,10 @@ turn.obstacle_cells
 turn.beacon
 turn.events
 ```
+
+每个存活 Unit 为 Core 提供 5 点资源容量。部分交付只存入能装下的量，剩余 Cargo 继续
+留在 Worker 身上；Core 已满时交付失败，但不会删除 Cargo。人口下降后，高于新容量的
+库存会立刻销毁。决定是否调用 `deposit()` 前，可以先看 `turn.resource_space`。
 
 能用分类好的集合时就直接用。例如 `turn.workers` 只包含自己控制的 Worker，
 `turn.visible_enemies` 包含当前看得到的敌方 Unit 和 Core。
@@ -137,7 +143,7 @@ for enemy in turn.visible_enemies:
 
 协议值本身不带 `@`。Unit 不公开所属玩家。
 
-Cargo 掉落和回收可以直接读取类型化属性：
+交付、Cargo 掉落、回收和超额销毁都可以直接读取类型化数量：
 
 ```python
 from arena_hero import HarvestSource
@@ -145,6 +151,8 @@ from arena_hero import HarvestSource
 for event in turn.events:
     if event.event_type == "WORKER_CARGO_DROPPED":
         print("掉落", event.resource_amount, "位置", event.position)
+    elif event.event_type == "CORE_RESOURCE_OVERFLOW_DESTROYED":
+        print("销毁超额 Core 资源", event.resource_amount)
     elif event.harvest_source is HarvestSource.DROPPED_CARGO:
         print("回收", event.resource_amount, "位置", event.position)
 ```

@@ -49,7 +49,7 @@ A successful respawn hands you:
 | Asset | Value |
 |---|---:|
 | New Core | 5 HP, 5 shield |
-| Resources | 20 |
+| Resources | 5 |
 | Workers | 1 |
 | Spawn protection | None |
 

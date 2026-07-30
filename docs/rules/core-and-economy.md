@@ -14,11 +14,30 @@ description: How the Core stores resources, creates Units, repairs, moves, and p
 | Maximum shield | 5 |
 | Maximum shield while the owner holds the Beacon | 10 |
 | Vision | 5 |
-| Starting resources after respawn | 20 |
+| Starting resources after respawn | 5 |
 
 Damage and upkeep shortfalls both eat shield before they touch HP. The Core is
 where your resources live, and it is also what pays upkeep, receives deposits,
 builds Units, repairs its own shield, and — slowly — migrates.
+
+## Resource storage
+
+Population counts living Units, not the Core. The Core can accept five stored
+resources per Unit:
+
+```text
+resource_capacity = population × 5
+```
+
+A new or respawned player starts with one Worker and 5 resources. If population
+falls and the current inventory is now above capacity, those existing resources
+above the new capacity are destroyed immediately. The private
+`CORE_RESOURCE_OVERFLOW_DESTROYED` event reports the amount lost and the new
+capacity.
+
+A Worker deposits only what fits. Any remainder stays on the Worker. A completely
+full Core returns `DEPOSIT_FAILED` with
+`CORE_RESOURCE_FULL`, without changing its inventory or the Worker's cargo.
 
 ## Core actions
 
@@ -54,8 +73,8 @@ A Unit that has just been spawned:
 - already blocks Ranger lines of fire;
 - starts counting toward upkeep from the next Tick.
 
-Worker deposits resolve before production, so resources delivered this Tick can
-pay for a `SPAWN` or a `REPAIR_SHIELD` in the same Tick. What they cannot do is
+Worker deposits resolve before the Core action, so resources actually accepted
+this Tick can pay for that action when it is otherwise legal. They cannot
 retroactively cover upkeep already charged after the self-destruct phase.
 
 ## Shield repair

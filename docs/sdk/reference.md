@@ -140,6 +140,8 @@ difference is that `AsyncTurn.submit()` must be awaited.
 | `tick` | `int` | Tick this state and plan belong to. |
 | `state` | `PlayerState` | Complete authoritative player-state model. |
 | `resources` | `int` | Resources currently stored in the Core. |
+| `resource_capacity` | `int` | Current storage capacity: `state.population * 5`. |
+| `resource_space` | `int` | Non-negative space available for another deposit. |
 | `core` | `Core | None` | Controlled Core, or `None` while respawning. |
 | `units` | `tuple[Unit, ...]` | All controlled Units. |
 | `workers` | `tuple[Worker, ...]` | Controlled Workers. |
@@ -200,7 +202,7 @@ Extra controls:
 | Method | Meaning |
 |---|---|
 | `harvest()` | Try to consume the resource point on the current cell. |
-| `deposit()` | Deposit cargo while sharing a cell with the Core. |
+| `deposit()` | Deposit what fits while sharing a cell with the Core; any remainder stays on the Worker. |
 
 One successful natural harvest consumes one point. A normal winner carries
 1 resource; a winner whose player holds the Beacon carries 2 from that same
@@ -208,6 +210,10 @@ point. Cargo piles dropped by dead Workers are recovered first and never yield
 more than their remaining amount. If several eligible Workers harvest one cell,
 only the lowest UUID succeeds and the others receive `HARVEST_FAILED` with
 `RESOURCE_DEPLETED`.
+
+A full Core resolves a deposit as `DEPOSIT_FAILED` with `CORE_RESOURCE_FULL`.
+When population falls, resources above the new capacity are destroyed
+immediately and reported as `CORE_RESOURCE_OVERFLOW_DESTROYED`.
 
 ### Vanguard
 
@@ -306,11 +312,25 @@ break an older SDK. See [Resolution results](../api/resolution-results.md) for
 their meanings.
 
 In particular, `HARVEST_FAILED` with `RESOURCE_DEPLETED` means a lower-UUID
-eligible Worker consumed the contested point in that Tick. For cargo events,
-`resource_amount` safely reads the dropped or recovered amount.
+eligible Worker consumed the contested point in that Tick. `resource_amount`
+safely reads the positive amount from `CORE_RESOURCE_OVERFLOW_DESTROYED`,
+`DEPOSIT_SUCCEEDED`, `WORKER_CARGO_DROPPED`, and `HARVEST_SUCCEEDED`.
 `harvest_source is HarvestSource.DROPPED_CARGO` identifies a recovery;
 `HarvestSource.RESOURCE_NODE` identifies an ordinary natural harvest. Unknown
 or inapplicable values return `None`.
+
+## Rule helpers
+
+```python
+from arena_hero import (
+    CORE_RESOURCE_CAPACITY_PER_UNIT,
+    core_resource_capacity,
+)
+```
+
+`CORE_RESOURCE_CAPACITY_PER_UNIT` is `5`.
+`core_resource_capacity(population)` returns `population * 5` and rejects a
+negative population.
 
 ### `Tick`, `Received`, and `Accepted`
 

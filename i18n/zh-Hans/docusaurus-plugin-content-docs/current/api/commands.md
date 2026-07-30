@@ -83,7 +83,7 @@ Unit A: WAIT
 | `WAIT` | 所有 | `{"type":"WAIT"}` | Unit 不行动。 |
 | `MOVE` | 所有 | `{"type":"MOVE","direction":"RIGHT"}` | 尝试向正交方向移动一格。 |
 | `HARVEST` | Worker | `{"type":"HARVEST"}` | 消耗资源点并装载 1 资源；玩家持有 Beacon 时装载 2。 |
-| `DEPOSIT` | Worker | `{"type":"DEPOSIT"}` | 把全部货物存入同格的己方 Core。 |
+| `DEPOSIT` | Worker | `{"type":"DEPOSIT"}` | 把能装下的货物存入同格的己方 Core。 |
 | `SWEEP` | Vanguard | `{"type":"SWEEP","direction":"UP"}` | 对相邻目标格内每个敌方实体造成 1 伤害。 |
 | `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | 尝试射击该格的指定目标，正交射程 1-3。 |
 | `PICKUP_BEACON` | 所有 | `{"type":"PICKUP_BEACON"}` | 尝试拾取 actor 同格的地面 Beacon。 |
@@ -110,7 +110,9 @@ Unit A: WAIT
   规则补回固定配额。
 - `DEPOSIT` 要求 Worker 有货，并且和自己的 Core 同格。
 - Core 处在迁移受限的 Tick 时收不了货。
-- 存入失败，货还在 Worker 身上，不会丢。
+- Core 容量是 `population × 5`；部分交付后，装不下的货继续留在 Worker 身上。
+- Core 已满时，返回 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`。
+- 存入失败时，全部货物仍在 Worker 身上。
 
 ### 横扫
 

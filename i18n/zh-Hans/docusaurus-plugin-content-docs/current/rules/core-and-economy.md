@@ -14,10 +14,25 @@ description: Core 如何保存资源、生产 Unit、修复、移动并支付维
 | 护盾上限 | 5 |
 | 持有 Beacon 时护盾上限 | 10 |
 | 视野 | 5 |
-| 重生启动资源 | 20 |
+| 重生启动资源 | 5 |
 
 伤害和欠费伤害都是先扣护盾，扣完了才动 HP。Core 是你放资源的地方，同时也负责交维护
 费、接收交付、生产 Unit、给自己修盾，以及——很慢地——迁移。
+
+## 资源容量
+
+人口只计算存活 Unit，不计算 Core。每个 Unit 为 Core 提供 5 点资源容量：
+
+```text
+resource_capacity = population × 5
+```
+
+新玩家和重生玩家以 1 个 Worker、5 点资源开始。人口下降后，如果现有库存高于新容量，
+高出的资源会立刻销毁。私有事件 `CORE_RESOURCE_OVERFLOW_DESTROYED` 会给出损失数量和
+新容量。
+
+Worker 只存入剩余容量，装不下的部分继续留在 Worker 身上。Core 已满时，
+返回 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`，Core 库存和 Worker Cargo 都不变。
 
 ## Core 动作
 
@@ -51,8 +66,8 @@ description: Core 如何保存资源、生产 Unit、修复、移动并支付维
 - 也已经开始阻挡 Ranger 的射线；
 - 从下一个 Tick 起计入维护费。
 
-Worker 交付排在生产之前，所以这个 Tick 交上来的资源，可以直接拿去 `SPAWN` 或者修盾。
-唯一做不到的是回头补上自毁阶段结束后已经扣掉的那笔维护费。
+Worker 交付排在 Core 动作之前，所以这个 Tick 实际存入的资源，可以在动作本身合法时
+用于该 Core 动作。唯一做不到的是回头补上自毁阶段结束后已经扣掉的那笔维护费。
 
 ## 修盾
 

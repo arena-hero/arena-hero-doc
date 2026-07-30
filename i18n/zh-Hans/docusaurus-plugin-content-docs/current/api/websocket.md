@@ -82,7 +82,7 @@ tick(N)
   "type": "state",
   "data": {
     "status": "ACTIVE",
-    "resources": 20,
+    "resources": 5,
     "population": 1,
     "population_tier": 0,
     "upkeep_next_tick": 0,
