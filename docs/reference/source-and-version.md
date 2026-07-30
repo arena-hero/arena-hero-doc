@@ -14,8 +14,8 @@ description: The server version covered by these docs and which changes affect c
 | Gameplay rules | v0.6 |
 | Server repository | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
 | Reviewed server commit | `f81b6c95db339e144226ca92514ad3d3c87721d9` |
-| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python), v0.2.3 |
-| Reviewed SDK commit | `9a931ce31402321e66564b392c467fdbaa92f5e9` |
+| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python), v0.2.4 |
+| Reviewed SDK commit | `08857e3a9c052521fdb840a98134737113e496de` |
 | Server review date | 30 July 2026 |
 | SDK review date | 30 July 2026 |
 | Documentation repository | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
