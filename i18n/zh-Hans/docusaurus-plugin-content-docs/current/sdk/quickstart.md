@@ -121,9 +121,10 @@ turn.beacon
 turn.events
 ```
 
-每个存活 Unit 为 Core 提供 5 点资源容量。部分交付只存入能装下的量，剩余 Cargo 继续
-留在 Worker 身上；Core 已满时交付失败，但不会删除 Cargo。人口下降后，高于新容量的
-库存会立刻销毁。决定是否调用 `deposit()` 前，可以先看 `turn.resource_space`。
+Core 最少能存 10 点资源，之后每个存活 Unit 提供 5 点容量。部分交付只存入能装下的
+量，剩余 Cargo 继续留在 Worker 身上；Core 已满时交付失败，但不会删除 Cargo。人口
+下降后，高于新容量的库存会立刻销毁。决定是否调用 `deposit()` 前，可以先看
+`turn.resource_space`。
 
 能用分类好的集合时就直接用。例如 `turn.workers` 只包含自己控制的 Worker，
 `turn.visible_enemies` 包含当前看得到的敌方 Unit 和 Core。

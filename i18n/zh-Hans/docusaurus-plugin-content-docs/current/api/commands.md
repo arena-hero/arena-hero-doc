@@ -110,7 +110,7 @@ Unit A: WAIT
   规则补回固定配额。
 - `DEPOSIT` 要求 Worker 有货，并且和自己的 Core 同格。
 - Core 处在迁移受限的 Tick 时收不了货。
-- Core 容量是 `population × 5`；部分交付后，装不下的货继续留在 Worker 身上。
+- Core 容量是 `max(10, population × 5)`；部分交付后，装不下的货继续留在 Worker 身上。
 - Core 已满时，返回 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`。
 - 存入失败时，全部货物仍在 Worker 身上。
 

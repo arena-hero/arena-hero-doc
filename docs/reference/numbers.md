@@ -29,7 +29,7 @@ description: Look up the current timing, costs, ranges, capacity, and protocol l
 | Vision | 5 |
 | Starting resources | 5 |
 | Starting Workers | 1 |
-| Resource capacity | `population × 5` |
+| Resource capacity | `max(10, population × 5)` |
 | Shield repair | 1 resource → 1 shield |
 
 ## Units
@@ -71,7 +71,7 @@ Cargo piles do not count toward the chunk's natural-resource quota.
 
 ```text
 population = Worker + Vanguard + Ranger
-resource_capacity = population × 5
+resource_capacity = max(10, population × 5)
 tier = floor(population / 20)
 upkeep = tier × (tier + 1) / 2
 ```

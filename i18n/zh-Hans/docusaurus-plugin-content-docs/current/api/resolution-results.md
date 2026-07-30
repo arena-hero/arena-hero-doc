@@ -82,7 +82,7 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `DEPOSIT_FAILED` | `WORKER_EMPTY` | `actor_id`：Worker；`position`：Worker 格 | 无 | Worker 身上没货。 |
 | `DEPOSIT_FAILED` | `CORE_NOT_PRESENT` | `actor_id`：Worker；`position`：Worker 格 | 无 | 己方 Core 不存在，或者不在同一格。 |
 | `DEPOSIT_FAILED` | `CORE_MOVING` | `actor_id`：Worker；`target_id`：Core；`position`：Worker 格 | 无 | 同格的 Core 本 Tick 受迁移限制。 |
-| `DEPOSIT_FAILED` | `CORE_RESOURCE_FULL` | `actor_id`：Worker；`target_id`：Core；`position`：同格坐标 | `{capacity: int}` | Core 已达到 `population × 5`，Cargo 不变。 |
+| `DEPOSIT_FAILED` | `CORE_RESOURCE_FULL` | `actor_id`：Worker；`target_id`：Core；`position`：同格坐标 | `{capacity: int}` | Core 已达到 `max(10, population × 5)`，Cargo 不变。 |
 | `DEPOSIT_SUCCEEDED` | 无 | `actor_id`：Worker；`target_id`：Core；`position`：同格坐标 | `{amount: int, capacity: int, remaining: int}` | `amount` 已存入 Core，`remaining` 继续留在 Worker。 |
 | `HARVEST_FAILED` | `NOT_RESOURCE_CELL` | `actor_id`：Worker；`position`：Worker 格 | 无 | 当前地形不是资源格。 |
 | `HARVEST_FAILED` | `CARGO_FULL` | `actor_id`：Worker；`position`：Worker 格 | 无 | Worker 身上已经有资源了。 |

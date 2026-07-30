@@ -117,7 +117,7 @@ Only a Worker can do either of these.
   chunk deterministically fills only its missing slots back to its fixed quota.
 - `DEPOSIT` needs a Worker with cargo and its own Core on the same cell.
 - A Core cannot receive a deposit during a migration-restricted Tick.
-- Core capacity is `population × 5`. A partial deposit leaves the remainder on
+- Core capacity is `max(10, population × 5)`. A partial deposit leaves the remainder on
   the Worker.
 - A full Core returns `DEPOSIT_FAILED` with
   `CORE_RESOURCE_FULL`.

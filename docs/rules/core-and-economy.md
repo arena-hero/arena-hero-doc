@@ -22,11 +22,11 @@ builds Units, repairs its own shield, and — slowly — migrates.
 
 ## Resource storage
 
-Population counts living Units, not the Core. The Core can accept five stored
-resources per Unit:
+Population counts living Units, not the Core. Core storage has a minimum
+capacity of 10; above two Units, it grows by five per Unit:
 
 ```text
-resource_capacity = population × 5
+resource_capacity = max(10, population × 5)
 ```
 
 A new or respawned player starts with one Worker and 5 resources. If population

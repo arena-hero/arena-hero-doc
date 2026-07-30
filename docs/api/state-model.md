@@ -75,7 +75,7 @@ If you want machine-readable definitions, use the
 |---|---|---:|---|
 | `status` | `"ACTIVE"` or `"RESPAWNING"` | Yes | Whether the player has an active Core or is waiting to respawn. |
 | `respawn_at_tick` | positive int64 | Only when respawning | Tick of the next respawn attempt. |
-| `resources` | integer ≥ 0 | Yes | Resources stored by the Core, capped at `population × 5`; Worker cargo is separate. |
+| `resources` | integer ≥ 0 | Yes | Resources stored by the Core, capped at `max(10, population × 5)`; Worker cargo is separate. |
 | `population` | integer ≥ 0 | Yes | Living owned Units; the Core is not counted. |
 | `population_tier` | integer ≥ 0 | Yes | `floor(population / 20)`. |
 | `upkeep_next_tick` | integer ≥ 0 | Yes | `tier × (tier + 1) / 2` for the current population. |

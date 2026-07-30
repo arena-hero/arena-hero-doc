@@ -127,10 +127,11 @@ turn.beacon
 turn.events
 ```
 
-Core storage accepts 5 resources per living Unit. A partial deposit leaves its
-remainder on the Worker; a full Core rejects the deposit without deleting
-cargo. If population falls, stored resources above the new capacity are
-destroyed immediately. Use `turn.resource_space` before choosing `deposit()`.
+Core storage has a minimum capacity of 10, then accepts 5 resources per living
+Unit. A partial deposit leaves its remainder on the Worker; a full Core rejects
+the deposit without deleting cargo. If population falls, stored resources above
+the new capacity are destroyed immediately. Use `turn.resource_space` before
+choosing `deposit()`.
 
 Use the filtered collections when possible. For example,
 `turn.workers` contains controlled Workers, while

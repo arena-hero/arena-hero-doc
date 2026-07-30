@@ -137,7 +137,7 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | `tick` | `int` | 这份状态和计划所属的 Tick。 |
 | `state` | `PlayerState` | 完整、权威的玩家状态模型。 |
 | `resources` | `int` | 当前存放在 Core 里的资源。 |
-| `resource_capacity` | `int` | 当前容量：`state.population * 5`。 |
+| `resource_capacity` | `int` | 当前容量：`max(10, state.population * 5)`。 |
 | `resource_space` | `int` | 还能接收多少资源；最小为 0。 |
 | `core` | `Core | None` | 自己控制的 Core；重生期间是 `None`。 |
 | `units` | `tuple[Unit, ...]` | 自己控制的所有 Unit。 |
@@ -314,12 +314,14 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 ```python
 from arena_hero import (
     CORE_RESOURCE_CAPACITY_PER_UNIT,
+    CORE_RESOURCE_MINIMUM_CAPACITY,
     core_resource_capacity,
 )
 ```
 
 `CORE_RESOURCE_CAPACITY_PER_UNIT` 的值是 `5`。
-`core_resource_capacity(population)` 返回 `population * 5`；人口为负数时会报错。
+`CORE_RESOURCE_MINIMUM_CAPACITY` 的值是 `10`。
+`core_resource_capacity(population)` 返回 `max(10, population * 5)`；人口为负数时会报错。
 
 ### `Tick`、`Received` 和 `Accepted`
 

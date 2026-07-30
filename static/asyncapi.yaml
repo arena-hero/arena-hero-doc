@@ -203,8 +203,9 @@ components:
           minimum: 0
           description: |
             Resources stored in the player's Core. Worker cargo is separate.
-            Storage is strictly limited to population * 5. If population falls,
-            resources above the new capacity are destroyed immediately.
+            Storage is strictly limited to max(10, population * 5). If
+            population falls, resources above the new capacity are destroyed
+            immediately.
         population:
           type: integer
           minimum: 0
@@ -520,7 +521,8 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Deposits only what fits under the Core capacity of population * 5.
+        Deposits only what fits under the Core capacity of
+        max(10, population * 5).
         Any remainder stays on the Worker. A full Core
         resolves this action as DEPOSIT_FAILED with CORE_RESOURCE_FULL.
       required: [type]

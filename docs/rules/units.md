@@ -49,8 +49,8 @@ Beacon does not delete cargo a Worker is already carrying.
 
 `DEPOSIT` needs the Worker to share a cell with its own Core, and that Core has to
 be normal and receptive — one that is migrating or recovering from a migration
-cannot take delivery. Core capacity is `population × 5`. A deposit moves only
-what fits and leaves any remainder on the Worker. A full Core
+cannot take delivery. Core capacity is `max(10, population × 5)`. A deposit
+moves only what fits and leaves any remainder on the Worker. A full Core
 returns `CORE_RESOURCE_FULL`; every failed deposit leaves the cargo alone. If
 the Worker dies for any reason, all cargo becomes a resource pile on its final
 cell.

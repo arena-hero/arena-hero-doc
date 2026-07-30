@@ -21,10 +21,11 @@ description: Core 如何保存资源、生产 Unit、修复、移动并支付维
 
 ## 资源容量
 
-人口只计算存活 Unit，不计算 Core。每个 Unit 为 Core 提供 5 点资源容量：
+人口只计算存活 Unit，不计算 Core。Core 最少能存 10 点资源；人口超过 2 后，每个 Unit
+提供 5 点容量：
 
 ```text
-resource_capacity = population × 5
+resource_capacity = max(10, population × 5)
 ```
 
 新玩家和重生玩家以 1 个 Worker、5 点资源开始。人口下降后，如果现有库存高于新容量，

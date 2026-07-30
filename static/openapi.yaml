@@ -252,7 +252,8 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Deposits only what fits under the Core capacity of population * 5.
+        Deposits only what fits under the Core capacity of
+        max(10, population * 5).
         Any remainder stays on the Worker. A full Core
         resolves this action as DEPOSIT_FAILED with CORE_RESOURCE_FULL.
       required: [type]

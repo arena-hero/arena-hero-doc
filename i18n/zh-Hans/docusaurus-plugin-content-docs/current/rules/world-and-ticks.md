@@ -122,7 +122,7 @@ sequenceDiagram
 库存、重生状态或 Champion Beacon 状态。资源位置作为地图层迁移到新的区块配额与补充
 协议。
 
-规则 v0.5 保留 Worker 死亡后的 Cargo 资源堆，并增加 `population × 5` 的严格 Core
-容量。现有 v0.1 到 v0.4 世界可以在 `OPEN` 或 `COMMITTED` 边界升级，不会重置游戏
-状态；第一次 v0.5 结算会销毁高于当前容量的库存。如果旧服务停在 `LOCKED` 或
-`RESOLVING`，必须先用旧规则完成该 Tick，才能升级。
+规则 v0.5 保留 Worker 死亡后的 Cargo 资源堆，并增加随人口变化的 Core 容量。规则
+v0.6 将容量改为 `max(10, population × 5)`。现有 v0.1 到 v0.5 世界可以在 `OPEN`
+或 `COMMITTED` 边界升级，不会重置游戏状态；提高最低容量不会销毁已有资源。如果旧
+服务停在 `LOCKED` 或 `RESOLVING`，必须先用旧规则完成该 Tick，才能升级。

@@ -140,7 +140,7 @@ difference is that `AsyncTurn.submit()` must be awaited.
 | `tick` | `int` | Tick this state and plan belong to. |
 | `state` | `PlayerState` | Complete authoritative player-state model. |
 | `resources` | `int` | Resources currently stored in the Core. |
-| `resource_capacity` | `int` | Current storage capacity: `state.population * 5`. |
+| `resource_capacity` | `int` | Current storage capacity: `max(10, state.population * 5)`. |
 | `resource_space` | `int` | Non-negative space available for another deposit. |
 | `core` | `Core | None` | Controlled Core, or `None` while respawning. |
 | `units` | `tuple[Unit, ...]` | All controlled Units. |
@@ -324,13 +324,15 @@ or inapplicable values return `None`.
 ```python
 from arena_hero import (
     CORE_RESOURCE_CAPACITY_PER_UNIT,
+    CORE_RESOURCE_MINIMUM_CAPACITY,
     core_resource_capacity,
 )
 ```
 
 `CORE_RESOURCE_CAPACITY_PER_UNIT` is `5`.
-`core_resource_capacity(population)` returns `population * 5` and rejects a
-negative population.
+`CORE_RESOURCE_MINIMUM_CAPACITY` is `10`.
+`core_resource_capacity(population)` returns
+`max(10, population * 5)` and rejects a negative population.
 
 ### `Tick`, `Received`, and `Accepted`
 
