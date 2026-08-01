@@ -111,7 +111,7 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 `UNIT_DAMAGED.values.hp === 0`，再结合新的完整状态里这个 Unit 已经不见了。
 
 Ranger 的所有动态失败用的都是同一个 `SHOT_MISSED`——目标没了、目标移开了、目标是
-友军、距离不对、射线被挡，全都一样。这个结果就是设计成什么都不透露的。
+友军、距离不对、射线被障碍物挡住，全都一样。这个结果就是设计成什么都不透露的。
 
 ## 移动事件 {#movement-events}
 

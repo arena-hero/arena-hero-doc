@@ -91,10 +91,11 @@ A shot is legal only when all of the following hold:
 2. it is still at `expected_cell`;
 3. target and Ranger sit on one horizontal or vertical line;
 4. the Manhattan distance is 1, 2, or 3;
-5. no cell in between holds an obstacle, Unit, or Core.
+5. no cell in between holds an obstacle.
 
-The target cell may hold several colocated objects, and `target_id` picks one of
-them. There is no front-to-back ordering to exploit within a cell.
+Units and Cores never block Ranger fire, regardless of owner. The target cell
+may hold several colocated objects, and `target_id` picks one of them. There is
+no front-to-back ordering to exploit within a cell.
 
 The POST endpoint accepts an unseen or even nonexistent UUID on purpose, so that
 nobody can use it to probe fog of war. At resolution, a missing target, a friendly

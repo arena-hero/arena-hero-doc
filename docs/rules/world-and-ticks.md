@@ -140,7 +140,8 @@ to the new per-chunk quota and replenishment contract as a map-layer migration.
 
 Rules v0.5 retained Worker cargo piles and added population-based Core storage.
 Rules v0.6 set that capacity to `max(10, population × 5)`. Existing v0.1 through
-v0.5 worlds upgrade at an `OPEN` or `COMMITTED` boundary without resetting game
-state. The higher minimum does not destroy existing resources. A server stopped
-in `LOCKED` or `RESOLVING` must finish that Tick under its old rules before
-upgrading.
+v0.5 worlds upgraded without resetting game state. Rules v0.7 let Ranger shots
+pass through Units and Cores; only obstacles block them. Existing v0.1 through
+v0.6 worlds upgrade at an `OPEN` or `COMMITTED` boundary without resetting game
+state. A server stopped in `LOCKED` or `RESOLVING` must finish that Tick under its
+old rules before upgrading.

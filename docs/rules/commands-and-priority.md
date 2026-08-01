@@ -64,7 +64,7 @@ resolution:
 - the movement was contested;
 - resources ran short;
 - a lower UUID won the Beacon;
-- the Ranger's line got blocked.
+- an obstacle blocked the Ranger's line.
 
 None of these invalidate the POST. They show up in the next `state.events`.
 

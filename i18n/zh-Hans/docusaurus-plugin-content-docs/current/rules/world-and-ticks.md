@@ -123,6 +123,7 @@ sequenceDiagram
 协议。
 
 规则 v0.5 保留 Worker 死亡后的 Cargo 资源堆，并增加随人口变化的 Core 容量。规则
-v0.6 将容量改为 `max(10, population × 5)`。现有 v0.1 到 v0.5 世界可以在 `OPEN`
-或 `COMMITTED` 边界升级，不会重置游戏状态；提高最低容量不会销毁已有资源。如果旧
-服务停在 `LOCKED` 或 `RESOLVING`，必须先用旧规则完成该 Tick，才能升级。
+v0.6 将容量改为 `max(10, population × 5)`。规则 v0.7 让 Ranger 射击穿过 Unit 和
+Core，只有障碍物阻挡。现有 v0.1 到 v0.6 世界可以在 `OPEN` 或 `COMMITTED` 边界升级，
+不会重置游戏状态。如果旧服务停在 `LOCKED` 或 `RESOLVING`，必须先用旧规则完成该
+Tick，才能升级。

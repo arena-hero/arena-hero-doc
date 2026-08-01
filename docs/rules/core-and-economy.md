@@ -70,7 +70,6 @@ A Unit that has just been spawned:
 
 - cannot act during the Tick it was created;
 - is already in the combat snapshot, so it can be attacked;
-- already blocks Ranger lines of fire;
 - starts counting toward upkeep from the next Tick.
 
 Worker deposits resolve before the Core action, so resources actually accepted

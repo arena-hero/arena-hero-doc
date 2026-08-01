@@ -55,7 +55,7 @@ flowchart TD
 - 移动被争夺；
 - 资源不够了；
 - Beacon 被更小的 UUID 抢走；
-- Ranger 的射线被挡住。
+- Ranger 的射线被障碍物挡住。
 
 这些都不会让你的 POST 作废，它们会出现在下一条 `state.events` 里。
 

@@ -86,9 +86,8 @@ Obstacles are traced with an integer supercover line: you can see the obstacle
 cell itself, but nothing behind it. Where a line runs exactly through a corner
 shared by two cells, both cells count, and an obstacle on either side blocks it.
 
-Units, Cores, and resource points do not block **vision** at all. Units and Cores do
-block a Ranger's **shot** — that is a separate rule, and it is easy to conflate the
-two.
+Units, Cores, and resource points do not block **vision**. They do not block a
+Ranger's **shot**, either. Only obstacle terrain blocks Ranger fire.
 
 ## What the server sends
 
