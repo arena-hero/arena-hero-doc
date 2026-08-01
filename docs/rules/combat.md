@@ -50,11 +50,13 @@ Point several sweeps at the same target and their damage adds.
 }
 ```
 
-A Ranger attacks one specific object 1-3 cells away, along a horizontal or
-vertical line. Only an obstacle in an intermediate cell blocks the shot. Units
-and Cores do not block Ranger fire, regardless of who owns them, so a Ranger can
-shoot through a battle line to hit the selected target. The target cell itself
-may hold another colocated object without that creating any front/back ordering.
+A Ranger attacks one specific object 1-3 cells away, along a horizontal,
+vertical, or exact 45-degree diagonal line. Relative offset `(3, 3)` is range 3;
+`(2, 1)` is not a valid line. Only an obstacle in an intermediate shot cell
+blocks the shot. Units and Cores do not block Ranger fire, regardless of who
+owns them, so a Ranger can shoot through a battle line to hit the selected
+target. Obstacles beside a diagonal do not block it. The target cell itself may
+hold another colocated object without that creating any front/back ordering.
 
 The endpoint checks the schema and nothing more. Every dynamic failure is deferred
 to resolution, where it becomes `SHOT_MISSED`:
@@ -62,7 +64,7 @@ to resolution, where it becomes `SHOT_MISSED`:
 - the target is gone;
 - the target is friendly;
 - the target moved off `expected_cell`;
-- the target is diagonal or out of range;
+- the target is not on one of the eight firing lines or is out of range;
 - an obstacle blocks the line of fire.
 
 The ambiguity is deliberate. It stops the command API from doubling as a

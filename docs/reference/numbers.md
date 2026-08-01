@@ -38,7 +38,7 @@ description: Look up the current timing, costs, ranges, capacity, and protocol l
 |---|---:|---:|---:|---|
 | Worker | 2 | 3 | 5 | none |
 | Vanguard | 4 | 4 | 10 | 1 to adjacent target cell |
-| Ranger | 2 | 5 | 12 | 1 at cardinal range 1-3 |
+| Ranger | 2 | 5 | 12 | 1 at eight-direction range 1-3 |
 
 ## World
 

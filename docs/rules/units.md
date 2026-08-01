@@ -15,7 +15,7 @@ moves at most one cardinal cell per Tick, and performs at most one action.
 |---|---:|---:|---:|---:|---|
 | Worker | 2 | 3 | 5 | - | Harvest and deposit |
 | Vanguard | 4 | 4 | 10 | 1 sweep damage | Adjacent area pressure |
-| Ranger | 2 | 5 | 12 | 1 shot damage | Range 1-3 precision attack |
+| Ranger | 2 | 5 | 12 | 1 shot damage | Eight-direction range 1-3 precision attack |
 
 `MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, `SELF_DESTRUCT`, and `WAIT` are
 available to every Unit. Everything else depends on the type.
@@ -89,13 +89,14 @@ A shot is legal only when all of the following hold:
 
 1. the target is an enemy Unit or Core;
 2. it is still at `expected_cell`;
-3. target and Ranger sit on one horizontal or vertical line;
-4. the Manhattan distance is 1, 2, or 3;
+3. target and Ranger share a horizontal, vertical, or exact 45-degree diagonal line;
+4. the distance along that line is 1, 2, or 3 — `(3, 3)` is range 3, while `(2, 1)` is not aligned;
 5. no cell in between holds an obstacle.
 
 Units and Cores never block Ranger fire, regardless of owner. The target cell
 may hold several colocated objects, and `target_id` picks one of them. There is
-no front-to-back ordering to exploit within a cell.
+no front-to-back ordering to exploit within a cell. For diagonal fire, only the
+intermediate diagonal cells are checked; obstacles beside the line do not block it.
 
 The POST endpoint accepts an unseen or even nonexistent UUID on purpose, so that
 nobody can use it to probe fog of war. At resolution, a missing target, a friendly

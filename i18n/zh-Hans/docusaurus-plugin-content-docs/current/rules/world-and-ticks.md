@@ -125,7 +125,8 @@ sequenceDiagram
 
 规则 v0.5 保留 Worker 死亡后的 Cargo 资源堆，并增加随人口变化的 Core 容量。规则
 v0.6 将容量改为 `max(10, population × 5)`。规则 v0.7 让 Ranger 射击穿过 Unit 和
-Core，只有障碍物阻挡。现有 v0.1 到 v0.6 世界可以在 `OPEN` 或 `COMMITTED` 边界升级，
+Core，只有障碍物阻挡。规则 v0.8 加入射程 1-3 的 45° 斜线射击，并且只检查射线实际
+经过的中间格障碍物。现有 v0.1 到 v0.7 世界可以在 `OPEN` 或 `COMMITTED` 边界升级，
 不会重置游戏状态。当前规则同时移除了复活冷却：Core 被摧毁后会在同一个 Tick 的后续
 阶段立即尝试重生。如果旧服务停在 `LOCKED` 或 `RESOLVING`，必须先用旧规则完成该 Tick，
 才能升级。

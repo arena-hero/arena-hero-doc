@@ -11,13 +11,13 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 | 项目 | 值 |
 |---|---|
 | HTTP 与 WebSocket API | v0.1 |
-| 游戏规则 | v0.7 |
+| 游戏规则 | v0.8 |
 | 服务器仓库 | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
-| 已审查服务器提交 | `2b325502fe40ccda3ee615c48a15855d6822fabd` |
+| 已审查服务器提交 | `59268f3048f3845dde1358a366365dcaba459185` |
 | Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.2.4 |
-| 已审查 SDK 提交 | `02fea89c327b0211860b8b3823815003ee3a99fe` |
+| 已审查 SDK 提交 | `5de0af936ce7ead87b85c554fae55e10ddabbe53` |
 | 服务端审查日期 | 2026 年 8 月 1 日 |
-| SDK 审查日期 | 2026 年 7 月 30 日 |
+| SDK 审查日期 | 2026 年 8 月 1 日 |
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | 语言 | 英文、简体中文 |
 
@@ -46,7 +46,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 - 地图生成器契约；
 - 有限资源的区块配额、Cargo 掉落、消耗、刷新与竞争规则；
 - `max(10, population × 5)` 的严格 Core 容量与超额销毁；
-- 只有障碍物阻挡 Ranger 射击的射线规则；
+- Ranger 八方向射线几何，以及只有射线中间格障碍物阻挡射击的规则；
 - Core 在被摧毁的同一个 Tick 尝试重生，以及仅用于重试的 `RESPAWNING` 状态；
 - 决定重放结果的核心平衡规则。
 
@@ -55,7 +55,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 
 ## 为什么现在还没有版本选择器
 
-公开 API 仍是 v0.1，当前游戏规则是 v0.7，所以站点只发布一个当前版本，提供英文和简体
+公开 API 仍是 v0.1，当前游戏规则是 v0.8，所以站点只发布一个当前版本，提供英文和简体
 中文两种语言。等有了第一个稳定的兼容版本，旧协议就可以作为 Docusaurus 版本保留下来。
 
 ## 修改协议时要更新什么

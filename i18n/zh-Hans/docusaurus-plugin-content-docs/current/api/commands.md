@@ -85,7 +85,7 @@ Unit A: WAIT
 | `HARVEST` | Worker | `{"type":"HARVEST"}` | 消耗资源点并装载 1 资源；玩家持有 Beacon 时装载 2。 |
 | `DEPOSIT` | Worker | `{"type":"DEPOSIT"}` | 把能装下的货物存入同格的己方 Core。 |
 | `SWEEP` | Vanguard | `{"type":"SWEEP","direction":"UP"}` | 对相邻目标格内每个敌方实体造成 1 伤害。 |
-| `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | 尝试射击该格的指定目标，正交射程 1-3。 |
+| `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | 尝试射击该格的指定目标，横、竖或 45° 斜线射程 1-3。 |
 | `PICKUP_BEACON` | 所有 | `{"type":"PICKUP_BEACON"}` | 尝试拾取 actor 同格的地面 Beacon。 |
 | `DROP_BEACON` | 所有 | `{"type":"DROP_BEACON"}` | 当前携带者尝试放下 Beacon。 |
 | `SELF_DESTRUCT` | 所有 | `{"type":"SELF_DESTRUCT"}` | 在计算维护费之前移除这个 Unit。 |
@@ -128,8 +128,9 @@ Unit A: WAIT
 | `target_id` | UUID | Ranger 要攻击的 Unit 或 Core。 |
 | `expected_cell` | `[x, y]` | Agent 预计目标结算时所在的格子。 |
 
-到结算时，目标必须还是敌方、还在 `expected_cell`、和 Ranger 同行或同列、距离在
-1-3 之间，而且中间不能有障碍物。Unit 和 Core 不会阻挡射击。
+到结算时，目标必须还是敌方、还在 `expected_cell`、和 Ranger 同行、同列或处于
+45° 斜线、距离在 1-3 之间，而且射线实际经过的中间格不能有障碍物。相对位置
+`(3, 3)` 算 3 格，`(2, 1)` 不合法。Unit、Core 和斜线两侧的障碍物不会阻挡射击。
 
 所有动态失败返回的都是同一个事件：
 `{"event_type":"SHOT_MISSED","reason_code":"SHOT_MISSED"}`。你从结果里看不出目标是
