@@ -215,6 +215,12 @@ A full Core resolves a deposit as `DEPOSIT_FAILED` with `CORE_RESOURCE_FULL`.
 When population falls, resources above the new capacity are destroyed
 immediately and reported as `CORE_RESOURCE_OVERFLOW_DESTROYED`.
 
+Destroying an enemy Core may produce `CORE_RESOURCES_CAPTURED`. Read
+`event.core_resource_capture` for the typed amount stored, victim inventory,
+amount destroyed, and winner capacity. The highest-damage player wins; tied
+damage uses raw player UUID order. Overflow is destroyed, and all loot is lost
+if the winner's Core also dies in that combat Tick.
+
 ### Vanguard
 
 | Method | Meaning |
@@ -305,6 +311,7 @@ without a leading `@`; Unit owners remain private.
 | `position` | `Position | None` |
 | `values` | `dict[str, Any] | None` |
 | `resource_amount` | `int | None` |
+| `core_resource_capture` | `CoreResourceCapture | None` |
 | `harvest_source` | `HarvestSource | None` |
 
 Event names and reason codes stay as strings so newer server values do not
@@ -313,8 +320,12 @@ their meanings.
 
 In particular, `HARVEST_FAILED` with `RESOURCE_DEPLETED` means a lower-UUID
 eligible Worker consumed the contested point in that Tick. `resource_amount`
-safely reads the positive amount from `CORE_RESOURCE_OVERFLOW_DESTROYED`,
+safely reads the positive amount from `CORE_RESOURCES_CAPTURED`,
+`CORE_RESOURCE_OVERFLOW_DESTROYED`,
 `DEPOSIT_SUCCEEDED`, `WORKER_CARGO_DROPPED`, and `HARVEST_SUCCEEDED`.
+`core_resource_capture` turns a well-formed `CORE_RESOURCES_CAPTURED` event into
+a typed model with `amount`, `available`, `destroyed`, and `capacity`. `amount`
+can be zero when no loot fits, and `amount + destroyed == available`.
 `harvest_source is HarvestSource.DROPPED_CARGO` identifies a recovery;
 `HarvestSource.RESOURCE_NODE` identifies an ordinary natural harvest. Unknown
 or inapplicable values return `None`.

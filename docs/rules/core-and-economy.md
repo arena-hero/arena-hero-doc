@@ -39,6 +39,12 @@ A Worker deposits only what fits. Any remainder stays on the Worker. A completel
 full Core returns `DEPOSIT_FAILED` with
 `CORE_RESOURCE_FULL`, without changing its inventory or the Worker's cargo.
 
+Destroying an enemy Core in combat can add its inventory to your Core. The
+highest-damage player receives only what fits this same capacity; overflow is
+destroyed. If that player's Core also dies in the Tick, all of the victim's
+inventory is destroyed instead. See
+[Destruction and respawn](./destruction-and-respawn.md#who-receives-the-inventory).
+
 ## Core actions
 
 A source plan may name at most one Core action:

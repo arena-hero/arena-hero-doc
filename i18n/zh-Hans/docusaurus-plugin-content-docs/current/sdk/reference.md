@@ -208,6 +208,11 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 Core 已满时，交付结算为 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`。人口下降后，高于
 新容量的资源会立刻销毁，并通过 `CORE_RESOURCE_OVERFLOW_DESTROYED` 返回。
 
+摧毁敌方 Core 后可能收到 `CORE_RESOURCES_CAPTURED`。通过
+`event.core_resource_capture` 读取实际存入量、受害者原库存、销毁量和获胜者容量。对该
+Core 总伤害最高者获胜，伤害相同时按玩家 UUID 原始字节序；超额资源销毁，获胜方 Core
+同 Tick 也死亡时全部战利品销毁。
+
 ### Vanguard
 
 | 方法 | 含义 |
@@ -296,6 +301,7 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 | `position` | `Position | None` |
 | `values` | `dict[str, Any] | None` |
 | `resource_amount` | `int | None` |
+| `core_resource_capture` | `CoreResourceCapture | None` |
 | `harvest_source` | `HarvestSource | None` |
 
 事件名和原因码保留为字符串，这样服务端以后新增值时，旧版 SDK 不会直接崩掉。具体
@@ -303,8 +309,11 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 
 其中 `HARVEST_FAILED`/`RESOURCE_DEPLETED` 表示同 Tick 有 UUID 更低的合格 Worker
 消耗了被竞争的资源点。`resource_amount` 可以读取
-`CORE_RESOURCE_OVERFLOW_DESTROYED`、`DEPOSIT_SUCCEEDED`、
+`CORE_RESOURCES_CAPTURED`、`CORE_RESOURCE_OVERFLOW_DESTROYED`、`DEPOSIT_SUCCEEDED`、
 `WORKER_CARGO_DROPPED` 和 `HARVEST_SUCCEEDED` 中的正数 `amount`。
+`core_resource_capture` 会把格式正确的 `CORE_RESOURCES_CAPTURED` 解析成带
+`amount`、`available`、`destroyed` 和 `capacity` 的类型化模型。满仓时 `amount`
+可以为零，并且始终满足 `amount + destroyed == available`。
 `harvest_source is HarvestSource.DROPPED_CARGO` 表示正在回收掉落资源；
 `HarvestSource.RESOURCE_NODE` 表示普通自然资源采集。不适用或无法识别的值会返回
 `None`。

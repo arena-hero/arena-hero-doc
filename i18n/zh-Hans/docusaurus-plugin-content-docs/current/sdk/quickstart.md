@@ -154,6 +154,9 @@ for event in turn.events:
         print("掉落", event.resource_amount, "位置", event.position)
     elif event.event_type == "CORE_RESOURCE_OVERFLOW_DESTROYED":
         print("销毁超额 Core 资源", event.resource_amount)
+    elif event.core_resource_capture is not None:
+        capture = event.core_resource_capture
+        print("夺取", capture.amount, "销毁", capture.destroyed)
     elif event.harvest_source is HarvestSource.DROPPED_CARGO:
         print("回收", event.resource_amount, "位置", event.position)
 ```

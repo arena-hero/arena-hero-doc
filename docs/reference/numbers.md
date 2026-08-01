@@ -79,6 +79,10 @@ upkeep = tier × (tier + 1) / 2
 Deposits move only what fits. If population falls, stored resources above the
 new capacity are destroyed immediately.
 
+Combat-destroyed Core inventory goes to the player who dealt the most damage to
+that Core during the Tick, up to this capacity. Ties use raw player UUID order;
+overflow is destroyed, and all loot is destroyed if the winner's Core also dies.
+
 | Population | Upkeep |
 |---:|---:|
 | 0-19 | 0 |

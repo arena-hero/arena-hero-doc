@@ -35,6 +35,10 @@ resource_capacity = max(10, population × 5)
 Worker 只存入剩余容量，装不下的部分继续留在 Worker 身上。Core 已满时，
 返回 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`，Core 库存和 Worker Cargo 都不变。
 
+在战斗中摧毁敌方 Core 也可能增加己方库存。对该 Core 伤害最高的玩家只能拿到当前容量
+装得下的部分，多出的资源直接销毁；如果该玩家的 Core 也在同 Tick 被摧毁，受害者库存
+则全部销毁。详见[摧毁与重生](./destruction-and-respawn.md#库存归谁)。
+
 ## Core 动作
 
 一份来源计划里最多写一个 Core 动作：

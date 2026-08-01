@@ -76,9 +76,11 @@ Damage always eats shield first, then HP. If a Core is at zero HP once all comba
 damage has been combined, its fleet goes away — but not before the snapshot
 attacks made by its still-living Units have counted.
 
-There is no last-hit authority to claim. When several players damage the same
-doomed target in one Tick, they share the destruction rather than having it
-awarded by input order.
+There is no exclusive last-hit credit. When several players damage the same
+doomed target in one Tick, all of them receive destruction participation.
+Destroyed-Core resources are separate: the player who dealt the most damage to
+that Core during the Tick receives what fits, with raw player UUID as the tie
+break. See [Destruction and respawn](./destruction-and-respawn.md#who-receives-the-inventory).
 
 ## Information returned to the player
 

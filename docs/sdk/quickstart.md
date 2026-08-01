@@ -158,6 +158,9 @@ for event in turn.events:
         print("dropped", event.resource_amount, "at", event.position)
     elif event.event_type == "CORE_RESOURCE_OVERFLOW_DESTROYED":
         print("destroyed", event.resource_amount, "excess Core resources")
+    elif event.core_resource_capture is not None:
+        capture = event.core_resource_capture
+        print("captured", capture.amount, "destroyed", capture.destroyed)
     elif event.harvest_source is HarvestSource.DROPPED_CARGO:
         print("recovered", event.resource_amount, "at", event.position)
 ```
