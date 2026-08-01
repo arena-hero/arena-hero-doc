@@ -139,7 +139,7 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | `resources` | `int` | 当前存放在 Core 里的资源。 |
 | `resource_capacity` | `int` | 当前容量：`max(10, state.population * 5)`。 |
 | `resource_space` | `int` | 还能接收多少资源；最小为 0。 |
-| `core` | `Core | None` | 自己控制的 Core；重生期间是 `None`。 |
+| `core` | `Core | None` | 自己控制的 Core；首次进入世界或出生点重试期间是 `None`。摧毁后通常会在同一个 Tick 得到替代 Core。 |
 | `units` | `tuple[Unit, ...]` | 自己控制的所有 Unit。 |
 | `workers` | `tuple[Worker, ...]` | 自己控制的 Worker。 |
 | `vanguards` | `tuple[Vanguard, ...]` | 自己控制的 Vanguard。 |

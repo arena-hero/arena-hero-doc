@@ -70,8 +70,8 @@ toc_max_heading_level: 3
 
 | 字段 | 格式 | 必需 | 含义 |
 |---|---|---:|---|
-| `status` | `"ACTIVE"` 或 `"RESPAWNING"` | 是 | 玩家有存活的 Core，还是正在等待重生。 |
-| `respawn_at_tick` | 正 int64 | 仅重生中 | 下一次尝试重生的 Tick。 |
+| `status` | `"ACTIVE"` 或 `"RESPAWNING"` | 是 | 玩家有存活的 Core，还是正在等待出生点重试。 |
+| `respawn_at_tick` | 正 int64 | 仅重生中 | 找不到合法出生点后，下一次尝试部署的 Tick。 |
 | `resources` | 非负整数 | 是 | Core 里的资源，上限为 `max(10, population × 5)`；Worker 身上的 cargo 另算。 |
 | `population` | 非负整数 | 是 | 存活的己方 Unit 数，不含 Core。 |
 | `population_tier` | 非负整数 | 是 | `floor(population / 20)`。 |
@@ -80,8 +80,9 @@ toc_max_heading_level: 3
 | `objects` | array | 是 | 己方实体，加上当前可见的地形和敌方实体。 |
 | `events` | array | 是 | 发给这名玩家的结算结果。 |
 
-没有内容时，`objects` 和 `events` 是空数组 `[]`，而不是干脆不出现。`RESPAWNING`
-期间资源和人口字段照样在，但在 `CORE_RESPAWNED` 到来之前，你可能一个 Core 都没有。
+没有内容时，`objects` 和 `events` 是空数组 `[]`，而不是干脆不出现。Core 被摧毁后通常
+会在同一个 Tick 重生，因此只有首次进入世界或暂时找不到合法出生点时才会发布
+`RESPAWNING`。期间资源和人口字段照样在，但在 `CORE_RESPAWNED` 到来之前没有 Core。
 
 ## Champion Beacon {#champion-beacon}
 

@@ -183,7 +183,9 @@ if turn.core is not None:
 turn.submit()
 ```
 
-`turn.core` is `None` while your player is respawning. Check it before issuing a
+`turn.core` is `None` only during initial admission or a spawn retry after the
+server could not find a legal position. Core destruction has no cooldown and
+normally produces a replacement in the same Tick. Check `turn.core` before a
 Core action.
 
 See [API reference](./reference.md) for every field, method,

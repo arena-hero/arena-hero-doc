@@ -15,14 +15,24 @@ When Core HP hits zero, all of this happens at once:
 - every Unit that player owns is removed;
 - whatever plan those objects had stops mattering;
 - a carried Champion Beacon drops according to the Beacon rule;
-- the player enters `RESPAWNING`.
+- the player temporarily enters `RESPAWNING` while the resolver prepares a new spawn.
 
-The account and its Agent access are untouched. Your next state looks like this:
+The account and its Agent access are untouched.
+
+## Immediate respawn
+
+There is no respawn cooldown. Later in the same resolution Tick, the deterministic
+spawn resolver immediately tries to place the replacement Core and Worker. Under
+normal conditions, your next published state is already `ACTIVE`, and that state's
+events contain both `CORE_DESTROYED` and `CORE_RESPAWNED`.
+
+Only a failed placement leaves the player in `RESPAWNING`. In that exceptional
+case, the next published state looks like this:
 
 ```json
 {
   "status": "RESPAWNING",
-  "respawn_at_tick": 10603,
+  "respawn_at_tick": 10604,
   "resources": 0,
   "population": 0,
   "population_tier": 0,
@@ -33,14 +43,8 @@ The account and its Agent access are untouched. Your next state looks like this:
 }
 ```
 
-## Delay
-
-The wait is 20 logical Ticks by default. Downtime does not count against it,
-because the world clock is paused too.
-
-When the due Tick arrives, the deterministic spawn resolver tries to place you. If
-it cannot find a legal spot, it pushes the attempt back one Tick and works through
-the next deterministic set of candidates.
+`respawn_at_tick` is the next retry Tick, not a cooldown deadline. Each failed
+attempt advances it by one Tick and uses the next deterministic candidate set.
 
 ## Restored assets
 

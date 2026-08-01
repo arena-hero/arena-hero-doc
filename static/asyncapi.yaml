@@ -192,12 +192,12 @@ components:
         status:
           type: string
           enum: [ACTIVE, RESPAWNING]
-          description: ACTIVE has a live Core; RESPAWNING is waiting for a respawn attempt.
+          description: ACTIVE has a live Core; RESPAWNING means an initial or replacement spawn could not yet be placed and will retry.
         respawn_at_tick:
           type: integer
           format: int64
           minimum: 1
-          description: Present only while status is RESPAWNING.
+          description: Present only while status is RESPAWNING; identifies the next placement attempt and is not a cooldown.
         resources:
           type: integer
           minimum: 0

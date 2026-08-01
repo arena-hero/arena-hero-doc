@@ -95,8 +95,8 @@ This order is part of the protocol, not an implementation detail:
 7. Resolve Worker harvest and deposit actions.
 8. Resolve Core spawn and shield repair.
 9. Freeze one immutable combat snapshot and accumulate every legal attack.
-10. Apply damage simultaneously, remove destroyed objects, and resolve any respawns
-   that are due.
+10. Apply damage simultaneously, remove destroyed objects, and immediately attempt
+    to respawn newly destroyed Cores. Retry next Tick only when no legal spawn exists.
 11. After every fourth resolved Tick, replenish only the consumed resource slots
     in each affected chunk back to that chunk's fixed quota.
 12. Atomically commit the world, resource layer, events, statistics, journal, and
@@ -143,5 +143,6 @@ Rules v0.6 set that capacity to `max(10, population × 5)`. Existing v0.1 throug
 v0.5 worlds upgraded without resetting game state. Rules v0.7 let Ranger shots
 pass through Units and Cores; only obstacles block them. Existing v0.1 through
 v0.6 worlds upgrade at an `OPEN` or `COMMITTED` boundary without resetting game
-state. A server stopped in `LOCKED` or `RESOLVING` must finish that Tick under its
-old rules before upgrading.
+state. The current rules also remove the respawn cooldown: a destroyed Core gets
+a replacement attempt later in the same Tick. A server stopped in `LOCKED` or
+`RESOLVING` must finish that Tick under its old rules before upgrading.

@@ -13,7 +13,7 @@ description: Look up the current timing, costs, ranges, capacity, and protocol l
 | Global command window | 15 seconds |
 | Resource replenishment | every 4 resolved Ticks (about 1 minute) |
 | Core migration | 4 logical Ticks per cell |
-| Core respawn delay | 20 logical Ticks |
+| Core respawn attempt | same Tick as destruction |
 | WebSocket Ping interval | 20 seconds |
 | WebSocket Pong timeout | 60 seconds |
 | Credential revalidation | approximately 5 seconds |

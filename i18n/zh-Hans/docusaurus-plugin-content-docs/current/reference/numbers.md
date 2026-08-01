@@ -13,7 +13,7 @@ description: 查询当前时序、成本、射程、容量和协议限制。
 | 全局命令窗口 | 15 秒 |
 | 资源补充 | 每 4 个已结算 Tick（约 1 分钟） |
 | Core 迁移 | 每格 4 个逻辑 Tick |
-| Core 重生延迟 | 20 个逻辑 Tick |
+| Core 重生尝试 | 被摧毁的同一个 Tick |
 | WebSocket Ping 间隔 | 20 秒 |
 | WebSocket Pong 超时 | 60 秒 |
 | 凭证重新校验 | 约 5 秒 |

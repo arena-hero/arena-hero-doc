@@ -63,7 +63,7 @@ damage or destruction participation. A Beacon carrier additionally receives
 |---|---|---|---|---|
 | `UPKEEP_PAID` | absent | `actor_id`: Core; `position`: Core cell | `{due: int, paid: int, deficit: int}` | Upkeep was collected. A positive deficit is then applied as Core damage. |
 | `CORE_DAMAGED` | `ATTACK` or `UPKEEP_DEFICIT` | `target_id`: Core; `position`: Core cell | `{damage: int, shield_damage: int, hp_damage: int}` | Total Core damage and how it was split between shield and HP. |
-| `CORE_DESTROYED` | `ATTACK` or `UPKEEP_DEFICIT` | `target_id`: destroyed Core; `position`: destruction cell | For an attack with named participants: `{destroyed_by: string[]}`; otherwise absent | The player's Core and remaining Units were removed and respawn waiting began. |
+| `CORE_DESTROYED` | `ATTACK` or `UPKEEP_DEFICIT` | `target_id`: destroyed Core; `position`: destruction cell | For an attack with named participants: `{destroyed_by: string[]}`; otherwise absent | The player's Core and remaining Units were removed. A replacement spawn is attempted later in the same Tick. |
 | `CORE_RESOURCE_OVERFLOW_DESTROYED` | absent | `actor_id`: Core; `position`: Core cell | `{amount: int, capacity: int}` | Population fell and resources above the new capacity were destroyed. |
 | `CORE_ACTION_FAILED` | `CORE_NOT_MOVING` or `CORE_ALREADY_MOVING` | `actor_id`: Core; `position`: Core cell | absent | `CANCEL_MOVE` was used on a normal Core, or an incompatible Core action was used during migration. |
 | `CORE_REPAIR_FAILED` | `SHIELD_FULL` or `INSUFFICIENT_RESOURCES` | `actor_id`: Core; `position`: Core cell | absent | One-shield repair could not be applied. |

@@ -62,7 +62,7 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 |---|---|---|---|---|
 | `UPKEEP_PAID` | 无 | `actor_id`：Core；`position`：Core 格 | `{due: int, paid: int, deficit: int}` | 维护费已扣；deficit 为正时随后作为 Core 伤害应用。 |
 | `CORE_DAMAGED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：Core；`position`：Core 格 | `{damage: int, shield_damage: int, hp_damage: int}` | Core 受到的总伤害，以及护盾和 HP 各分摊多少。 |
-| `CORE_DESTROYED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：被摧毁的 Core；`position`：摧毁格 | 攻击且存在可命名参与者时为 `{destroyed_by: string[]}`，否则无 | Core 和剩余 Unit 被移除，玩家开始等待重生。 |
+| `CORE_DESTROYED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：被摧毁的 Core；`position`：摧毁格 | 攻击且存在可命名参与者时为 `{destroyed_by: string[]}`，否则无 | Core 和剩余 Unit 被移除；新的 Core 会在本 Tick 后续阶段立即尝试部署。 |
 | `CORE_RESOURCE_OVERFLOW_DESTROYED` | 无 | `actor_id`：Core；`position`：Core 格 | `{amount: int, capacity: int}` | 人口下降后，高于新容量的资源被销毁。 |
 | `CORE_ACTION_FAILED` | `CORE_NOT_MOVING` 或 `CORE_ALREADY_MOVING` | `actor_id`：Core；`position`：Core 格 | 无 | 对正常 Core 执行了 `CANCEL_MOVE`，或在迁移期间执行了不兼容的动作。 |
 | `CORE_REPAIR_FAILED` | `SHIELD_FULL` 或 `INSUFFICIENT_RESOURCES` | `actor_id`：Core；`position`：Core 格 | 无 | 这一点护盾没能修上。 |

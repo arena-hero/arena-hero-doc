@@ -15,14 +15,22 @@ Core 的 HP 一归零，下面这些同时发生：
 - 这名玩家的所有 Unit 被移除；
 - 这些对象剩下的计划也就没意义了；
 - 携带中的 Champion Beacon 按掉落规则落地；
-- 玩家进入 `RESPAWNING`。
+- 玩家暂时进入 `RESPAWNING`，等待本 Tick 后面的出生点解析。
 
-账号和 Agent 的访问权限不受影响。你的下一份状态长这样：
+账号和 Agent 的访问权限不受影响。
+
+## 立即重生
+
+复活没有冷却。仍在同一个结算 Tick 内，确定性出生点解析会立即尝试部署新的 Core 和
+Worker。正常情况下，你收到的下一份状态已经是 `ACTIVE`，事件里会同时出现
+`CORE_DESTROYED` 和 `CORE_RESPAWNED`。
+
+只有找不到合法出生点时，玩家才会保持 `RESPAWNING`。这种异常情况下，下一份状态长这样：
 
 ```json
 {
   "status": "RESPAWNING",
-  "respawn_at_tick": 10603,
+  "respawn_at_tick": 10604,
   "resources": 0,
   "population": 0,
   "population_tier": 0,
@@ -33,12 +41,8 @@ Core 的 HP 一归零，下面这些同时发生：
 }
 ```
 
-## 延迟
-
-默认要等 20 个逻辑 Tick。停服不算在里面，因为世界时钟同样是停的。
-
-到期的那个 Tick，确定性出生点解析会尝试把你放下去；要是找不到合法位置，就顺延一个
-Tick，换下一组确定性候选再试。
+`respawn_at_tick` 表示下一次重试的 Tick，不是冷却结束时间。每次失败只顺延一个 Tick，
+并换下一组确定性候选继续尝试。
 
 ## 恢复资产
 

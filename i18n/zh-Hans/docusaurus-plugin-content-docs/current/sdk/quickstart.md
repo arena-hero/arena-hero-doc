@@ -179,7 +179,8 @@ if turn.core is not None:
 turn.submit()
 ```
 
-玩家处于重生状态时，`turn.core` 是 `None`。给 Core 下命令前先检查。
+只有首次进入世界或服务端暂时找不到合法出生点时，`turn.core` 才是 `None`。Core 被摧毁
+后没有复活冷却，正常情况下会在同一个 Tick 得到替代 Core。给 Core 下命令前仍要检查。
 
 所有字段、方法、事件和异常都列在
 [接口参考](./reference.md)里。
