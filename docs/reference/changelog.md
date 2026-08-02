@@ -192,7 +192,7 @@ SDK versions are separate from gameplay rule versions.
 
 | Version | Date | Developer-visible change |
 |---|---|---|
-| 0.2.6 source | 2 Aug 2026 | Adds Unit/Core healing controls and typed `HealingResult`; committed but not yet published to PyPI. |
+| 0.2.6 | 2 Aug 2026 | PyPI release adding Unit/Core healing, typed `HealingResult`, and the `CoreResourceCapture` model from the unreleased 0.2.5 source. |
 | 0.2.5 source | 1 Aug 2026 | Adds typed `CoreResourceCapture`; committed but not yet published to PyPI. |
 | 0.2.4 | 30 Jul 2026 | Adds the minimum Core-capacity contract and release metadata. |
 | 0.2.3 | 30 Jul 2026 | Exposes Core resource capacity and available storage space. |
