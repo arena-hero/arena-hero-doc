@@ -21,6 +21,9 @@ description: The server version covered by these docs and which changes affect c
 | Documentation repository | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | Languages | English, Simplified Chinese |
 
+For a release-oriented history assembled from all project repositories, see the
+[Changelog](./changelog.md).
+
 ## If the docs and server disagree
 
 These pages describe the public rules and game API, but what actually happens at

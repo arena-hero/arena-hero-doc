@@ -21,6 +21,8 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | 语言 | 英文、简体中文 |
 
+按五个项目仓库整理的版本变化见[更新日志](./changelog.md)。
+
 ## 文档和服务端不一致时
 
 这些页面描述的是公开的游戏规则和 API，但运行时到底怎么表现，由服务端代码、数据库

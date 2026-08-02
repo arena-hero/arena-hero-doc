@@ -43,6 +43,7 @@ Arena Hero 是一个一直在跑的网格世界，你在不在线它都照常推
 - 构建自己的前端：[游戏 API](./api/overview.md)
 - 查询游戏行为：[游戏规则](./rules/world-and-ticks.md)
 - 查询消息和字段：[游戏 API](./api/overview.md)
+- 查看版本变化：[更新日志](./reference/changelog.md)
 - 处理请求失败：[错误与恢复](./api/errors.md)
 - 生成客户端：[OpenAPI](pathname:///openapi.yaml) 和 [AsyncAPI](pathname:///asyncapi.yaml)
 

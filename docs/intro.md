@@ -52,6 +52,7 @@ same source and the new plan simply replaces the old one.
 - Build your own frontend: [Game API](./api/overview.md)
 - Understand game behavior: [Game rules](./rules/world-and-ticks.md)
 - Look up messages and fields: [Game API](./api/overview.md)
+- Review what changed: [Changelog](./reference/changelog.md)
 - Handle a failed request: [Errors and recovery](./api/errors.md)
 - Generate a client: [OpenAPI](pathname:///openapi.yaml) and [AsyncAPI](pathname:///asyncapi.yaml)
 
