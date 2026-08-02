@@ -25,11 +25,13 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
   摧毁参与；受伤但存活的 Unit 本 Tick 仍可行动并在之后恢复。
 - `UPKEEP_PAID` 继续给出 `due`、`paid` 和 `deficit`；`UNIT_DAMAGED` /
   `UPKEEP_DEFICIT` 给出受伤 Unit、伤害与剩余 HP。
-- 前端会在 Tick 结果中解释欠费伤害与死亡；Python SDK 文档说明了如何读取这个向前
+- 前端会在 Tick 结果中解释欠费伤害与死亡。当下 Tick 维护费超过 Core 当前资源时，
+  前端还会提前显示确切缺口和受威胁的 Unit；Python SDK 文档说明了如何读取这个向前
   兼容的事件。
 
 来源：[服务端 `83ae972`](https://github.com/arena-hero/arena-hero/commit/83ae972099ad99c21cbc15c1beaf4a4e3ca724d9)、
-[前端 `0a673f1`](https://github.com/arena-hero/arena-hero-web/commit/0a673f1011c7a3cda393b75e0e8bd9012da4ef7c)
+[前端 Tick 结果 `0a673f1`](https://github.com/arena-hero/arena-hero-web/commit/0a673f1011c7a3cda393b75e0e8bd9012da4ef7c)、
+[前端预警 `4d2808c`](https://github.com/arena-hero/arena-hero-web/commit/4d2808cea3c2e4f7fdee4b7939ff0fbd22ace5e3)
 和 [SDK `8f967aa`](https://github.com/arena-hero/arena-hero-python/commit/8f967aabad8798580e8c9f20bde0f082a8914c47)。
 
 ### 游戏规则 v0.10 — 战斗后恢复 HP

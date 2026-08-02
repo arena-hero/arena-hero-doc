@@ -29,11 +29,14 @@ see [Source and version policy](./source-and-version.md).
   surviving damaged Unit may still act and heal later in the Tick.
 - `UPKEEP_PAID` continues to report `due`, `paid`, and `deficit`.
   `UNIT_DAMAGED` / `UPKEEP_DEFICIT` reports the affected Unit, damage, and HP.
-- The frontend now explains upkeep damage and destruction in Tick results. The
-  Python SDK documentation shows how to read the forward-compatible event.
+- The frontend explains upkeep damage and destruction in Tick results. It also
+  warns when the next Tick's upkeep exceeds current Core resources, showing the
+  exact shortfall and which Units are at risk. The Python SDK documentation
+  shows how to read the forward-compatible event.
 
 Source: [server `83ae972`](https://github.com/arena-hero/arena-hero/commit/83ae972099ad99c21cbc15c1beaf4a4e3ca724d9),
-[frontend `0a673f1`](https://github.com/arena-hero/arena-hero-web/commit/0a673f1011c7a3cda393b75e0e8bd9012da4ef7c),
+[frontend Tick results `0a673f1`](https://github.com/arena-hero/arena-hero-web/commit/0a673f1011c7a3cda393b75e0e8bd9012da4ef7c),
+[frontend warning `4d2808c`](https://github.com/arena-hero/arena-hero-web/commit/4d2808cea3c2e4f7fdee4b7939ff0fbd22ace5e3),
 and [SDK `8f967aa`](https://github.com/arena-hero/arena-hero-python/commit/8f967aabad8798580e8c9f20bde0f082a8914c47).
 
 ### Gameplay rules v0.10 — post-combat HP recovery
