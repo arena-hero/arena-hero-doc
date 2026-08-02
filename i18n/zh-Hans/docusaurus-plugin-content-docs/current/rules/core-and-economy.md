@@ -16,8 +16,9 @@ description: Core 如何保存资源、生产 Unit、修复、移动并支付维
 | 视野 | 5 |
 | 重生启动资源 | 5 |
 
-伤害和欠费伤害都是先扣护盾，扣完了才动 HP。Core 是你放资源的地方，同时也负责交维护
-费、接收交付、生产 Unit、恢复 HP 和护盾，以及——很慢地——迁移。
+战斗伤害先扣护盾，扣完了才动 HP。Core 是你放资源的地方，同时也负责交维护费、接收
+交付、生产 Unit、恢复 HP 和护盾，以及——很慢地——迁移。维护费欠款伤害超额 Unit，
+不会伤害 Core。
 
 ## 资源容量
 
@@ -142,6 +143,14 @@ upkeep = tier × (tier + 1) / 2
 Unit 的 `SELF_DESTRUCT` 会先结算，维护费按自毁后剩余的人口计算。本 Tick 后面新生产
 的 Unit 从下一 Tick 才开始计费；战斗阶段死亡的 Unit 已经支付了本 Tick 维护费。
 
-维护费自动扣，不占 Core 动作。交不起的话，库存直接归零，缺多少资源就对 Core 造成多少点
-伤害，先盾后 HP。在维护阶段被打掉的 Core，舰队和锁定计划当场就没了，这个 Tick 后面
-的阶段它们都不再参与；被移除 Worker 携带的 Cargo 会留在各自最后所在格。
+维护费自动扣，不占 Core 动作。服务端先扣掉 Core 能支付的部分，剩余每 1 点欠款对超额
+Unit 造成 1 HP 伤害。Core 不会因为欠维护费掉盾或掉血。
+
+离 Core 最近的 19 个 Unit 受保护。其他 Unit 按到当前 Core 的曼哈顿距离从远到近排列；
+距离相同时按 Unit UUID 原始字节序。伤害会集中打在第一名身上，死亡后才轮到下一名。
+
+因此死亡的 Unit 会在移动、Worker、Beacon 和战斗阶段前被移除。Worker Cargo 和携带的
+Beacon 原地掉落，但不授予任何敌人摧毁参与。没死的 Unit 保留锁定动作，本 Tick 仍可
+行动，也可以在战斗后合法使用 `HEAL`。私有 `UPKEEP_PAID` 给出 `due`、`paid` 和
+`deficit`；随后每个受伤 Unit 都有 `UNIT_DAMAGED` / `UPKEEP_DEFICIT`，其中包含
+`damage` 和剩余 `hp`。

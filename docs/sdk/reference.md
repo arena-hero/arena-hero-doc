@@ -157,6 +157,12 @@ difference is that `AsyncTurn.submit()` must be awaited.
 
 `Position` is `tuple[int, int]` in `(x, y)` order.
 
+`state.upkeep_next_tick` is charged before movement. Core resources pay first;
+any deficit damages excess Units, never the Core. The nearest 19 Units are
+protected. Other Units are ordered by descending Manhattan distance from the
+Core, then raw UUID bytes. Upkeep deaths happen before actions, while survivors
+keep their action.
+
 ### Methods
 
 | Method | Meaning |
@@ -215,6 +221,9 @@ only the lowest UUID succeeds and the others receive `HARVEST_FAILED` with
 A full Core resolves a deposit as `DEPOSIT_FAILED` with `CORE_RESOURCE_FULL`.
 When population falls, resources above the new capacity are destroyed
 immediately and reported as `CORE_RESOURCE_OVERFLOW_DESTROYED`.
+
+Unpaid upkeep can also kill a Worker. Its complete cargo remains as a resource
+pile on the final cell, just like any other Worker death.
 
 Destroying an enemy Core may produce `CORE_RESOURCES_CAPTURED`. Read
 `event.core_resource_capture` for the typed amount stored, victim inventory,
@@ -320,6 +329,13 @@ without a leading `@`; Unit owners remain private.
 Event names and reason codes stay as strings so newer server values do not
 break an older SDK. See [Resolution results](../api/resolution-results.md) for
 their meanings.
+
+For upkeep, `UPKEEP_PAID.values` contains `due`, `paid`, and `deficit`. Each
+affected Unit then has `event_type == "UNIT_DAMAGED"` and
+`reason_code == "UPKEEP_DEFICIT"`; `target_id` identifies it and `values`
+contains `damage` and post-damage `hp`. `hp == 0` means the Unit was removed
+before its action. These fields intentionally remain in the forward-compatible
+`values` mapping.
 
 In particular, `HARVEST_FAILED` with `RESOURCE_DEPLETED` means a lower-UUID
 eligible Worker consumed the contested point in that Tick. `resource_amount`

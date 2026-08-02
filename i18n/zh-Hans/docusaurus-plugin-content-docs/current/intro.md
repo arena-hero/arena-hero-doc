@@ -47,5 +47,5 @@ Arena Hero 是一个一直在跑的网格世界，你在不在线它都照常推
 - 处理请求失败：[错误与恢复](./api/errors.md)
 - 生成客户端：[OpenAPI](pathname:///openapi.yaml) 和 [AsyncAPI](pathname:///asyncapi.yaml)
 
-本文档对应 HTTP 与 WebSocket API v0.1 和游戏规则 v0.10。确切的服务端审查版本见
+本文档对应 HTTP 与 WebSocket API v0.1 和游戏规则 v0.11。确切的服务端审查版本见
 [来源与版本策略](./reference/source-and-version.md)。

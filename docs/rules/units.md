@@ -137,6 +137,9 @@ the Core action. A fatal hit removes the Unit before healing. A full-HP or
 currently unfunded heal is still a valid plan; if nothing changes before
 resolution, it fails without spending resources.
 
+A Unit that survives unpaid-upkeep damage keeps its `HEAL` action and may repair
+that damage here. A Unit killed by upkeep is already gone and spends nothing.
+
 ## Action schema examples
 
 ```json title="Worker harvest"

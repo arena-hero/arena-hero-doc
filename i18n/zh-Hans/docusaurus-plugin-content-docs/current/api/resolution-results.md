@@ -66,16 +66,16 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `CORE_HEAL_SUCCEEDED` | 无 | `actor_id`：被恢复的 Core；`position`：Core 格 | `{amount: int, hp: int, cost: int}` | Core 实际恢复 `amount` HP，当前 HP 为 `hp`，并消耗同等数量的 `cost`。 |
 | `CORE_HEAL_FAILED` | `HP_FULL` 或 `INSUFFICIENT_RESOURCES` | `actor_id`：Core；`position`：Core 格 | 无 | 战斗后的 Core 恢复无法开始；不扣资源。 |
 
-战斗中死亡的 Unit 会在恢复阶段前被移除，因此不会产生恢复事件，也不会扣资源。
+因维护费或战斗死亡的 Unit 会在恢复阶段前被移除，因此不会产生恢复事件，也不会扣资源。
 `unit_hp_recovered` 和 `core_hp_recovered` 记录玩家生涯实际恢复的 HP 总量。
 
 ## 经济与 Core 事件 {#economy-and-core-events}
 
 | `event_type` | `reason_code` | ID 与位置 | `values` | 含义 |
 |---|---|---|---|---|
-| `UPKEEP_PAID` | 无 | `actor_id`：Core；`position`：Core 格 | `{due: int, paid: int, deficit: int}` | 维护费已扣；deficit 为正时随后作为 Core 伤害应用。 |
-| `CORE_DAMAGED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：Core；`position`：Core 格 | `{damage: int, shield_damage: int, hp_damage: int}` | Core 受到的总伤害，以及护盾和 HP 各分摊多少。 |
-| `CORE_DESTROYED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：被摧毁的 Core；`position`：摧毁格 | 攻击且存在可命名参与者时为 `{destroyed_by: string[]}`，否则无 | Core 和剩余 Unit 被移除；新的 Core 会在本 Tick 后续阶段立即尝试部署。 |
+| `UPKEEP_PAID` | 无 | `actor_id`：Core；`position`：Core 格 | `{due: int, paid: int, deficit: int}` | 维护费已扣；`deficit` 为正时随后伤害超额 Unit，不伤害 Core。 |
+| `CORE_DAMAGED` | `ATTACK` | `target_id`：Core；`position`：Core 格 | `{damage: int, shield_damage: int, hp_damage: int}` | Core 受到的战斗总伤害，以及护盾和 HP 各分摊多少。 |
+| `CORE_DESTROYED` | `ATTACK` | `target_id`：被摧毁的 Core；`position`：摧毁格 | 存在可命名参与者时为 `{destroyed_by: string[]}`，否则无 | Core 和剩余 Unit 被移除；新的 Core 会在本 Tick 后续阶段立即尝试部署。 |
 | `CORE_RESOURCE_OVERFLOW_DESTROYED` | 无 | `actor_id`：Core；`position`：Core 格 | `{amount: int, capacity: int}` | 人口下降后，高于新容量的资源被销毁。 |
 | `CORE_RESOURCES_CAPTURED` | 无 | `actor_id`：获胜者存活的 Core；`target_id`：被摧毁 Core；`position`：摧毁格 | `{amount: int, available: int, destroyed: int, capacity: int}` | 最高伤害者从受害者 `available` 库存中实际存入 `amount`，装不下的 `destroyed` 被销毁；`amount` 可以为零。获胜者 Core 同 Tick 也死亡时不产生该事件。 |
 | `CORE_ACTION_FAILED` | `CORE_NOT_MOVING` 或 `CORE_ALREADY_MOVING` | `actor_id`：Core；`position`：Core 格 | 无 | 对正常 Core 执行了 `CANCEL_MOVE`，或在迁移期间执行了不兼容的动作。 |
@@ -118,11 +118,15 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `SWEEP_RESOLVED` | 无 | `actor_id`：Vanguard；`position`：被横扫的相邻格 | `{targets_hit: int}` | 横扫已结算；命中 `0` 也是正常结果。 |
 | `SHOT_MISSED` | 固定为 `SHOT_MISSED` | `actor_id`：Ranger；`target_id`：请求里的 UUID；`position`：提交的 `expected_cell` | 无 | 射击动态失败，具体原因是故意藏起来的。 |
 | `SHOT_HIT` | 无 | `actor_id`：Ranger；`target_id`：被命中的 Core 或 Unit；`position`：目标格 | `{damage: int}` | 合法射击贡献了伤害。 |
-| `UNIT_DAMAGED` | `ATTACK` | `target_id`：受伤的 Unit；`position`：Unit 所在格 | `{damage: int, hp: int}` | 聚合后的伤害和受伤后的 HP，最低为 `0`；`hp: 0` 表示这个 Unit 已被摧毁。 |
+| `UNIT_DAMAGED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：受伤的 Unit；`position`：Unit 所在格 | `{damage: int, hp: int}` | 伤害和伤后 HP，最低为 `0`。`ATTACK` 是同时战斗伤害；`UPKEEP_DEFICIT` 是行动前集中施加给最远超额 Unit 的伤害。`hp: 0` 表示 Unit 已被摧毁。 |
 | `DESTRUCTION_PARTICIPATION` | `UNIT` 或 `CORE` | `target_id`：被摧毁的对象；`position`：摧毁格 | 无 | 你至少对这个对象打出过 1 点伤害。 |
 
 受害方不会再单独收到一条 `UNIT_DESTROYED`。判断击杀要靠
 `UNIT_DAMAGED.values.hp === 0`，再结合新的完整状态里这个 Unit 已经不见了。
+
+`UPKEEP_DEFICIT` 会保护离 Core 最近的 19 个 Unit；其他 Unit 按曼哈顿距离从远到近、
+同距离按 UUID 原始字节序处理。欠费死亡发生在移动与战斗前，Worker Cargo 和携带的
+Beacon 正常掉落，但不产生 `DESTRUCTION_PARTICIPATION`。没死的 Unit 本 Tick 仍可行动。
 
 Ranger 的所有动态失败用的都是同一个 `SHOT_MISSED`——目标没了、目标移开了、目标是
 友军、距离不对、射线被障碍物挡住，全都一样。这个结果就是设计成什么都不透露的。

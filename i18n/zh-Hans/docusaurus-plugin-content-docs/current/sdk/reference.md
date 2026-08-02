@@ -154,6 +154,10 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 
 `Position` 是 `(x, y)` 顺序的 `tuple[int, int]`。
 
+`state.upkeep_next_tick` 在移动前扣除。Core 资源先支付，欠款只伤害超额 Unit，不伤害
+Core。离 Core 最近的 19 个 Unit 受保护；其他 Unit 按曼哈顿距离从远到近、同距离按
+UUID 原始字节序处理。欠费死亡发生在动作前，存活 Unit 保留动作。
+
 ### 方法
 
 | 方法 | 含义 |
@@ -208,6 +212,9 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 
 Core 已满时，交付结算为 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`。人口下降后，高于
 新容量的资源会立刻销毁，并通过 `CORE_RESOURCE_OVERFLOW_DESTROYED` 返回。
+
+维护费欠款也可能杀死 Worker。它携带的全部 Cargo 会和其他死亡情况一样，留在最后
+所在格形成资源堆。
 
 摧毁敌方 Core 后可能收到 `CORE_RESOURCES_CAPTURED`。通过
 `event.core_resource_capture` 读取实际存入量、受害者原库存、销毁量和获胜者容量。对该
@@ -309,6 +316,11 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 
 事件名和原因码保留为字符串，这样服务端以后新增值时，旧版 SDK 不会直接崩掉。具体
 含义见[结算结果](../api/resolution-results.md)。
+
+维护费先看 `UPKEEP_PAID.values` 的 `due`、`paid` 和 `deficit`。每个受影响 Unit 随后
+会有 `event_type == "UNIT_DAMAGED"`、`reason_code == "UPKEEP_DEFICIT"`；`target_id`
+是该 Unit，`values` 包含 `damage` 和伤后 `hp`。`hp == 0` 表示 Unit 已在动作前移除。
+这些字段故意保留在向前兼容的 `values` 中。
 
 其中 `HARVEST_FAILED`/`RESOURCE_DEPLETED` 表示同 Tick 有 UUID 更低的合格 Worker
 消耗了被竞争的资源点。`resource_amount` 可以读取

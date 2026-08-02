@@ -15,6 +15,23 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
 
 ## 2026 年 8 月 2 日
 
+### 游戏规则 v0.11 — 维护费欠款伤害超额 Unit
+
+- 维护费仍然先扣 Core 现有资源，但每 1 点未支付欠款改为对超额 Unit 造成 1 HP 伤害，
+  不再伤害 Core。
+- 离当前 Core 最近的 19 个 Unit 受保护。其他 Unit 按曼哈顿距离从远到近排列，同距离按
+  UUID 原始字节序；伤害沿这个顺序集中结算。
+- 欠费死亡发生在移动与战斗前。Worker Cargo 和携带的 Beacon 正常掉落，不授予敌人
+  摧毁参与；受伤但存活的 Unit 本 Tick 仍可行动并在之后恢复。
+- `UPKEEP_PAID` 继续给出 `due`、`paid` 和 `deficit`；`UNIT_DAMAGED` /
+  `UPKEEP_DEFICIT` 给出受伤 Unit、伤害与剩余 HP。
+- 前端会在 Tick 结果中解释欠费伤害与死亡；Python SDK 文档说明了如何读取这个向前
+  兼容的事件。
+
+来源：[服务端 `83ae972`](https://github.com/arena-hero/arena-hero/commit/83ae972099ad99c21cbc15c1beaf4a4e3ca724d9)、
+[前端 `0a673f1`](https://github.com/arena-hero/arena-hero-web/commit/0a673f1011c7a3cda393b75e0e8bd9012da4ef7c)
+和 [SDK `8f967aa`](https://github.com/arena-hero/arena-hero-python/commit/8f967aabad8798580e8c9f20bde0f082a8914c47)。
+
 ### 游戏规则 v0.10 — 战斗后恢复 HP
 
 - 所有 Unit 与自己的静止 Core 同格时都可以使用 `HEAL`；Core 也可以把 `HEAL` 作为

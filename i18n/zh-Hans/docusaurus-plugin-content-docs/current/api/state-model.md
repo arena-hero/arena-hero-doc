@@ -75,7 +75,7 @@ toc_max_heading_level: 3
 | `resources` | 非负整数 | 是 | Core 里的资源，上限为 `max(10, population × 5)`；Worker 身上的 cargo 另算。 |
 | `population` | 非负整数 | 是 | 存活的己方 Unit 数，不含 Core。 |
 | `population_tier` | 非负整数 | 是 | `floor(population / 20)`。 |
-| `upkeep_next_tick` | 非负整数 | 是 | 当前人口对应的 `tier × (tier + 1) / 2`。 |
+| `upkeep_next_tick` | 非负整数 | 是 | 当前人口对应的 `tier × (tier + 1) / 2`。Core 资源先支付；欠款保护最近 19 个 Unit，并伤害最远的超额 Unit。 |
 | `champion_beacon` | object | 是 | 公开位置，以及可见时的携带状态。 |
 | `objects` | array | 是 | 己方实体，加上当前可见的地形和敌方实体。 |
 | `events` | array | 是 | 发给这名玩家的结算结果。 |

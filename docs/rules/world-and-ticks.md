@@ -88,7 +88,8 @@ This order is part of the protocol, not an implementation detail:
 1. Lock the final valid Agent and Manual plans.
 2. Resolve every `SELF_DESTRUCT`, remove those Units, and drop any Worker cargo
    on their final cells.
-3. Charge upkeep from the remaining population and apply unpaid upkeep damage.
+3. Charge upkeep from the remaining population. Apply any shortfall to the
+   farthest excess Units and remove upkeep deaths before they can act.
 4. Resolve Unit movement, and Core migrations that reach their fourth Tick.
 5. Validate new Core `START_MOVE` actions.
 6. Resolve Champion Beacon pickup and drop actions.
@@ -148,7 +149,8 @@ exact 45-degree diagonal fire at range 1-3, with only intermediate shot cells
 checked for obstacles. Rules v0.9 transfers a combat-destroyed Core's inventory,
 up to capacity, to the highest-damage player whose Core survives that combat
 Tick. Rules v0.10 moves Core resource actions after combat and adds Unit and
-Core HP recovery. Existing v0.1 through v0.9 worlds upgrade at an `OPEN` or
+Core HP recovery. Rules v0.11 makes unpaid upkeep damage excess Units instead
+of the Core. Existing v0.1 through v0.10 worlds upgrade at an `OPEN` or
 `COMMITTED` boundary without resetting game state. The current rules also remove
 the respawn cooldown: a destroyed Core gets a replacement attempt later in the
 same Tick. A server stopped in `LOCKED` or `RESOLVING` must finish that Tick under

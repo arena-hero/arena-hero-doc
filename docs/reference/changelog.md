@@ -17,6 +17,25 @@ see [Source and version policy](./source-and-version.md).
 
 ## 2 August 2026
 
+### Gameplay rules v0.11 — unpaid upkeep damages excess Units
+
+- Upkeep still spends available Core resources first, but an unpaid point now
+  deals 1 HP of damage to an excess Unit instead of damaging the Core.
+- The 19 Units nearest the current Core are protected. Other Units are ordered
+  farthest first by Manhattan distance, with raw UUID order breaking ties;
+  damage is concentrated in that order.
+- Upkeep deaths resolve before movement and combat. Worker cargo and a carried
+  Beacon drop normally, no enemy receives destruction participation, and a
+  surviving damaged Unit may still act and heal later in the Tick.
+- `UPKEEP_PAID` continues to report `due`, `paid`, and `deficit`.
+  `UNIT_DAMAGED` / `UPKEEP_DEFICIT` reports the affected Unit, damage, and HP.
+- The frontend now explains upkeep damage and destruction in Tick results. The
+  Python SDK documentation shows how to read the forward-compatible event.
+
+Source: [server `83ae972`](https://github.com/arena-hero/arena-hero/commit/83ae972099ad99c21cbc15c1beaf4a4e3ca724d9),
+[frontend `0a673f1`](https://github.com/arena-hero/arena-hero-web/commit/0a673f1011c7a3cda393b75e0e8bd9012da4ef7c),
+and [SDK `8f967aa`](https://github.com/arena-hero/arena-hero-python/commit/8f967aabad8798580e8c9f20bde0f082a8914c47).
+
 ### Gameplay rules v0.10 — post-combat HP recovery
 
 - Every Unit can use `HEAL` while sharing a cell with its own stationary Core;

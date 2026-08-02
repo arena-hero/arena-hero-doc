@@ -140,6 +140,20 @@ the deposit without deleting cargo. If population falls, stored resources above
 the new capacity are destroyed immediately. Use `turn.resource_space` before
 choosing `deposit()`.
 
+The server charges `turn.state.upkeep_next_tick` before movement. It spends Core
+resources first. If resources run out, each unpaid point deals one HP of damage
+to an excess Unit; the 19 Units nearest the Core are protected, and farther
+Units are damaged first. The Core itself never takes unpaid-upkeep damage.
+
+```python
+for event in turn.events:
+    if event.event_type == "UNIT_DAMAGED" and event.reason_code == "UPKEEP_DEFICIT":
+        print(event.target_id, event.values["damage"], event.values["hp"])
+```
+
+A survivor can still act in that Tick. A Unit killed by upkeep is removed before
+movement or combat; Worker cargo and a carried Beacon drop on its cell.
+
 Use the filtered collections when possible. For example,
 `turn.workers` contains controlled Workers, while
 `turn.visible_enemies` contains visible enemy Units and Cores.

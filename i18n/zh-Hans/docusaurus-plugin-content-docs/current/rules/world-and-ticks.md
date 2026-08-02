@@ -79,7 +79,7 @@ sequenceDiagram
 
 1. 锁定最终有效的 Agent 与 Manual 计划。
 2. 结算所有 `SELF_DESTRUCT`，立即移除这些 Unit，并把 Worker Cargo 掉在最后所在格。
-3. 按剩余人口扣维护费，并应用欠费伤害。
+3. 按剩余人口扣维护费；欠款从离 Core 最远的超额 Unit 开始造成伤害，死亡 Unit 在行动前移除。
 4. 结算 Unit 移动，以及走到第 4 个 Tick 的 Core 迁移。
 5. 检查新提交的 Core `START_MOVE`。
 6. 结算 Champion Beacon 的拾取与放下。
@@ -129,7 +129,8 @@ v0.6 将容量改为 `max(10, population × 5)`。规则 v0.7 让 Ranger 射击�
 Core，只有障碍物阻挡。规则 v0.8 加入射程 1-3 的 45° 斜线射击，并且只检查射线实际
 经过的中间格障碍物。规则 v0.9 把战斗中被摧毁 Core 的容量内库存交给对它伤害最高、
 且 Core 在同 Tick 战斗后仍存活的玩家。规则 v0.10 把 Core 的资源动作移到战斗后，
-并加入 Unit 与 Core 的 HP 恢复。现有 v0.1 到 v0.9 世界可以在 `OPEN` 或
+并加入 Unit 与 Core 的 HP 恢复。规则 v0.11 把维护费欠款从 Core 伤害改为超额 Unit
+伤害。现有 v0.1 到 v0.10 世界可以在 `OPEN` 或
 `COMMITTED` 边界升级，
 不会重置游戏状态。当前规则同时移除了复活冷却：Core 被摧毁后会在同一个 Tick 的后续
 阶段立即尝试重生。如果旧服务停在 `LOCKED` 或 `RESOLVING`，必须先用旧规则完成该 Tick，

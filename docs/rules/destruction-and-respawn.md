@@ -33,7 +33,8 @@ ownership is a separate deterministic decision:
 
 If the winner's Core also dies in this combat Tick, the victim's entire
 inventory is destroyed. It does not enter the replacement Core and does not
-pass to the runner-up. A Core destroyed by upkeep deficit never yields loot.
+pass to the runner-up. Upkeep deficits cannot destroy a Core under the current
+rules.
 
 When several Cores die in one Tick, victims resolve by raw player UUID order.
 Earlier captures therefore consume capacity before later ones. A surviving

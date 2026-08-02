@@ -16,9 +16,10 @@ description: How the Core stores resources, creates Units, repairs, moves, and p
 | Vision | 5 |
 | Starting resources after respawn | 5 |
 
-Damage and upkeep shortfalls both eat shield before they touch HP. The Core is
-where your resources live, and it is also what pays upkeep, receives deposits,
-builds Units, restores HP and shield, and — slowly — migrates.
+Combat damage eats shield before it touches HP. The Core is where your resources
+live, and it is also what pays upkeep, receives deposits, builds Units, restores
+HP and shield, and — slowly — migrates. An upkeep shortfall damages excess Units,
+not the Core.
 
 ## Resource storage
 
@@ -160,8 +161,18 @@ Unit `SELF_DESTRUCT` resolves first, and upkeep uses the population left after
 those removals. Units spawned later in the Tick start counting next Tick; Units
 destroyed during combat have already paid for the current Tick.
 
-Upkeep comes out automatically and costs the Core no action. If you cannot cover it,
-your inventory drops to zero and every resource you were short deals 1 damage to
-the Core, shield first. A Core destroyed during upkeep loses its fleet and its
-locked plan right there — those objects take no part in the rest of the Tick.
-Cargo carried by removed Workers remains on their final cells as resource piles.
+Upkeep comes out automatically and costs the Core no action. The server spends
+whatever the Core can pay, then turns every unpaid resource into 1 HP of damage
+to excess Units. The Core never loses shield or HP to upkeep.
+
+The 19 Units nearest the Core are protected. Every other Unit is ordered by
+Manhattan distance from the current Core, farthest first; equal distances use raw
+Unit UUID order. Damage is concentrated on the first Unit until it dies, then
+moves to the next.
+
+A Unit killed this way is removed before movement, Worker actions, Beacon
+actions, or combat. Worker cargo and a carried Beacon drop on its cell, but no
+enemy gets destruction participation. A survivor keeps its locked action and can
+still use a legal post-combat `HEAL`. Read the private `UPKEEP_PAID` event for
+`due`, `paid`, and `deficit`, followed by `UNIT_DAMAGED` /
+`UPKEEP_DEFICIT` events containing `damage` and remaining `hp`.
