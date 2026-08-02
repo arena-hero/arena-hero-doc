@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Arena Hero Game HTTP API
   version: 0.1.0
-  summary: Submit complete command plans for the current Arena Hero Tick.
+  summary: Submit command plans and read the public Arena Hero leaderboard.
   description: |
     The HTTP half of the Arena Hero game loop. Authoritative tick, state, and
     plan receipts are delivered through the WebSocket contract in asyncapi.yaml.
@@ -18,7 +18,40 @@ servers:
 tags:
   - name: Commands
     description: Replace the complete plan for one player, Tick, and source.
+  - name: Leaderboard
+    description: Read the three public lifetime rankings.
 paths:
+  /api/v1/leaderboard:
+    get:
+      tags: [Leaderboard]
+      operationId: getLeaderboard
+      summary: Read the public lifetime leaderboards
+      description: |
+        Returns exactly three rankings: Champion Beacon Ticks held, damage
+        dealt, and Core destruction participations. Each ranking contains at
+        most 100 players with a positive score. Equal scores share a rank, and
+        tied entries are ordered by username.
+      security: []
+      responses:
+        '200':
+          description: The three public lifetime rankings.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: public, max-age=15
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeaderboardResponse'
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: INTERNAL_ERROR
   /api/v1/game/commands:
     post:
       tags: [Commands]
@@ -194,6 +227,47 @@ components:
         pattern: '^[\x21-\x7e]+$'
       example: agent-10583-plan-01
   schemas:
+    LeaderboardEntry:
+      type: object
+      additionalProperties: false
+      required: [rank, username, score]
+      properties:
+        rank:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Competition rank. Equal scores share a rank.
+        username:
+          type: string
+          minLength: 3
+          maxLength: 24
+          pattern: '^[a-z0-9_]+$'
+          description: Public Arena Hero username without an @ prefix.
+        score:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Positive lifetime total for the containing ranking.
+    LeaderboardResponse:
+      type: object
+      additionalProperties: false
+      required: [beacon_ticks_held, damage_dealt, core_destruction_participations]
+      properties:
+        beacon_ticks_held:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/LeaderboardEntry'
+        damage_dealt:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/LeaderboardEntry'
+        core_destruction_participations:
+          type: array
+          maxItems: 100
+          items:
+            $ref: '#/components/schemas/LeaderboardEntry'
     Position:
       type: array
       prefixItems:

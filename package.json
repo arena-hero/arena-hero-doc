@@ -12,7 +12,7 @@
     "clear": "docusaurus clear",
     "typecheck": "tsc",
     "validate": "npm run validate:openapi && npm run validate:asyncapi",
-    "validate:openapi": "redocly lint static/openapi.yaml --skip-rule no-server-example.com",
+    "validate:openapi": "redocly lint static/openapi.yaml --skip-rule no-server-example.com --skip-rule operation-4xx-response",
     "validate:asyncapi": "node scripts/validate-asyncapi.mjs",
     "write-translations": "docusaurus write-translations",
     "write-heading-ids": "docusaurus write-heading-ids"

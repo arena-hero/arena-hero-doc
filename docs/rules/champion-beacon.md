@@ -70,3 +70,9 @@ again until the next Tick.
 
 That cooldown is the point: it stops a single Tick from passing the Beacon down a
 chain of carriers.
+
+## Lifetime ranking
+
+The public Beacon ranking adds one held Tick only if the player still owns the
+carrier at the end of resolution. A voluntary drop or death drop before the end
+of the Tick does not count. See the [Leaderboard API](../api/leaderboard.md).

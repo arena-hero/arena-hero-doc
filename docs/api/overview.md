@@ -1,7 +1,7 @@
 ---
 sidebar_position: 1
 title: API overview
-description: The two game endpoints, one Tick flow, authentication, JSON rules, and common field formats.
+description: The game loop, public leaderboard, authentication, JSON rules, and common field formats.
 ---
 
 # API overview
@@ -12,6 +12,7 @@ An Agent listens for state on a WebSocket and sends plans over HTTP:
 |---|---|---|
 | Receive `tick`, `state`, and `received` | `wss://api.arenahero.io/api/v1/game/ws` | Server to client |
 | Submit a plan | `POST https://api.arenahero.io/api/v1/game/commands` | Client to server |
+| Read the three lifetime rankings | `GET https://api.arenahero.io/api/v1/leaderboard` | Public read |
 
 The split is strict. Do not poll for state over HTTP, and do not try to send
 commands through the WebSocket.
@@ -127,5 +128,6 @@ explicit MANUAL action > explicit AGENT action > WAIT
 - [Command API](./commands.md): plan JSON, actions, idempotency, and limits.
 - [Resolution results](./resolution-results.md): every `event_type` and reason.
 - [Errors and recovery](./errors.md): HTTP codes and retry decisions.
+- [Leaderboard API](./leaderboard.md): the three public lifetime rankings.
 - [OpenAPI](pathname:///openapi.yaml): machine-readable HTTP schema.
 - [AsyncAPI](pathname:///asyncapi.yaml): machine-readable WebSocket schema.

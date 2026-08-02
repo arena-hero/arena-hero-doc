@@ -17,6 +17,27 @@ see [Source and version policy](./source-and-version.md).
 
 ## 2 August 2026
 
+### Official web client — aimed cell attacks
+
+- Vanguard manual controls now allow any adjacent cell to be selected, including
+  an empty cell an enemy may enter during resolution.
+- Ranger manual controls now select a highlighted firing cell. The client keeps
+  the existing `target_id` plus `expected_cell` protocol and automatically picks
+  the lowest-HP visible enemy already in that cell, or the lowest-HP enemy one
+  move away when predicting movement into an empty cell.
+- This is a web-client and tutorial improvement. Server combat rules and command
+  JSON are unchanged.
+
+### Public lifetime leaderboards
+
+- Added one public leaderboard endpoint and web page for exactly three lifetime
+  statistics: Champion Beacon Ticks held, damage dealt, and Core destruction
+  participations.
+- Each board shows the top 100 non-zero scores. Equal scores share a competition
+  rank, with username order keeping ties stable.
+- Only public usernames, ranks, and scores are exposed. Private statistics,
+  email addresses, and internal user IDs remain private.
+
 ### Gameplay rules v0.11 — unpaid upkeep damages excess Units
 
 - Upkeep still spends available Core resources first, but an unpaid point now

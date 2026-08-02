@@ -87,6 +87,11 @@ Destroyed-Core resources are separate: the player who dealt the most damage to
 that Core during the Tick receives what fits, with raw player UUID as the tie
 break. See [Destruction and respawn](./destruction-and-respawn.md#who-receives-the-inventory).
 
+The public damage ranking counts every legal hit, including shield damage and
+simultaneous damage beyond the target's remaining shield and HP. The public Core
+destruction participation ranking adds 1 to every player who damaged the Core
+in its destruction Tick. See the [Leaderboard API](../api/leaderboard.md).
+
 ## Information returned to the player
 
 Combat results show up in the next `state.events`, like this:
