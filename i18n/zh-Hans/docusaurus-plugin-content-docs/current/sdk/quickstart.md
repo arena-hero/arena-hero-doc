@@ -50,6 +50,11 @@ with ArenaHeroClient(api_key=api_key) as game:
 2. `turn.submit()` 才会一次性提交完整计划。同一个对象提交前又调用了别的动作方法，
    后一次会顶掉前一次。
 
+用 `unit.heal()` 或 `turn.core.heal()` 安排战斗后的 HP 恢复。每实际恢复 1 HP 消耗 1 Core
+资源，一次动作可以消耗多份资源直至回满。Unit 必须在战斗后存活，并与自己静止的 Core
+同格。Unit 先消耗资源，然后才结算 Core 动作；致死伤害无法恢复。满血或当前没有资源时
+也可以提前安排，因为战斗伤害和夺取资源会先结算。
+
 `turn.resource_cells` 包含本 Turn 可见的自然资源点和死亡 Worker 留下的 Cargo
 资源堆，但不公开资源堆数量。自然资源点成功采集一次后消失；多个合格 Worker 抢同一格
 时，只有最低 UUID 成功，其余 Worker 会在下一份 Turn 收到
@@ -177,6 +182,7 @@ for ranger in turn.rangers:
         ranger.shoot(turn.visible_enemies[0])
 
 if turn.core is not None:
+    turn.core.heal()
     turn.core.spawn(UnitType.WORKER)
 
 turn.submit()

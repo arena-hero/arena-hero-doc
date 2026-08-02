@@ -93,15 +93,18 @@ This order is part of the protocol, not an implementation detail:
 5. Validate new Core `START_MOVE` actions.
 6. Resolve Champion Beacon pickup and drop actions.
 7. Resolve Worker harvest and deposit actions.
-8. Resolve Core spawn and shield repair.
-9. Freeze one immutable combat snapshot and accumulate every legal attack.
-10. Apply damage simultaneously, remove destroyed objects, and immediately attempt
-    to respawn newly destroyed Cores. Retry next Tick only when no legal spawn exists.
-11. After every fourth resolved Tick, replenish only the consumed resource slots
+8. Freeze one immutable combat snapshot and accumulate every legal attack.
+9. Apply damage simultaneously, remove destroyed objects, and transfer eligible
+   destroyed-Core inventory.
+10. Resolve surviving Unit `HEAL` actions in Unit UUID order.
+11. Resolve the surviving Core's `HEAL`, `REPAIR_SHIELD`, or `SPAWN` action.
+12. Immediately attempt to respawn newly destroyed Cores. Retry next Tick only
+    when no legal spawn exists.
+13. After every fourth resolved Tick, replenish only the consumed resource slots
     in each affected chunk back to that chunk's fixed quota.
-12. Atomically commit the world, resource layer, events, statistics, journal, and
+14. Atomically commit the world, resource layer, events, statistics, journal, and
     new clock.
-13. Announce the next Tick and prepare fresh private states.
+15. Announce the next Tick and prepare fresh private states.
 
 The server never skips a Tick to catch up with wall-clock time; downtime simply
 pauses the world. And two Ticks never resolve at the same time.
@@ -144,7 +147,8 @@ shots pass through Units and Cores; only obstacles block them. Rules v0.8 adds
 exact 45-degree diagonal fire at range 1-3, with only intermediate shot cells
 checked for obstacles. Rules v0.9 transfers a combat-destroyed Core's inventory,
 up to capacity, to the highest-damage player whose Core survives that combat
-Tick. Existing v0.1 through v0.8 worlds upgrade at an `OPEN` or
+Tick. Rules v0.10 moves Core resource actions after combat and adds Unit and
+Core HP recovery. Existing v0.1 through v0.9 worlds upgrade at an `OPEN` or
 `COMMITTED` boundary without resetting game state. The current rules also remove
 the respawn cooldown: a destroyed Core gets a replacement attempt later in the
 same Tick. A server stopped in `LOCKED` or `RESOLVING` must finish that Tick under

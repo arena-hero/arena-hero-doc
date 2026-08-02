@@ -17,7 +17,7 @@ moves at most one cardinal cell per Tick, and performs at most one action.
 | Vanguard | 4 | 4 | 10 | 1 sweep damage | Adjacent area pressure |
 | Ranger | 2 | 5 | 12 | 1 shot damage | Eight-direction range 1-3 precision attack |
 
-`MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, `SELF_DESTRUCT`, and `WAIT` are
+`MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, `HEAL`, `SELF_DESTRUCT`, and `WAIT` are
 available to every Unit. Everything else depends on the type.
 
 ## Worker
@@ -29,6 +29,7 @@ Allowed actions:
 - `DEPOSIT`
 - `PICKUP_BEACON`
 - `DROP_BEACON`
+- `HEAL`
 - `SELF_DESTRUCT`
 - `WAIT`
 
@@ -65,6 +66,7 @@ Allowed actions:
 - `SWEEP` with one cardinal `direction`
 - `PICKUP_BEACON`
 - `DROP_BEACON`
+- `HEAL`
 - `SELF_DESTRUCT`
 - `WAIT`
 
@@ -82,6 +84,7 @@ Allowed actions:
 - `SHOOT` with `target_id` and `expected_cell`
 - `PICKUP_BEACON`
 - `DROP_BEACON`
+- `HEAL`
 - `SELF_DESTRUCT`
 - `WAIT`
 
@@ -118,6 +121,22 @@ drops on the Unit's cell. A carried Beacon also drops there and cannot be picked
 until the next Tick. The owner receives `UNIT_SELF_DESTRUCTED`, and
 `units_lost` increases by one.
 
+## Healing
+
+Every Unit can send:
+
+```json
+{"type": "HEAL"}
+```
+
+The Unit gives up its complete action for this Tick. After combat, it must still
+be alive and share a cell with its own stationary Core. The action spends one
+Core resource per missing HP and can restore several HP at once, stopping at
+full HP or when resources run out. Unit heals resolve by raw Unit UUID before
+the Core action. A fatal hit removes the Unit before healing. A full-HP or
+currently unfunded heal is still a valid plan; if nothing changes before
+resolution, it fails without spending resources.
+
 ## Action schema examples
 
 ```json title="Worker harvest"
@@ -126,6 +145,10 @@ until the next Tick. The owner receives `UNIT_SELF_DESTRUCTED`, and
 
 ```json title="Any Unit self-destruct"
 {"type": "SELF_DESTRUCT"}
+```
+
+```json title="Any Unit heal"
+{"type": "HEAL"}
 ```
 
 ```json title="Vanguard sweep right"

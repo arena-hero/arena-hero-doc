@@ -16,13 +16,13 @@ description: Worker、Vanguard 和 Ranger 能做什么，需要多少资源。
 | Vanguard | 4 | 4 | 10 | 范围 1 格、伤害 1 | 相邻格范围压制 |
 | Ranger | 2 | 5 | 12 | 八方向直线 1-3 格、伤害 1 | 精确远程攻击 |
 
-`MOVE`、`PICKUP_BEACON`、`DROP_BEACON`、`SELF_DESTRUCT` 和 `WAIT` 所有 Unit
+`MOVE`、`PICKUP_BEACON`、`DROP_BEACON`、`HEAL`、`SELF_DESTRUCT` 和 `WAIT` 所有 Unit
 都能用，其余动作则要看类型。
 
 ## Worker
 
 允许的动作：`MOVE`、`HARVEST`、`DEPOSIT`、`PICKUP_BEACON`、`DROP_BEACON`、
-`SELF_DESTRUCT`、`WAIT`。
+`HEAL`、`SELF_DESTRUCT`、`WAIT`。
 
 `HARVEST` 要求一个空载 Worker 站在 `RESOURCE` 格上。自然资源点通常产出 1 点，
 所属玩家持有 Champion Beacon 时产出 2 点，随后该点被消耗。若同格有死亡 Worker
@@ -47,7 +47,7 @@ Worker 完全不能攻击。
 ## Vanguard
 
 允许的动作：`MOVE`、带 cardinal `direction` 的 `SWEEP`、`PICKUP_BEACON`、
-`DROP_BEACON`、`SELF_DESTRUCT`、`WAIT`。
+`DROP_BEACON`、`HEAL`、`SELF_DESTRUCT`、`WAIT`。
 
 `SWEEP` 打你指定方向上的那一格相邻格：站在那儿的每个敌方 Unit 各受 1 伤害，敌方
 Core 同样受 1。多个 Vanguard 打同一格，伤害会在同一份战斗快照里累加。
@@ -57,7 +57,7 @@ Core 同样受 1。多个 Vanguard 打同一格，伤害会在同一份战斗快
 ## Ranger
 
 允许的动作：`MOVE`、带 `target_id` 和 `expected_cell` 的 `SHOOT`、`PICKUP_BEACON`、
-`DROP_BEACON`、`SELF_DESTRUCT`、`WAIT`。
+`DROP_BEACON`、`HEAL`、`SELF_DESTRUCT`、`WAIT`。
 
 一次射击只有在下面几条全部成立时才合法：
 
@@ -88,6 +88,19 @@ POST 接口故意接受你没见过、甚至根本不存在的 UUID，就是不�
 会掉在当前格。携带 Beacon 的 Unit 也会把 Beacon 掉在这里，而且本 Tick 不能再次拾取。玩家
 会收到 `UNIT_SELF_DESTRUCTED`，`units_lost` 同时增加 1。
 
+## 恢复 HP
+
+所有 Unit 都能提交：
+
+```json
+{"type": "HEAL"}
+```
+
+Unit 会用掉本 Tick 的完整动作。战斗结束后，它必须仍然存活，并与自己静止的 Core 同格。
+动作从 Core 库存中按 1 资源恢复 1 HP，可以一次恢复多点，直到 HP 回满或资源耗尽。Unit
+按 UUID 原始字节序依次恢复，然后才结算 Core 动作。致死伤害会先移除 Unit，无法恢复。
+满血或当前没有资源时提交仍是一份合法计划；若到结算时情况没有改变，动作失败且不扣资源。
+
 ## 动作示例
 
 ```json title="Worker 采集"
@@ -96,6 +109,10 @@ POST 接口故意接受你没见过、甚至根本不存在的 UUID，就是不�
 
 ```json title="任意 Unit 自毁"
 {"type": "SELF_DESTRUCT"}
+```
+
+```json title="任意 Unit 恢复 HP"
+{"type": "HEAL"}
 ```
 
 ```json title="Vanguard 向右横扫"

@@ -25,6 +25,7 @@ HTTP `202` 只说明服务端把计划存下来了，动作还没结算。结果
 | 要查什么 | 去哪里 |
 |---|---|
 | Unit 自毁 | [Unit 生命周期事件](#unit-lifecycle-events) |
+| HP 恢复 | [恢复事件](#healing-events) |
 | 维护费、Core 伤害、修盾或生产 | [经济与 Core 事件](#economy-and-core-events) |
 | 采集或交付 | [Worker 事件](#worker-events) |
 | 横扫、射击和伤害 | [战斗事件](#combat-events) |
@@ -55,6 +56,18 @@ HTTP `202` 只说明服务端把计划存下来了，动作还没结算。结果
 
 自毁也会让该玩家的 `units_lost` 加 1，但不会产生攻击伤害或摧毁参与。携带 Beacon 的
 Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
+
+## 恢复事件 {#healing-events}
+
+| `event_type` | `reason_code` | ID 与位置 | `values` | 含义 |
+|---|---|---|---|---|
+| `UNIT_HEAL_SUCCEEDED` | 无 | `actor_id`：被恢复的 Unit；`position`：与 Core 同格坐标 | `{amount: int, hp: int, cost: int}` | Unit 实际恢复 `amount` HP，当前 HP 为 `hp`，并消耗同等数量的 `cost`。 |
+| `UNIT_HEAL_FAILED` | `HP_FULL`、`NOT_AT_OWN_CORE`、`CORE_MOVING` 或 `INSUFFICIENT_RESOURCES` | `actor_id`：Unit；`position`：Unit 格 | 无 | 战斗后的 Unit 恢复无法开始；不扣资源。 |
+| `CORE_HEAL_SUCCEEDED` | 无 | `actor_id`：被恢复的 Core；`position`：Core 格 | `{amount: int, hp: int, cost: int}` | Core 实际恢复 `amount` HP，当前 HP 为 `hp`，并消耗同等数量的 `cost`。 |
+| `CORE_HEAL_FAILED` | `HP_FULL` 或 `INSUFFICIENT_RESOURCES` | `actor_id`：Core；`position`：Core 格 | 无 | 战斗后的 Core 恢复无法开始；不扣资源。 |
+
+战斗中死亡的 Unit 会在恢复阶段前被移除，因此不会产生恢复事件，也不会扣资源。
+`unit_hp_recovered` 和 `core_hp_recovered` 记录玩家生涯实际恢复的 HP 总量。
 
 ## 经济与 Core 事件 {#economy-and-core-events}
 

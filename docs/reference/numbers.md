@@ -30,6 +30,7 @@ description: Look up the current timing, costs, ranges, capacity, and protocol l
 | Starting resources | 5 |
 | Starting Workers | 1 |
 | Resource capacity | `max(10, population × 5)` |
+| HP recovery | 1 resource → 1 HP, after combat |
 | Shield repair | 1 resource → 1 shield |
 
 ## Units

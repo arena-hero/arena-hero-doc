@@ -15,6 +15,29 @@ Gameplay rule versions are independent from the Python SDK version. The public
 HTTP and WebSocket API is still v0.1. For the exact currently reviewed source,
 see [Source and version policy](./source-and-version.md).
 
+## 2 August 2026
+
+### Gameplay rules v0.10 — post-combat HP recovery
+
+- Every Unit can use `HEAL` while sharing a cell with its own stationary Core;
+  the Core can also use `HEAL` as its action.
+- Healing runs after simultaneous combat damage and costs 1 Core resource per
+  HP actually restored. One action may spend several resources to reach full HP.
+- Unit heals resolve by Unit UUID before the Core action. Fatal damage cannot be
+  healed, and a failed heal spends nothing.
+- Core healing, shield repair, and spawning now resolve after combat. Newly
+  spawned Units cannot be attacked during their birth Tick, and repaired shield
+  cannot absorb damage from the Tick that just ended.
+- Inventory captured from a destroyed enemy Core can immediately fund Unit
+  healing and the surviving Core action in the same Tick.
+- Added private healing result events, lifetime HP-recovery counters, frontend
+  controls and feedback, plus Python SDK v0.2.6 with `unit.heal()`,
+  `core.heal()`, `HealAction`, and typed `HealingResult` values.
+
+Source: [server `5a3bcdf`](https://github.com/arena-hero/arena-hero/commit/5a3bcdf5fbc75574938dc35acf48b12145b37582),
+[frontend `789cf1b`](https://github.com/arena-hero/arena-hero-web/commit/789cf1b5584a18b2de5f2b2ee5546c3d9fb68166),
+and [SDK `4a29585`](https://github.com/arena-hero/arena-hero-python/commit/4a295851002ac5e73b34fa652e8d084f780c01ed).
+
 ## 1 August 2026
 
 ### Gameplay rules v0.9 — Core resource capture
@@ -169,6 +192,7 @@ SDK versions are separate from gameplay rule versions.
 
 | Version | Date | Developer-visible change |
 |---|---|---|
+| 0.2.6 source | 2 Aug 2026 | Adds Unit/Core healing controls and typed `HealingResult`; committed but not yet published to PyPI. |
 | 0.2.5 source | 1 Aug 2026 | Adds typed `CoreResourceCapture`; committed but not yet published to PyPI. |
 | 0.2.4 | 30 Jul 2026 | Adds the minimum Core-capacity contract and release metadata. |
 | 0.2.3 | 30 Jul 2026 | Exposes Core resource capacity and available storage space. |
@@ -176,4 +200,3 @@ SDK versions are separate from gameplay rule versions.
 | 0.2.1 | 29 Jul 2026 | Packaging and Apache-2.0 release update; no gameplay protocol change. |
 | 0.2.0 | 29 Jul 2026 | Adds self-destruct and cargo recovery event support. |
 | 0.1.0 | 28 Jul 2026 | First PyPI release of the official synchronous and asynchronous SDK. |
-

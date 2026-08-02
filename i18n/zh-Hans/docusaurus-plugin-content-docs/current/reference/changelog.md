@@ -13,6 +13,25 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
 游戏规则版本和 Python SDK 版本互相独立。公开 HTTP 与 WebSocket API 仍是 v0.1。
 当前文档对应的确切代码见[来源与版本策略](./source-and-version.md)。
 
+## 2026 年 8 月 2 日
+
+### 游戏规则 v0.10 — 战斗后恢复 HP
+
+- 所有 Unit 与自己的静止 Core 同格时都可以使用 `HEAL`；Core 也可以把 `HEAL` 作为
+  自己的动作。
+- 恢复在同时战斗伤害之后结算，每实际恢复 1 HP 消耗 1 Core 资源，一次动作可以消耗多份
+  资源直至回满。
+- Unit 按 UUID 顺序先恢复，然后才结算 Core 动作。致死伤害无法恢复，恢复失败不扣资源。
+- Core 恢复 HP、修盾和生产都改到战斗后结算。因此刚修好的护盾不能吸收刚结束的伤害，
+  新生产的 Unit 在出生 Tick 不会被攻击。
+- 战斗中从敌方 Core 夺取的资源，可以立即用于同 Tick 的 Unit 恢复和 Core 动作。
+- 增加私有恢复结果事件、生涯 HP 恢复统计、前端操作与提示，以及 Python SDK v0.2.6 的
+  `unit.heal()`、`core.heal()`、`HealAction` 和类型化 `HealingResult`。
+
+来源：[服务端 `5a3bcdf`](https://github.com/arena-hero/arena-hero/commit/5a3bcdf5fbc75574938dc35acf48b12145b37582)、
+[前端 `789cf1b`](https://github.com/arena-hero/arena-hero-web/commit/789cf1b5584a18b2de5f2b2ee5546c3d9fb68166)
+和 [SDK `4a29585`](https://github.com/arena-hero/arena-hero-python/commit/4a295851002ac5e73b34fa652e8d084f780c01ed)。
+
 ## 2026 年 8 月 1 日
 
 ### 游戏规则 v0.9 — 摧毁 Core 后夺取资源
@@ -146,6 +165,7 @@ SDK 版本与游戏规则版本互相独立。
 
 | 版本 | 日期 | 开发者可见变化 |
 |---|---|---|
+| 0.2.6 源码 | 2026-08-02 | 增加 Unit/Core 恢复控制和类型化 `HealingResult`；已提交，但尚未发布到 PyPI。 |
 | 0.2.5 源码 | 2026-08-01 | 增加类型化 `CoreResourceCapture`；已提交，但尚未发布到 PyPI。 |
 | 0.2.4 | 2026-07-30 | 加入 Core 最低容量契约与发布元数据。 |
 | 0.2.3 | 2026-07-30 | 公开 Core 资源容量与剩余空间。 |
@@ -153,4 +173,3 @@ SDK 版本与游戏规则版本互相独立。
 | 0.2.1 | 2026-07-29 | 更新打包与 Apache-2.0 发布信息；没有玩法协议变化。 |
 | 0.2.0 | 2026-07-29 | 支持 Unit 自毁与 Cargo 回收事件。 |
 | 0.1.0 | 2026-07-28 | 官方同步/异步 SDK 首次发布到 PyPI。 |
-

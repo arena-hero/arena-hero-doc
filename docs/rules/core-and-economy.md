@@ -18,7 +18,7 @@ description: How the Core stores resources, creates Units, repairs, moves, and p
 
 Damage and upkeep shortfalls both eat shield before they touch HP. The Core is
 where your resources live, and it is also what pays upkeep, receives deposits,
-builds Units, repairs its own shield, and — slowly — migrates.
+builds Units, restores HP and shield, and — slowly — migrates.
 
 ## Resource storage
 
@@ -52,6 +52,7 @@ A source plan may name at most one Core action:
 | Action | Parameters | Purpose |
 |---|---|---|
 | `SPAWN` | `unit_type` | Create one Unit on the Core cell. |
+| `HEAL` | none | After combat, spend 1 resource per missing Core HP, up to full HP. |
 | `REPAIR_SHIELD` | none | Spend 1 resource to restore 1 shield. |
 | `START_MOVE` | `direction` | Begin a four-Tick migration. |
 | `CANCEL_MOVE` | none | Cancel migration and clear progress. |
@@ -75,12 +76,28 @@ spent.
 A Unit that has just been spawned:
 
 - cannot act during the Tick it was created;
-- is already in the combat snapshot, so it can be attacked;
+- is created after combat, so it cannot be attacked during its birth Tick;
 - starts counting toward upkeep from the next Tick.
 
 Worker deposits resolve before the Core action, so resources actually accepted
 this Tick can pay for that action when it is otherwise legal. They cannot
 retroactively cover upkeep already charged after the self-destruct phase.
+Resources captured from an enemy Core during combat can fund same-Tick Unit
+healing and then the Core action.
+
+## HP recovery
+
+`HEAL` is a complete action for either one Unit or the Core. Healing happens
+after simultaneous combat damage. It spends 1 Core resource for each HP actually
+restored and automatically continues until the object reaches its HP maximum or
+the Core runs out of resources.
+
+A Unit must still be alive on the same cell as its own stationary Core. Unit
+heals resolve in raw Unit UUID order, before the Core action. Fatal damage cannot
+be healed. It is valid to queue `HEAL` while HP is full or resources are
+currently empty: the object may take nonfatal combat damage, or the Core may
+capture resources, before healing resolves. If the condition is still unmet,
+the action fails privately and spends nothing.
 
 ## Shield repair
 
@@ -108,7 +125,7 @@ Changing direction means `CANCEL_MOVE` first, which resets progress to zero.
 
 While it is migrating, a Core:
 
-- cannot spawn, repair, or pick up and drop the Beacon;
+- cannot spawn, heal, repair, or pick up and drop the Beacon;
 - cannot accept Worker deposits;
 - still pays upkeep and still takes damage;
 - keeps its inventory;

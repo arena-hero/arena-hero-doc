@@ -52,6 +52,13 @@ There are two important details:
 2. `turn.submit()` sends the complete plan once. Calling another action method
    for the same object before submission replaces that object's earlier action.
 
+Use `unit.heal()` or `turn.core.heal()` to queue post-combat HP recovery. It
+costs one Core resource per HP actually restored and can spend several resources
+to reach full HP. A Unit must survive on the same cell as its own stationary
+Core. Unit heals use resources before the Core action, and fatal damage cannot
+be healed. Full-HP and currently unfunded heals are valid plans because combat
+damage and captured resources resolve first.
+
 `turn.resource_cells` contains visible natural points and cargo piles left by
 dead Workers; pile amounts are not exposed. One successful harvest consumes a
 natural point. If several eligible Workers target the same cell, only the
@@ -181,6 +188,7 @@ for ranger in turn.rangers:
         ranger.shoot(turn.visible_enemies[0])
 
 if turn.core is not None:
+    turn.core.heal()
     turn.core.spawn(UnitType.WORKER)
 
 turn.submit()

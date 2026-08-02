@@ -426,6 +426,8 @@ components:
       type: string
       enum:
         - UNIT_SELF_DESTRUCTED
+        - UNIT_HEAL_SUCCEEDED
+        - UNIT_HEAL_FAILED
         - WORKER_CARGO_DROPPED
         - UPKEEP_PAID
         - CORE_DAMAGED
@@ -440,6 +442,8 @@ components:
         - CORE_ACTION_FAILED
         - CORE_REPAIR_FAILED
         - CORE_REPAIR_SUCCEEDED
+        - CORE_HEAL_SUCCEEDED
+        - CORE_HEAL_FAILED
         - CORE_SPAWN_FAILED
         - CORE_SPAWN_SUCCEEDED
         - SWEEP_RESOLVED
@@ -574,6 +578,17 @@ components:
       properties:
         type:
           const: SELF_DESTRUCT
+    HealAction:
+      type: object
+      additionalProperties: false
+      description: |
+        Resolves after combat and costs 1 Core resource per HP actually
+        restored. Unit healing requires the owned stationary Core on the same
+        cell. Unit heals resolve before the Core action.
+      required: [type]
+      properties:
+        type:
+          const: HEAL
     UnitAction:
       description: Strict discriminator union. Fields for another action type are invalid.
       oneOf:
@@ -586,6 +601,7 @@ components:
         - $ref: '#/components/schemas/PickupBeaconAction'
         - $ref: '#/components/schemas/DropBeaconAction'
         - $ref: '#/components/schemas/SelfDestructAction'
+        - $ref: '#/components/schemas/HealAction'
     CoreWaitAction:
       type: object
       additionalProperties: false
@@ -635,6 +651,7 @@ components:
         - $ref: '#/components/schemas/CancelMoveAction'
         - $ref: '#/components/schemas/PickupBeaconAction'
         - $ref: '#/components/schemas/DropBeaconAction'
+        - $ref: '#/components/schemas/HealAction'
     CommandPlan:
       type: object
       additionalProperties: false

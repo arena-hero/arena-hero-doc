@@ -179,6 +179,7 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 | `move(direction)` | 移动一格。 |
 | `pickup_beacon()` | 拾取当前格的信标。 |
 | `drop_beacon()` | 放下携带的信标。 |
+| `heal()` | 与己方静止 Core 同格时，在战斗后恢复 HP。 |
 | `self_destruct()` | 在维护费前移除这个 Unit；不返还资源，也不造成范围伤害。 |
 | `wait()` | 明确提交 `WAIT`。 |
 | `clear_action()` | 把这个 Unit 从待提交计划里移除。 |
@@ -245,6 +246,7 @@ ranger.shoot(target_id, expected_cell=(120, 85))
 | `hp` | `int` |
 | `shield` | `int` |
 | `spawn(unit_type)` | 生产 `WORKER`、`VANGUARD` 或 `RANGER`。 |
+| `heal()` | 战斗后恢复 Core HP。 |
 | `repair_shield()` | 消耗资源修复护盾。 |
 | `start_move(direction)` | 开始移动 Core。 |
 | `cancel_move()` | 取消 Core 当前的移动。 |
@@ -302,6 +304,7 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 | `values` | `dict[str, Any] | None` |
 | `resource_amount` | `int | None` |
 | `core_resource_capture` | `CoreResourceCapture | None` |
+| `healing` | `HealingResult | None` |
 | `harvest_source` | `HarvestSource | None` |
 
 事件名和原因码保留为字符串，这样服务端以后新增值时，旧版 SDK 不会直接崩掉。具体
@@ -314,6 +317,8 @@ Core 也只有一个动作槽。后调用的方法会替换之前排好的动作
 `core_resource_capture` 会把格式正确的 `CORE_RESOURCES_CAPTURED` 解析成带
 `amount`、`available`、`destroyed` 和 `capacity` 的类型化模型。满仓时 `amount`
 可以为零，并且始终满足 `amount + destroyed == available`。
+`healing` 会把成功的 Unit 或 Core 恢复解析成带 `amount`、恢复后 `hp` 和 `cost` 的
+类型化模型。恢复失败时它是 `None`，具体原因读取 `reason_code`。
 `harvest_source is HarvestSource.DROPPED_CARGO` 表示正在回收掉落资源；
 `HarvestSource.RESOURCE_NODE` 表示普通自然资源采集。不适用或无法识别的值会返回
 `None`。
@@ -378,12 +383,14 @@ accepted = game.submit(plan)
 | `PickupBeaconAction` | 无 |
 | `DropBeaconAction` | 无 |
 | `SelfDestructAction` | 无 |
+| `HealAction` | 无 |
 
 | Core 动作 | 必填数据 |
 |---|---|
 | `WaitAction` | 无 |
 | `SpawnAction` | `unit_type` |
 | `RepairShieldAction` | 无 |
+| `HealAction` | 无 |
 | `StartMoveAction` | `direction` |
 | `CancelMoveAction` | 无 |
 | `PickupBeaconAction` | 无 |

@@ -182,6 +182,7 @@ All controlled Unit objects expose:
 | `move(direction)` | Queue a one-cell move. |
 | `pickup_beacon()` | Pick up the Beacon on the current cell. |
 | `drop_beacon()` | Drop a carried Beacon. |
+| `heal()` | Recover HP after combat while sharing a cell with the owned stationary Core. |
 | `self_destruct()` | Remove this Unit before upkeep, with no refund or area damage. |
 | `wait()` | Queue an explicit `WAIT`. |
 | `clear_action()` | Remove this Unit from the queued plan. |
@@ -254,6 +255,7 @@ The `Core` controller exposes:
 | `shield` | `int` |
 | `owner_username` | `str` |
 | `spawn(unit_type)` | Spawn `UnitType.WORKER`, `VANGUARD`, or `RANGER`. |
+| `heal()` | Recover Core HP after combat. |
 | `repair_shield()` | Spend resources to repair shield. |
 | `start_move(direction)` | Start moving the Core. |
 | `cancel_move()` | Cancel current Core movement. |
@@ -312,6 +314,7 @@ without a leading `@`; Unit owners remain private.
 | `values` | `dict[str, Any] | None` |
 | `resource_amount` | `int | None` |
 | `core_resource_capture` | `CoreResourceCapture | None` |
+| `healing` | `HealingResult | None` |
 | `harvest_source` | `HarvestSource | None` |
 
 Event names and reason codes stay as strings so newer server values do not
@@ -326,6 +329,8 @@ safely reads the positive amount from `CORE_RESOURCES_CAPTURED`,
 `core_resource_capture` turns a well-formed `CORE_RESOURCES_CAPTURED` event into
 a typed model with `amount`, `available`, `destroyed`, and `capacity`. `amount`
 can be zero when no loot fits, and `amount + destroyed == available`.
+`healing` parses a successful Unit or Core heal into typed `amount`, post-heal
+`hp`, and `cost` values. Failed heals leave it as `None`; read `reason_code`.
 `harvest_source is HarvestSource.DROPPED_CARGO` identifies a recovery;
 `HarvestSource.RESOURCE_NODE` identifies an ordinary natural harvest. Unknown
 or inapplicable values return `None`.
@@ -392,12 +397,14 @@ Public action models:
 | `PickupBeaconAction` | none |
 | `DropBeaconAction` | none |
 | `SelfDestructAction` | none |
+| `HealAction` | none |
 
 | Core action | Required data |
 |---|---|
 | `WaitAction` | none |
 | `SpawnAction` | `unit_type` |
 | `RepairShieldAction` | none |
+| `HealAction` | none |
 | `StartMoveAction` | `direction` |
 | `CancelMoveAction` | none |
 | `PickupBeaconAction` | none |

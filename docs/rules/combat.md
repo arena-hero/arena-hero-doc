@@ -8,14 +8,19 @@ description: How sweeps, shots, simultaneous damage, and destruction resolve.
 
 ## One immutable snapshot
 
-Combat runs last, after movement, Beacon actions, Worker actions, production, and
-shield repair are all done. At that point the engine freezes a single immutable
+Combat runs after movement, Beacon actions, and Worker actions, but before HP
+healing, shield repair, and production. The engine freezes a single immutable
 snapshot and works from it:
 
 1. Validate every locked attack against that one snapshot.
 2. Accumulate damage from every legal attack.
 3. Apply all of the accumulated damage simultaneously.
 4. Only then remove dead Units and destroyed Cores.
+
+After that removal, surviving Units may heal, then the surviving Core may heal,
+repair shield, or spawn. This means fatal damage cannot be healed, a repaired
+shield cannot absorb damage from the Tick that just ended, and a newly spawned
+Unit cannot be attacked during its birth Tick.
 
 Because validation and damage happen against a frozen picture, an object killed
 during combat still lands the legal attack it had already locked in, and mutual

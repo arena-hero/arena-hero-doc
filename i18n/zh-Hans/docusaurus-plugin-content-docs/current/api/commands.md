@@ -88,6 +88,7 @@ Unit A: WAIT
 | `SHOOT` | Ranger | `{"type":"SHOOT","target_id":"<uuid>","expected_cell":[120,85]}` | 尝试射击该格的指定目标，横、竖或 45° 斜线射程 1-3。 |
 | `PICKUP_BEACON` | 所有 | `{"type":"PICKUP_BEACON"}` | 尝试拾取 actor 同格的地面 Beacon。 |
 | `DROP_BEACON` | 所有 | `{"type":"DROP_BEACON"}` | 当前携带者尝试放下 Beacon。 |
+| `HEAL` | 所有 | `{"type":"HEAL"}` | 战斗后在己方静止 Core 同格恢复 HP，每 1 HP 消耗 1 Core 资源。 |
 | `SELF_DESTRUCT` | 所有 | `{"type":"SELF_DESTRUCT"}` | 在计算维护费之前移除这个 Unit。 |
 
 ### 移动
@@ -153,12 +154,20 @@ Unit A: WAIT
 时，Beacon 掉在当前格，并且要到下一 Tick 才能再次拾取。
 Worker 的拥有者还会收到带掉落数量的 `WORKER_CARGO_DROPPED`。
 
+### 恢复 Unit HP
+
+`HEAL` 不带其他字段，并占用 Unit 的完整动作。结算时，Unit 必须仍然存活，并与自己
+静止的 Core 同格。战斗结束后，它会按每 1 HP 消耗 1 Core 资源恢复，直至回满或资源耗尽。
+Unit 按 UUID 原始字节序依次恢复，然后才结算 Core 动作。满血、没有资源、不在己方 Core
+同格或 Core 正在移动，都是动态失败：已经存下的计划仍然有效，但不会扣资源。
+
 ## Core 动作
 
 | `type` | JSON | 结算时会发生什么 |
 |---|---|---|
 | `WAIT` | `{"type":"WAIT"}` | 不发起新动作。正在进行的迁移会继续。 |
 | `SPAWN` | `{"type":"SPAWN","unit_type":"WORKER"}` | 支付费用，在 Core 所在格生成一个 Unit。 |
+| `HEAL` | `{"type":"HEAL"}` | 战斗后消耗资源恢复 Core HP，每 1 HP 消耗 1 资源，直至回满。 |
 | `REPAIR_SHIELD` | `{"type":"REPAIR_SHIELD"}` | 支付 1 资源，恢复 1 shield，但不超过当前上限。 |
 | `START_MOVE` | `{"type":"START_MOVE","direction":"LEFT"}` | 开始向相邻空格迁移，过程持续四个 Tick。 |
 | `CANCEL_MOVE` | `{"type":"CANCEL_MOVE"}` | 停止当前迁移并清空进度。 |
@@ -171,6 +180,9 @@ Worker 的拥有者还会收到带掉落数量的 `WORKER_CARGO_DROPPED`。
 迁移中的 Core 可以用 `WAIT` 接着走，或者用 `CANCEL_MOVE` 停下来；换成别的动作就是
 `CORE_ALREADY_MOVING`。反过来，对一个没在迁移的 Core 用 `CANCEL_MOVE`，会拿到
 `CORE_NOT_MOVING`。
+
+Unit 恢复先于 Core 动作，Core 动作使用剩余资源，也可以使用本 Tick 战斗中从敌方 Core
+夺取的库存。Core 恢复 HP、修盾和生产都发生在战斗后，无法改变已经结束的战斗结果。
 
 ## 多余字段会让动作无效
 
