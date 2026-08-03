@@ -173,12 +173,16 @@ Unit 按 UUID 原始字节序依次恢复，然后才结算 Core 动作。满血
 | `CANCEL_MOVE` | `{"type":"CANCEL_MOVE"}` | 停止当前迁移并清空进度。 |
 | `PICKUP_BEACON` | `{"type":"PICKUP_BEACON"}` | 普通状态的 Core 尝试拾取同格 Beacon。 |
 | `DROP_BEACON` | `{"type":"DROP_BEACON"}` | 携带 Beacon 的 Core 尝试放下它。 |
+| `SELF_DESTRUCT` | `{"type":"SELF_DESTRUCT"}` | 战斗后销毁仍存活的 Core、库存和所有己方 Unit，然后进入普通重生流程。 |
 
 `unit_type` 只能是 `WORKER`、`VANGUARD` 或 `RANGER`，目前的价格分别是 5、10 和 12
 资源。
 
-迁移中的 Core 可以用 `WAIT` 接着走，或者用 `CANCEL_MOVE` 停下来；换成别的动作就是
-`CORE_ALREADY_MOVING`。反过来，对一个没在迁移的 Core 用 `CANCEL_MOVE`，会拿到
+迁移中的 Core 可以用 `WAIT` 接着走、用 `CANCEL_MOVE` 停下来，或提交
+`SELF_DESTRUCT`；换成别的动作就是 `CORE_ALREADY_MOVING`。自毁没有资源、Unit、迁移
+状态或冷却限制。位移和战斗先结算：敌方致死攻击保留正常归属和资源转移；否则存活 Core
+销毁库存与全军，Worker Cargo 和 Beacon 在实际位置掉落，立即进入普通重生流程，不给
+任何玩家战利品。反过来，对一个没在迁移的 Core 用 `CANCEL_MOVE`，会拿到
 `CORE_NOT_MOVING`。
 
 Unit 恢复先于 Core 动作，Core 动作使用剩余资源，也可以使用本 Tick 战斗中从敌方 Core

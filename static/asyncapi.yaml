@@ -476,7 +476,9 @@ components:
         Event-specific reason_code, ID, position, and values rules are defined
         in /api/resolution-results. UPKEEP_PAID reports due, paid, and deficit.
         UNIT_DAMAGED with reason_code UPKEEP_DEFICIT reports damage and post-
-        damage HP for an excess Unit. Optional fields are omitted, never null.
+        damage HP for an excess Unit. CORE_DESTROYED uses reason_code ATTACK
+        with optional values.destroyed_by, or SELF_DESTRUCT without an attacker
+        or values. Optional fields are omitted, never null.
       required: [event_id, tick, event_type]
       properties:
         event_id:
@@ -577,8 +579,11 @@ components:
       type: object
       additionalProperties: false
       description: |
-        Removes the Unit before upkeep, without refund or area damage. A
-        Worker's cargo becomes a resource pile on its final cell.
+        For a Unit, removes it before upkeep without refund or area damage; a
+        Worker's cargo becomes a resource pile on its final cell. For a Core,
+        resolves after combat with no restrictions, destroys its inventory and
+        owned Units, drops cargo and the Beacon, and enters normal respawn
+        without awarding credit or loot.
       required: [type]
       properties:
         type:
@@ -656,6 +661,7 @@ components:
         - $ref: '#/components/schemas/CancelMoveAction'
         - $ref: '#/components/schemas/PickupBeaconAction'
         - $ref: '#/components/schemas/DropBeaconAction'
+        - $ref: '#/components/schemas/SelfDestructAction'
         - $ref: '#/components/schemas/HealAction'
     CommandPlan:
       type: object

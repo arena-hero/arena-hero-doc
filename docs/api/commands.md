@@ -188,13 +188,19 @@ failures: the stored plan remains valid and no resource is spent.
 | `CANCEL_MOVE` | `{"type":"CANCEL_MOVE"}` | Stops the current migration and clears its progress. |
 | `PICKUP_BEACON` | `{"type":"PICKUP_BEACON"}` | A normal Core tries to pick up the Beacon on its cell. |
 | `DROP_BEACON` | `{"type":"DROP_BEACON"}` | A carrier Core tries to drop the Beacon. |
+| `SELF_DESTRUCT` | `{"type":"SELF_DESTRUCT"}` | After combat, destroys the surviving Core, its inventory, and all owned Units, then enters the normal respawn flow. |
 
 `unit_type` has to be `WORKER`, `VANGUARD`, or `RANGER`, currently costing 5, 10,
 and 12 resources.
 
-A migrating Core can carry on with `WAIT` or stop with `CANCEL_MOVE`; anything else
-fails with `CORE_ALREADY_MOVING`. In the other direction, `CANCEL_MOVE` on a Core
-that is not moving fails with `CORE_NOT_MOVING`.
+A migrating Core can carry on with `WAIT`, stop with `CANCEL_MOVE`, or queue
+`SELF_DESTRUCT`; anything else fails with `CORE_ALREADY_MOVING`. A self-destruct
+has no resource, Unit, movement-state, or cooldown restriction. Movement and
+combat resolve first. A lethal enemy attack keeps normal credit and resource
+capture; otherwise the surviving Core destroys its inventory and fleet, drops
+Worker cargo and the Beacon at their actual positions, and immediately enters
+the normal respawn flow without awarding loot. In the other direction,
+`CANCEL_MOVE` on a Core that is not moving fails with `CORE_NOT_MOVING`.
 
 Unit healing resolves before the Core action. The Core action then uses whatever
 resources remain, including inventory captured from an enemy Core during that

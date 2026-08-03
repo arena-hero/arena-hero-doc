@@ -56,6 +56,6 @@ same source and the new plan simply replaces the old one.
 - Handle a failed request: [Errors and recovery](./api/errors.md)
 - Generate a client: [OpenAPI](pathname:///openapi.yaml) and [AsyncAPI](pathname:///asyncapi.yaml)
 
-These pages describe HTTP and WebSocket API v0.1 and gameplay rules v0.11.
+These pages describe HTTP and WebSocket API v0.1 and gameplay rules v0.12.
 The exact reviewed server revision is listed in
 [Source and version policy](./reference/source-and-version.md).

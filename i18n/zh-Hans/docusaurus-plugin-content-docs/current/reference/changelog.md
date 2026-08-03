@@ -13,6 +13,30 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
 游戏规则版本和 Python SDK 版本互相独立。公开 HTTP 与 WebSocket API 仍是 v0.1。
 当前文档对应的确切代码见[来源与版本策略](./source-and-version.md)。
 
+## 2026 年 8 月 3 日
+
+### 游戏规则 v0.12 — Core 无条件主动自毁
+
+- 任意存活 Core 都能提交 `{"type":"SELF_DESTRUCT"}`，不受资源、Unit 数量、迁移状态
+  或冷却限制。
+- 位移和战斗先结算。敌方致死攻击保留正常摧毁参与和资源归属；否则存活 Core 在恢复、
+  修盾和生产前销毁库存与所有己方 Unit。
+- Worker Cargo 和 Champion Beacon 掉在各载体实际位置。Core 自毁不造成伤害，也不给
+  任何玩家摧毁参与或战利品。
+- 私有 `CORE_DESTROYED` 使用 `reason_code: SELF_DESTRUCT`，不含 `destroyed_by`，之后
+  走普通的同 Tick 重生流程。
+- 两个网页客户端都加入带确认的危险 Core 动作，并显示专用 Tick 结果和重生提示。
+- Python SDK v0.2.7 源码加入 `core.self_destruct()`，并允许严格的
+  `SelfDestructAction` 作为 Core 动作。PyPI 在单独发布前仍为 v0.2.6。
+
+这次修改保持 HTTP 与 WebSocket API v0.1，但新增了严格的 `core_action.type` 枚举值。
+使用封闭 Core 动作联合类型的客户端，必须先更新才能解析包含该动作的权威
+`received.plan`。
+
+来源：[服务端 `bdd68e8`](https://github.com/arena-hero/arena-hero/commit/bdd68e86c778cf973452fecd5cb6a4bcf091ad45)、
+[前端 `9d2d553`](https://github.com/arena-hero/arena-hero-web/commit/9d2d5534dae9e9bf170436f7fce90fe79ddce5f1)
+和 [SDK `880e3a3`](https://github.com/arena-hero/arena-hero-python/commit/880e3a3869300053c8a99092b7495ba4a97f2c0e)。
+
 ## 2026 年 8 月 2 日
 
 ### 官方网页——按格指定攻击
@@ -199,6 +223,7 @@ SDK 版本与游戏规则版本互相独立。
 
 | 版本 | 日期 | 开发者可见变化 |
 |---|---|---|
+| 0.2.7 源码 | 2026-08-03 | 加入 `core.self_destruct()`，并允许严格的 Core `SelfDestructAction` 计划；已提交但尚未发布到 PyPI。 |
 | 0.2.6 | 2026-08-02 | 已发布到 PyPI；增加 Unit/Core 恢复、类型化 `HealingResult`，并包含未单独发布的 0.2.5 源码中的 `CoreResourceCapture`。 |
 | 0.2.5 源码 | 2026-08-01 | 增加类型化 `CoreResourceCapture`；已提交，但尚未发布到 PyPI。 |
 | 0.2.4 | 2026-07-30 | 加入 Core 最低容量契约与发布元数据。 |

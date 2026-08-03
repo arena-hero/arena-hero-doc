@@ -15,6 +15,33 @@ Gameplay rule versions are independent from the Python SDK version. The public
 HTTP and WebSocket API is still v0.1. For the exact currently reviewed source,
 see [Source and version policy](./source-and-version.md).
 
+## 3 August 2026
+
+### Gameplay rules v0.12 — unconditional Core self-destruction
+
+- Every living Core can submit `{"type":"SELF_DESTRUCT"}` with no resource,
+  Unit, movement-state, or cooldown restriction.
+- Movement and combat resolve first. A lethal enemy attack keeps normal
+  destruction participation and resource capture; otherwise the surviving Core
+  destroys its inventory and all owned Units before healing, repair, or spawn.
+- Worker cargo and the Champion Beacon drop at each carrier's actual position.
+  Core self-destruction awards no damage, destruction participation, or loot.
+- The private `CORE_DESTROYED` result uses `reason_code: SELF_DESTRUCT` without
+  `destroyed_by`, then follows the normal same-Tick respawn flow.
+- Both web clients add a destructive Core action with confirmation and dedicated
+  Tick-result/respawn feedback.
+- Python SDK v0.2.7 source adds `core.self_destruct()` and accepts
+  `SelfDestructAction` as a strict Core action. PyPI remains on v0.2.6 until a
+  separate package release.
+
+This adds a new strict `core_action.type` enum value while keeping HTTP and
+WebSocket API v0.1. Clients with a closed Core-action union must update before
+parsing a canonical `received.plan` containing this action.
+
+Source: [server `bdd68e8`](https://github.com/arena-hero/arena-hero/commit/bdd68e86c778cf973452fecd5cb6a4bcf091ad45),
+[frontend `9d2d553`](https://github.com/arena-hero/arena-hero-web/commit/9d2d5534dae9e9bf170436f7fce90fe79ddce5f1),
+and [SDK `880e3a3`](https://github.com/arena-hero/arena-hero-python/commit/880e3a3869300053c8a99092b7495ba4a97f2c0e).
+
 ## 2 August 2026
 
 ### Official web client — aimed cell attacks
@@ -235,6 +262,7 @@ SDK versions are separate from gameplay rule versions.
 
 | Version | Date | Developer-visible change |
 |---|---|---|
+| 0.2.7 source | 3 Aug 2026 | Adds `core.self_destruct()` and accepts strict `SelfDestructAction` plans for Cores; committed but not yet published to PyPI. |
 | 0.2.6 | 2 Aug 2026 | PyPI release adding Unit/Core healing, typed `HealingResult`, and the `CoreResourceCapture` model from the unreleased 0.2.5 source. |
 | 0.2.5 source | 1 Aug 2026 | Adds typed `CoreResourceCapture`; committed but not yet published to PyPI. |
 | 0.2.4 | 30 Jul 2026 | Adds the minimum Core-capacity contract and release metadata. |

@@ -270,11 +270,17 @@ The `Core` controller exposes:
 | `cancel_move()` | Cancel current Core movement. |
 | `pickup_beacon()` | Pick up the Beacon on the current cell. |
 | `drop_beacon()` | Drop a carried Beacon. |
+| `self_destruct()` | Destroy the Core, its inventory, and all owned Units after combat, then enter the normal respawn flow. |
 | `wait()` | Queue an explicit `WAIT`. |
 | `clear_action()` | Remove the queued Core action. |
 
 The Core has one action slot. As with Units, a later call replaces its earlier
 queued action.
+
+Core self-destruction is valid while moving and has no resource, Unit, or
+cooldown requirement. Combat destruction takes priority. Otherwise the Core
+destroys its inventory and army, drops cargo and the Beacon, awards no credit
+or loot, and immediately enters the normal respawn flow.
 
 ## State models
 
@@ -425,6 +431,7 @@ Public action models:
 | `CancelMoveAction` | none |
 | `PickupBeaconAction` | none |
 | `DropBeaconAction` | none |
+| `SelfDestructAction` | none |
 
 `CommandPlan.unit_actions` maps Unit UUIDs to actions.
 `CommandPlan.core_action` is one Core action or `None`.

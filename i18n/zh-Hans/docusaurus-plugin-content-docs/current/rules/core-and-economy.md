@@ -53,7 +53,26 @@ Worker 只存入剩余容量，装不下的部分继续留在 Worker 身上。Co
 | `CANCEL_MOVE` | 无 | 取消迁移并清零进度。 |
 | `PICKUP_BEACON` | 无 | 拾取同格地面 Beacon。 |
 | `DROP_BEACON` | 无 | 放下 Core 携带的 Beacon。 |
+| `SELF_DESTRUCT` | 无 | 战斗后销毁这个 Core、库存和所有己方 Unit。 |
 | `WAIT` | 无 | 显式不行动。 |
+
+## Core 自毁
+
+任意存活 Core 都可以提交不带其他字段的 `{"type":"SELF_DESTRUCT"}`。它不检查资源、
+Unit 数量、迁移状态或历史自毁次数，也没有冷却。迁移中的 Core 会先推进或完成本 Tick
+位移，仍然支付维护费并承受攻击。
+
+战斗优先。如果敌方攻击已经摧毁 Core，照常计算摧毁参与和资源归属，自毁不再执行。
+如果 Core 在战斗后仍存活，它会在 Unit 恢复、Core 恢复、修盾和生产之前自毁：
+
+- Core 库存全部销毁，不退款也不转移；
+- 所有己方 Unit 被移除并计入 `units_lost`；
+- Worker Cargo 和 Champion Beacon 掉在各载体实际的战后位置；
+- 不造成伤害，不给任何玩家摧毁参与或战利品；
+- 立即进入普通重生流程，并增加 `respawn_count`。
+
+私有 `CORE_DESTROYED` 使用 `reason_code: SELF_DESTRUCT`，不含 `destroyed_by`；出生点
+部署成功时随后出现 `CORE_RESPAWNED`。新 Core 可在下一 Tick 再次自毁。
 
 ## 生产
 
@@ -110,7 +129,7 @@ START_MOVE 结算  -> 进度 1/4
 
 迁移期间的 Core：
 
-- 不能生产、恢复 HP、修盾，也不能拾取或放下 Beacon；
+- 不能生产、恢复 HP、修盾，也不能拾取或放下 Beacon，但可以 `SELF_DESTRUCT`；
 - 不能接收 Worker 交付；
 - 照常交维护费、照常挨打；
 - 库存保留；

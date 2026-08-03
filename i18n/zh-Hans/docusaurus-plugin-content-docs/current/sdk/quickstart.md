@@ -55,6 +55,11 @@ with ArenaHeroClient(api_key=api_key) as game:
 同格。Unit 先消耗资源，然后才结算 Core 动作；致死伤害无法恢复。满血或当前没有资源时
 也可以提前安排，因为战斗伤害和夺取资源会先结算。
 
+用 `turn.core.self_destruct()` 安排 Core 无条件主动自毁。迁移中也能使用，不检查资源、
+Unit 数量或冷却。位移和战斗先结算；敌方致死攻击保留正常归属和资源转移，否则存活 Core
+销毁库存与全军，让 Worker Cargo 和 Beacon 掉在实际位置，然后进入普通重生流程，不给
+任何玩家战利品。
+
 `turn.resource_cells` 包含本 Turn 可见的自然资源点和死亡 Worker 留下的 Cargo
 资源堆，但不公开资源堆数量。自然资源点成功采集一次后消失；多个合格 Worker 抢同一格
 时，只有最低 UUID 成功，其余 Worker 会在下一份 Turn 收到

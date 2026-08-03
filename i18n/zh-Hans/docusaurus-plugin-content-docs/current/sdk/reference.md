@@ -259,10 +259,14 @@ ranger.shoot(target_id, expected_cell=(120, 85))
 | `cancel_move()` | 取消 Core 当前的移动。 |
 | `pickup_beacon()` | 拾取当前格的信标。 |
 | `drop_beacon()` | 放下携带的信标。 |
+| `self_destruct()` | 战斗后销毁 Core、库存和所有己方 Unit，然后进入普通重生流程。 |
 | `wait()` | 明确提交 `WAIT`。 |
 | `clear_action()` | 清掉 Core 的待提交动作。 |
 
 Core 也只有一个动作槽。后调用的方法会替换之前排好的动作。
+
+Core 自毁在迁移中也有效，不检查资源、Unit 数量或冷却。战斗摧毁优先；否则 Core 销毁
+库存和全军，让 Cargo 与 Beacon 掉落，不产生摧毁归属或战利品，并立即进入普通重生流程。
 
 ## 状态模型
 
@@ -407,6 +411,7 @@ accepted = game.submit(plan)
 | `CancelMoveAction` | 无 |
 | `PickupBeaconAction` | 无 |
 | `DropBeaconAction` | 无 |
+| `SelfDestructAction` | 无 |
 
 `CommandPlan.unit_actions` 是 Unit UUID 到动作的映射。
 `CommandPlan.core_action` 是一个 Core 动作，也可以是 `None`。

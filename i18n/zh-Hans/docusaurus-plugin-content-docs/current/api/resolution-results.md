@@ -25,6 +25,7 @@ HTTP `202` 只说明服务端把计划存下来了，动作还没结算。结果
 | 要查什么 | 去哪里 |
 |---|---|
 | Unit 自毁 | [Unit 生命周期事件](#unit-lifecycle-events) |
+| Core 自毁 | [经济与 Core 事件](#economy-and-core-events) |
 | HP 恢复 | [恢复事件](#healing-events) |
 | 维护费、Core 伤害、修盾或生产 | [经济与 Core 事件](#economy-and-core-events) |
 | 采集或交付 | [Worker 事件](#worker-events) |
@@ -75,7 +76,7 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 |---|---|---|---|---|
 | `UPKEEP_PAID` | 无 | `actor_id`：Core；`position`：Core 格 | `{due: int, paid: int, deficit: int}` | 维护费已扣；`deficit` 为正时随后伤害超额 Unit，不伤害 Core。 |
 | `CORE_DAMAGED` | `ATTACK` | `target_id`：Core；`position`：Core 格 | `{damage: int, shield_damage: int, hp_damage: int}` | Core 受到的战斗总伤害，以及护盾和 HP 各分摊多少。 |
-| `CORE_DESTROYED` | `ATTACK` | `target_id`：被摧毁的 Core；`position`：摧毁格 | 存在可命名参与者时为 `{destroyed_by: string[]}`，否则无 | Core 和剩余 Unit 被移除；新的 Core 会在本 Tick 后续阶段立即尝试部署。 |
+| `CORE_DESTROYED` | `ATTACK` 或 `SELF_DESTRUCT` | `target_id`：被摧毁的 Core；`position`：摧毁格 | `ATTACK` 存在可命名参与者时为 `{destroyed_by: string[]}`；`SELF_DESTRUCT` 时无 | Core 和剩余 Unit 被移除；新的 Core 会在本 Tick 后续阶段立即尝试部署。 |
 | `CORE_RESOURCE_OVERFLOW_DESTROYED` | 无 | `actor_id`：Core；`position`：Core 格 | `{amount: int, capacity: int}` | 人口下降后，高于新容量的资源被销毁。 |
 | `CORE_RESOURCES_CAPTURED` | 无 | `actor_id`：获胜者存活的 Core；`target_id`：被摧毁 Core；`position`：摧毁格 | `{amount: int, available: int, destroyed: int, capacity: int}` | 最高伤害者从受害者 `available` 库存中实际存入 `amount`，装不下的 `destroyed` 被销毁；`amount` 可以为零。获胜者 Core 同 Tick 也死亡时不产生该事件。 |
 | `CORE_ACTION_FAILED` | `CORE_NOT_MOVING` 或 `CORE_ALREADY_MOVING` | `actor_id`：Core；`position`：Core 格 | 无 | 对正常 Core 执行了 `CANCEL_MOVE`，或在迁移期间执行了不兼容的动作。 |
@@ -87,7 +88,8 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `CORE_SPAWN_SUCCEEDED` | 无 | `actor_id`：Core；`target_id`：新 Unit；`position`：Core 格 | `{unit_type: UnitType, cost: int}` | 在 Core 格生产出一个 Unit。 |
 
 `destroyed_by` 是按确定性顺序排的参与者用户名。只有攻击造成的摧毁、而且至少能点出
-一个参与者时，它才会出现。
+一个参与者时，它才会出现。`SELF_DESTRUCT` 没有攻击者、伤害、摧毁参与或资源归属；
+若同 Tick 敌方攻击已经致死，则战斗摧毁优先。
 
 ## Worker 事件 {#worker-events}
 

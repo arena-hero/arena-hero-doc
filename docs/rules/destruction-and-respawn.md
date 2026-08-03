@@ -8,17 +8,23 @@ description: What a player loses when the Core is destroyed and how respawning w
 
 ## Core destruction
 
-When Core HP hits zero, all of this happens at once:
+When Core HP hits zero in combat, or when a surviving Core resolves
+`SELF_DESTRUCT`, all of this happens at once:
 
 - the Core is removed;
 - if combat destroyed it, its inventory is offered to the player who dealt the
-  most damage to that Core during this Tick;
+  most damage to that Core during this Tick; self-destruction destroys it;
 - every Unit that player owns is removed;
 - whatever plan those objects had stops mattering;
 - a carried Champion Beacon drops according to the Beacon rule;
 - the player temporarily enters `RESPAWNING` while the resolver prepares a new spawn.
 
 The account and its Agent access are untouched.
+
+Combat destruction takes priority over a queued self-destruct. A self-destroyed
+Core grants no damage, destruction participation, or inventory capture. Its
+private `CORE_DESTROYED` event has `reason_code: SELF_DESTRUCT` and no
+`destroyed_by`; attack destruction uses `reason_code: ATTACK`.
 
 ## Who receives the inventory
 

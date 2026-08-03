@@ -97,15 +97,18 @@ This order is part of the protocol, not an implementation detail:
 8. Freeze one immutable combat snapshot and accumulate every legal attack.
 9. Apply damage simultaneously, remove destroyed objects, and transfer eligible
    destroyed-Core inventory.
-10. Resolve surviving Unit `HEAL` actions in Unit UUID order.
-11. Resolve the surviving Core's `HEAL`, `REPAIR_SHIELD`, or `SPAWN` action.
-12. Immediately attempt to respawn newly destroyed Cores. Retry next Tick only
+10. Resolve `SELF_DESTRUCT` for every Core that survived combat. Destroy its
+    inventory and fleet, and drop Worker cargo and the Beacon at their actual
+    positions.
+11. Resolve surviving Unit `HEAL` actions in Unit UUID order.
+12. Resolve each remaining Core's `HEAL`, `REPAIR_SHIELD`, or `SPAWN` action.
+13. Immediately attempt to respawn newly destroyed Cores. Retry next Tick only
     when no legal spawn exists.
-13. After every fourth resolved Tick, replenish only the consumed resource slots
+14. After every fourth resolved Tick, replenish only the consumed resource slots
     in each affected chunk back to that chunk's fixed quota.
-14. Atomically commit the world, resource layer, events, statistics, journal, and
+15. Atomically commit the world, resource layer, events, statistics, journal, and
     new clock.
-15. Announce the next Tick and prepare fresh private states.
+16. Announce the next Tick and prepare fresh private states.
 
 The server never skips a Tick to catch up with wall-clock time; downtime simply
 pauses the world. And two Ticks never resolve at the same time.
@@ -150,7 +153,8 @@ checked for obstacles. Rules v0.9 transfers a combat-destroyed Core's inventory,
 up to capacity, to the highest-damage player whose Core survives that combat
 Tick. Rules v0.10 moves Core resource actions after combat and adds Unit and
 Core HP recovery. Rules v0.11 makes unpaid upkeep damage excess Units instead
-of the Core. Existing v0.1 through v0.10 worlds upgrade at an `OPEN` or
+of the Core. Rules v0.12 adds unconditional, cooldown-free Core self-destruction
+after combat. Existing v0.1 through v0.11 worlds upgrade at an `OPEN` or
 `COMMITTED` boundary without resetting game state. The current rules also remove
 the respawn cooldown: a destroyed Core gets a replacement attempt later in the
 same Tick. A server stopped in `LOCKED` or `RESOLVING` must finish that Tick under

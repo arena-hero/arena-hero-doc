@@ -8,16 +8,21 @@ description: Core 被摧毁后会失去什么，以及玩家如何重生。
 
 ## Core 摧毁
 
-Core 的 HP 一归零，下面这些同时发生：
+Core 在战斗中 HP 归零，或者存活 Core 结算 `SELF_DESTRUCT` 时，下面这些同时发生：
 
 - Core 被移除；
 - 如果 Core 因战斗被摧毁，它的库存会尝试交给本 Tick 对这个 Core 造成伤害最多的玩家；
+  主动自毁则直接销毁库存；
 - 这名玩家的所有 Unit 被移除；
 - 这些对象剩下的计划也就没意义了；
 - 携带中的 Champion Beacon 按掉落规则落地；
 - 玩家暂时进入 `RESPAWNING`，等待本 Tick 后面的出生点解析。
 
 账号和 Agent 的访问权限不受影响。
+
+战斗摧毁优先于已提交的自毁。主动自毁不产生伤害、摧毁参与或库存归属。它的私有
+`CORE_DESTROYED` 使用 `reason_code: SELF_DESTRUCT`，不含 `destroyed_by`；攻击摧毁则
+使用 `reason_code: ATTACK`。
 
 ## 库存归谁
 

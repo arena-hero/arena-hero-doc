@@ -59,6 +59,13 @@ Core. Unit heals use resources before the Core action, and fatal damage cannot
 be healed. Full-HP and currently unfunded heals are valid plans because combat
 damage and captured resources resolve first.
 
+Use `turn.core.self_destruct()` to queue unconditional Core self-destruction.
+It is valid while moving and has no resource, Unit, or cooldown requirement.
+Movement and combat resolve first; a lethal enemy attack keeps normal credit
+and resource capture. Otherwise the surviving Core destroys its inventory and
+army, drops Worker cargo and the Beacon at their actual positions, and enters
+the normal respawn flow without awarding loot.
+
 `turn.resource_cells` contains visible natural points and cargo piles left by
 dead Workers; pile amounts are not exposed. One successful harvest consumes a
 natural point. If several eligible Workers target the same cell, only the

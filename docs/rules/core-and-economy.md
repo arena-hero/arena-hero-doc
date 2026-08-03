@@ -59,7 +59,31 @@ A source plan may name at most one Core action:
 | `CANCEL_MOVE` | none | Cancel migration and clear progress. |
 | `PICKUP_BEACON` | none | Pick up a ground Beacon on the same cell. |
 | `DROP_BEACON` | none | Drop the Beacon carried by this Core. |
+| `SELF_DESTRUCT` | none | After combat, destroy this Core, its inventory, and all owned Units. |
 | `WAIT` | none | Explicitly take no action. |
+
+## Core self-destruction
+
+Any living Core may submit `{"type":"SELF_DESTRUCT"}` with no other fields.
+It has no resource, Unit, movement-state, or cooldown restriction. A migrating
+Core advances or completes its movement first, continues paying upkeep, and can
+still be attacked during that Tick.
+
+Combat has priority. If an enemy attack destroys the Core, normal destruction
+participation and resource capture apply and the self-destruct does not run. If
+the Core survives combat, it self-destructs before Unit healing, Core healing,
+shield repair, or spawning:
+
+- the Core inventory is destroyed, with no refund or transfer;
+- every owned Unit is removed and counts toward `units_lost`;
+- Worker cargo and a carried Champion Beacon drop at each carrier's actual
+  post-movement position;
+- no damage, destruction participation, or loot is awarded;
+- the normal same-Tick respawn attempt runs, and `respawn_count` increases.
+
+The private `CORE_DESTROYED` event uses `reason_code: SELF_DESTRUCT`, omits
+`destroyed_by`, and is followed by `CORE_RESPAWNED` when placement succeeds.
+The replacement Core may self-destruct again on the next Tick.
 
 ## Production
 
@@ -126,7 +150,8 @@ Changing direction means `CANCEL_MOVE` first, which resets progress to zero.
 
 While it is migrating, a Core:
 
-- cannot spawn, heal, repair, or pick up and drop the Beacon;
+- cannot spawn, heal, repair, or pick up and drop the Beacon, but may
+  `SELF_DESTRUCT`;
 - cannot accept Worker deposits;
 - still pays upkeep and still takes damage;
 - keeps its inventory;
