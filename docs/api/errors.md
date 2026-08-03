@@ -111,7 +111,7 @@ order, then the Core problem.
 | `UNEXPECTED_ACTION_FIELDS` | Unit or Core | The action contains a field that its `type` does not allow, even if the value is `null`, empty, or zero. |
 | `INVALID_DIRECTION` | `MOVE`, `SWEEP`, `START_MOVE` | `direction` is missing or is not `UP`, `DOWN`, `LEFT`, or `RIGHT`. |
 | `INVALID_UNIT_TYPE` | `SPAWN` | `unit_type` is missing or is not `WORKER`, `VANGUARD`, or `RANGER`. |
-| `TARGET_ID_REQUIRED` | `SHOOT` | `target_id` is the nil UUID. A malformed UUID returns `INVALID_JSON` instead. |
+| `TARGET_ID_REQUIRED` | `SHOOT` | An explicitly supplied `target_id` is the nil UUID. Omit the field for a cell shot; a malformed UUID returns `INVALID_JSON`. |
 | `EXPECTED_CELL_REQUIRED` | `SHOOT` | `expected_cell` is missing. |
 | `VANGUARD_CANNOT_HARVEST` | Unit | A Vanguard selected `HARVEST`. |
 | `RANGER_CANNOT_HARVEST` | Unit | A Ranger selected `HARVEST`. |

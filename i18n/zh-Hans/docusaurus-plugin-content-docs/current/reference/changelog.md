@@ -15,6 +15,27 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
 
 ## 2026 年 8 月 3 日
 
+### 游戏规则 v0.13 — Ranger 真正按格射击
+
+- `SHOOT` 保留原名并始终使用 `expected_cell`，但 `target_id` 改为可选；现有精准目标命令
+  完全兼容。
+- 不带 `target_id` 时，Ranger 可以射击横、竖或准确 45° 斜线上射程 1-3 内任意未受阻挡
+  的格子，即使命令提交时该格还是空的。
+- 移动先结算。服务端命中届时格内 HP 最低的敌方对象，HP 相同时按 UUID 原始字节序；
+  空格按普通、不可区分的 `SHOT_MISSED` 结算。
+- 两个网页客户端现在始终允许 Ranger 射击并高亮全部合法射击格，不再要求前端编造目标
+  UUID。
+- Python SDK v0.2.8 加入 `ranger.shoot_cell(position)`，让 `ShootAction.target_id` 可选，
+  同时保留 `ranger.shoot(...)`。
+
+这修复了 8 月 2 日仅网页端的近似实现：当时界面看起来是在选格，但无法指定一个可见敌人
+作为 `target_id` 时仍会拒绝射击。HTTP 与 WebSocket API 保持 v0.1；由于服务端战斗选目标
+逻辑改变，游戏规则升至 v0.13。
+
+来源：[服务端 `57c2a5b`](https://github.com/arena-hero/arena-hero/commit/57c2a5b2c070c808092ddcf5425d0c87773fc6e2)、
+[前端 `ceaf2b6`](https://github.com/arena-hero/arena-hero-web/commit/ceaf2b60b51882dedd65e15f9205d9fae91945ae)
+和 [SDK `e32ff94`](https://github.com/arena-hero/arena-hero-python/commit/e32ff948b7ee05fa932a1305eef164bc45fc2986)。
+
 ### 游戏规则 v0.12 — Core 无条件主动自毁
 
 - 任意存活 Core 都能提交 `{"type":"SELF_DESTRUCT"}`，不受资源、Unit 数量、迁移状态
@@ -26,8 +47,8 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
 - 私有 `CORE_DESTROYED` 使用 `reason_code: SELF_DESTRUCT`，不含 `destroyed_by`，之后
   走普通的同 Tick 重生流程。
 - 两个网页客户端都加入带确认的危险 Core 动作，并显示专用 Tick 结果和重生提示。
-- Python SDK v0.2.7 源码加入 `core.self_destruct()`，并允许严格的
-  `SelfDestructAction` 作为 Core 动作。PyPI 在单独发布前仍为 v0.2.6。
+- Python SDK v0.2.7 加入 `core.self_destruct()`，并允许严格的
+  `SelfDestructAction` 作为 Core 动作。
 
 这次修改保持 HTTP 与 WebSocket API v0.1，但新增了严格的 `core_action.type` 枚举值。
 使用封闭 Core 动作联合类型的客户端，必须先更新才能解析包含该动作的权威
@@ -46,6 +67,8 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
   `expected_cell` 协议：格内已有敌人时选择当前 HP 最低者；预判射击空格时，选择一步
   内可能进入该格的最低 HP 可见敌人。
 - 这只是网页端和教程改进；服务端战斗规则及指令 JSON 没有变化。
+
+这个只改客户端的实现后来由上面的规则 v0.13 取代；新规则允许真正不带目标的按格射击。
 
 ### 公开终身排行榜
 
@@ -223,7 +246,8 @@ SDK 版本与游戏规则版本互相独立。
 
 | 版本 | 日期 | 开发者可见变化 |
 |---|---|---|
-| 0.2.7 源码 | 2026-08-03 | 加入 `core.self_destruct()`，并允许严格的 Core `SelfDestructAction` 计划；已提交但尚未发布到 PyPI。 |
+| 0.2.8 | 2026-08-03 | 加入 `ranger.shoot_cell(position)`，并允许 `ShootAction` 不带 `target_id`；已发布到 PyPI。 |
+| 0.2.7 | 2026-08-03 | 加入 `core.self_destruct()`，并允许严格的 Core `SelfDestructAction` 计划。 |
 | 0.2.6 | 2026-08-02 | 已发布到 PyPI；增加 Unit/Core 恢复、类型化 `HealingResult`，并包含未单独发布的 0.2.5 源码中的 `CoreResourceCapture`。 |
 | 0.2.5 源码 | 2026-08-01 | 增加类型化 `CoreResourceCapture`；已提交，但尚未发布到 PyPI。 |
 | 0.2.4 | 2026-07-30 | 加入 Core 最低容量契约与发布元数据。 |

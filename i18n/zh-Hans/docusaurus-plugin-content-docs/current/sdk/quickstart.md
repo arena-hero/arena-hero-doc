@@ -198,6 +198,9 @@ for worker in turn.workers:
 for ranger in turn.rangers:
     if turn.visible_enemies:
         ranger.shoot(turn.visible_enemies[0])
+    else:
+        x, y = ranger.position
+        ranger.shoot_cell((x + 1, y))
 
 if turn.core is not None:
     turn.core.heal()

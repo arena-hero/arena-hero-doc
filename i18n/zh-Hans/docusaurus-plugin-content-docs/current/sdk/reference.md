@@ -230,9 +230,13 @@ Core 总伤害最高者获胜，伤害相同时按玩家 UUID 原始字节序；
 ### Ranger
 
 ```python
+ranger.shoot_cell((120, 85))
 ranger.shoot(target)
 ranger.shoot(target_id, expected_cell=(120, 85))
 ```
+
+`shoot_cell(expected_cell)` 不需要当前目标。移动先结算；服务端命中届时格内 HP 最低的
+敌方对象，HP 相同时按 UUID 排序；格子为空则返回 `SHOT_MISSED`。
 
 `target` 可以是可见的 `Unit`、`Core`、`UnitView` 或 `CoreView`。SDK 会把目标 UUID
 和当前位置一起写入命令。只传 UUID 或 UUID 字符串时，必须同时传
@@ -395,7 +399,7 @@ accepted = game.submit(plan)
 | `HarvestAction` | 无 |
 | `DepositAction` | 无 |
 | `SweepAction` | `direction` |
-| `ShootAction` | `target_id`、`expected_cell` |
+| `ShootAction` | `expected_cell`；可选 `target_id` |
 | `PickupBeaconAction` | 无 |
 | `DropBeaconAction` | 无 |
 | `SelfDestructAction` | 无 |

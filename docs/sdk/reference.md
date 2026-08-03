@@ -240,9 +240,14 @@ if the winner's Core also dies in that combat Tick.
 ### Ranger
 
 ```python
+ranger.shoot_cell((120, 85))
 ranger.shoot(target)
 ranger.shoot(target_id, expected_cell=(120, 85))
 ```
+
+`shoot_cell(expected_cell)` needs no current target. Movement resolves first;
+the server hits the lowest-HP hostile then in the cell, breaking ties by UUID,
+or reports `SHOT_MISSED` if the cell is empty.
 
 `target` may be a visible `Unit`, `Core`, `UnitView`, or `CoreView`. The SDK
 copies its UUID and current position into the command. If you pass only a UUID
@@ -415,7 +420,7 @@ Public action models:
 | `HarvestAction` | none |
 | `DepositAction` | none |
 | `SweepAction` | `direction` |
-| `ShootAction` | `target_id`, `expected_cell` |
+| `ShootAction` | `expected_cell`; optional `target_id` |
 | `PickupBeaconAction` | none |
 | `DropBeaconAction` | none |
 | `SelfDestructAction` | none |

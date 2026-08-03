@@ -154,7 +154,8 @@ up to capacity, to the highest-damage player whose Core survives that combat
 Tick. Rules v0.10 moves Core resource actions after combat and adds Unit and
 Core HP recovery. Rules v0.11 makes unpaid upkeep damage excess Units instead
 of the Core. Rules v0.12 adds unconditional, cooldown-free Core self-destruction
-after combat. Existing v0.1 through v0.11 worlds upgrade at an `OPEN` or
+after combat. Rules v0.13 adds target-free Ranger cell shots and deterministic
+lowest-HP/UUID target selection. Existing v0.1 through v0.12 worlds upgrade at an `OPEN` or
 `COMMITTED` boundary without resetting game state. The current rules also remove
 the respawn cooldown: a destroyed Core gets a replacement attempt later in the
 same Tick. A server stopped in `LOCKED` or `RESOLVING` must finish that Tick under

@@ -553,7 +553,11 @@ components:
     ShootAction:
       type: object
       additionalProperties: false
-      required: [type, target_id, expected_cell]
+      description: |
+        Fires at expected_cell after movement. Without target_id, hits the
+        lowest-HP hostile in that cell, breaking ties by raw UUID order. With
+        target_id, keeps backward-compatible precision-target behavior.
+      required: [type, expected_cell]
       properties:
         type:
           const: SHOOT

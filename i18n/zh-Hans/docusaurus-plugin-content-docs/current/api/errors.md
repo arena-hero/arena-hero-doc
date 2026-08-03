@@ -108,7 +108,7 @@ description: 读取错误响应，判断能否重试，并修复命令或 WebSoc
 | `UNEXPECTED_ACTION_FIELDS` | Unit 或 Core | 动作带了该 `type` 不允许的字段，即使值是 `null`、空值或零。 |
 | `INVALID_DIRECTION` | `MOVE`、`SWEEP`、`START_MOVE` | `direction` 缺失，或不是 `UP`、`DOWN`、`LEFT`、`RIGHT`。 |
 | `INVALID_UNIT_TYPE` | `SPAWN` | `unit_type` 缺失，或不是 `WORKER`、`VANGUARD`、`RANGER`。 |
-| `TARGET_ID_REQUIRED` | `SHOOT` | `target_id` 是零 UUID。格式错误的 UUID 会返回 `INVALID_JSON`。 |
+| `TARGET_ID_REQUIRED` | `SHOOT` | 明确提供的 `target_id` 是零 UUID。按格射击应省略该字段；格式错误的 UUID 会返回 `INVALID_JSON`。 |
 | `EXPECTED_CELL_REQUIRED` | `SHOOT` | `expected_cell` 缺失。 |
 | `VANGUARD_CANNOT_HARVEST` | Unit | Vanguard 选择了 `HARVEST`。 |
 | `RANGER_CANNOT_HARVEST` | Unit | Ranger 选择了 `HARVEST`。 |

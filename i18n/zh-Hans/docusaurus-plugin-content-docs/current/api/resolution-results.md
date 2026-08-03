@@ -118,7 +118,7 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 | `event_type` | `reason_code` | ID 与位置 | `values` | 含义 |
 |---|---|---|---|---|
 | `SWEEP_RESOLVED` | 无 | `actor_id`：Vanguard；`position`：被横扫的相邻格 | `{targets_hit: int}` | 横扫已结算；命中 `0` 也是正常结果。 |
-| `SHOT_MISSED` | 固定为 `SHOT_MISSED` | `actor_id`：Ranger；`target_id`：请求里的 UUID；`position`：提交的 `expected_cell` | 无 | 射击动态失败，具体原因是故意藏起来的。 |
+| `SHOT_MISSED` | 固定为 `SHOT_MISSED` | `actor_id`：Ranger；可选 `target_id`：请求的精准目标 UUID；`position`：提交的 `expected_cell` | 无 | 射击动态失败。按格射击落空时没有 `target_id`；具体原因是故意藏起来的。 |
 | `SHOT_HIT` | 无 | `actor_id`：Ranger；`target_id`：被命中的 Core 或 Unit；`position`：目标格 | `{damage: int}` | 合法射击贡献了伤害。 |
 | `UNIT_DAMAGED` | `ATTACK` 或 `UPKEEP_DEFICIT` | `target_id`：受伤的 Unit；`position`：Unit 所在格 | `{damage: int, hp: int}` | 伤害和伤后 HP，最低为 `0`。`ATTACK` 是同时战斗伤害；`UPKEEP_DEFICIT` 是行动前集中施加给最远超额 Unit 的伤害。`hp: 0` 表示 Unit 已被摧毁。 |
 | `DESTRUCTION_PARTICIPATION` | `UNIT` 或 `CORE` | `target_id`：被摧毁的对象；`position`：摧毁格 | 无 | 你至少对这个对象打出过 1 点伤害。 |
@@ -130,8 +130,9 @@ Unit 还会收到 `BEACON_DROPPED_ON_DEATH`。
 同距离按 UUID 原始字节序处理。欠费死亡发生在移动与战斗前，Worker Cargo 和携带的
 Beacon 正常掉落，但不产生 `DESTRUCTION_PARTICIPATION`。没死的 Unit 本 Tick 仍可行动。
 
-Ranger 的所有动态失败用的都是同一个 `SHOT_MISSED`——目标没了、目标移开了、目标是
-友军、距离不对、射线被障碍物挡住，全都一样。这个结果就是设计成什么都不透露的。
+Ranger 的所有动态失败用的都是同一个 `SHOT_MISSED`——格子为空、精准目标没了、移开了
+或是友军、距离不对、射线被障碍物挡住，全都一样。这个结果就是设计成什么都不透露的。
+按格射击落空时不带 `target_id`；命中时，实际目标在 `SHOT_HIT.target_id` 中返回。
 
 ## 移动事件 {#movement-events}
 

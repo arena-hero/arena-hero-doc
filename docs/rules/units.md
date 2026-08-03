@@ -81,30 +81,31 @@ A sweep needs no target UUID, and it will never hurt your own objects.
 Allowed actions:
 
 - `MOVE`
-- `SHOOT` with `target_id` and `expected_cell`
+- `SHOOT` with `expected_cell` and an optional `target_id`
 - `PICKUP_BEACON`
 - `DROP_BEACON`
 - `HEAL`
 - `SELF_DESTRUCT`
 - `WAIT`
 
-A shot is legal only when all of the following hold:
+A cell shot is legal only when all of the following hold:
 
-1. the target is an enemy Unit or Core;
-2. it is still at `expected_cell`;
-3. target and Ranger share a horizontal, vertical, or exact 45-degree diagonal line;
-4. the distance along that line is 1, 2, or 3 — `(3, 3)` is range 3, while `(2, 1)` is not aligned;
-5. no cell in between holds an obstacle.
+1. `expected_cell` and Ranger share a horizontal, vertical, or exact 45-degree diagonal line;
+2. the distance along that line is 1, 2, or 3 — `(3, 3)` is range 3, while `(2, 1)` is not aligned;
+3. no cell in between holds an obstacle.
 
-Units and Cores never block Ranger fire, regardless of owner. The target cell
-may hold several colocated objects, and `target_id` picks one of them. There is
-no front-to-back ordering to exploit within a cell. For diagonal fire, only the
-intermediate diagonal cells are checked; obstacles beside the line do not block it.
+Movement resolves first. If the cell contains hostiles, the server hits the one
+with the lowest HP, breaking ties by raw UUID order. If no hostile remains, the
+shot misses normally. Units and Cores never block Ranger fire, regardless of
+owner. There is no front-to-back ordering to exploit within a cell. For diagonal
+fire, only the intermediate diagonal cells are checked; obstacles beside the
+line do not block it.
 
-The POST endpoint accepts an unseen or even nonexistent UUID on purpose, so that
-nobody can use it to probe fog of war. At resolution, a missing target, a friendly
-target, a target that moved, bad range, and a blocked line all collapse into the
-same private `SHOT_MISSED` event.
+For backward-compatible precision fire, include `target_id`; that mode hits only
+that object if it is still hostile and at `expected_cell`. The POST endpoint
+still accepts an unseen or even nonexistent UUID on purpose. At resolution, an
+empty cell, a missing or moved precision target, bad range, and a blocked line
+all collapse into the same private `SHOT_MISSED` event.
 
 ## Self-destruct
 
@@ -158,10 +159,9 @@ that damage here. A Unit killed by upkeep is already gone and spends nothing.
 {"type": "SWEEP", "direction": "RIGHT"}
 ```
 
-```json title="Ranger shot"
+```json title="Ranger cell shot"
 {
   "type": "SHOOT",
-  "target_id": "175f47f4-f7de-4785-b45c-9a2d2289a8ea",
   "expected_cell": [120, 85]
 }
 ```
