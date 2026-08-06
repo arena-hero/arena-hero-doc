@@ -27,7 +27,7 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
   `CORE_SPAWN_FAILED/INSUFFICIENT_RESOURCES.values.required` 返回实际结算价格。
 - 两个官方网页客户端删除维护费预警和结果，并按当前状态显示动态价格；同 Tick 死亡可能让
   服务端实际扣款低于预览。
-- Python SDK v0.2.9 源码删除旧状态字段，增加精确的
+- Python SDK v0.2.9 删除旧状态字段，增加精确的
   `unit_cost(unit_type, population)` 和只读 `UNIT_BASE_COSTS`。
 
 依赖两个已删除状态字段或枚举维护费事件的客户端需要更新。HTTP 与 WebSocket 仍保持
@@ -270,7 +270,7 @@ SDK 版本与游戏规则版本互相独立。
 
 | 版本 | 日期 | 开发者可见变化 |
 |---|---|---|
-| 0.2.9 源码 | 2026-08-06 | 删除维护费状态字段，增加精确的动态 Unit 价格 helper；已提交，尚未发布到 PyPI。 |
+| 0.2.9 | 2026-08-06 | PyPI 发布版；删除维护费状态字段，增加精确的动态 Unit 价格 helper。 |
 | 0.2.8 | 2026-08-03 | 加入 `ranger.shoot_cell(position)`，并允许 `ShootAction` 不带 `target_id`；已发布到 PyPI。 |
 | 0.2.7 | 2026-08-03 | 加入 `core.self_destruct()`，并允许严格的 Core `SelfDestructAction` 计划。 |
 | 0.2.6 | 2026-08-02 | 已发布到 PyPI；增加 Unit/Core 恢复、类型化 `HealingResult`，并包含未单独发布的 0.2.5 源码中的 `CoreResourceCapture`。 |
