@@ -79,22 +79,22 @@ sequenceDiagram
 
 1. 锁定最终有效的 Agent 与 Manual 计划。
 2. 结算所有 `SELF_DESTRUCT`，立即移除这些 Unit，并把 Worker Cargo 掉在最后所在格。
-3. 按剩余人口扣维护费；欠款从离 Core 最远的超额 Unit 开始造成伤害，死亡 Unit 在行动前移除。
-4. 结算 Unit 移动，以及走到第 4 个 Tick 的 Core 迁移。
-5. 检查新提交的 Core `START_MOVE`。
-6. 结算 Champion Beacon 的拾取与放下。
-7. 结算 Worker 的采集与交付。
-8. 冻结不可变战斗快照，累计所有合法攻击。
-9. 同时应用伤害、移除死亡对象，并转移符合条件的被摧毁 Core 库存。
-10. 结算所有战斗后仍存活 Core 的 `SELF_DESTRUCT`；销毁库存和全军，并让 Worker Cargo
+3. 结算 Unit 移动，以及走到第 4 个 Tick 的 Core 迁移。
+4. 检查新提交的 Core `START_MOVE`。
+5. 结算 Champion Beacon 的拾取与放下。
+6. 结算 Worker 的采集与交付。
+7. 冻结不可变战斗快照，累计所有合法攻击。
+8. 同时应用伤害、移除死亡对象，并转移符合条件的被摧毁 Core 库存。
+9. 结算所有战斗后仍存活 Core 的 `SELF_DESTRUCT`；销毁库存和全军，并让 Worker Cargo
     与 Beacon 掉在各自实际位置。
-11. 按 Unit UUID 顺序结算仍存活 Unit 的 `HEAL`。
-12. 结算其余存活 Core 的 `HEAL`、`REPAIR_SHIELD` 或 `SPAWN` 动作。
-13. 立即尝试让新摧毁的 Core 重生，只有找不到合法出生点时才顺延到下一 Tick 重试。
-14. 每结算满 4 个 Tick，按区块只补回已经消耗的资源槽位，使可用资源总数回到该区块的
+10. 按 Unit UUID 顺序结算仍存活 Unit 的 `HEAL`。
+11. 记录每名玩家此时的存活人口，再结算其余存活 Core 的 `HEAL`、`REPAIR_SHIELD` 或
+    动态定价的 `SPAWN` 动作。
+12. 立即尝试让新摧毁的 Core 重生，只有找不到合法出生点时才顺延到下一 Tick 重试。
+13. 每结算满 4 个 Tick，按区块只补回已经消耗的资源槽位，使可用资源总数回到该区块的
     固定配额。
-15. 原子提交世界、资源层、事件、统计、journal 和新时钟。
-16. 宣布下一个 Tick，并准备新的私有状态。
+14. 原子提交世界、资源层、事件、统计、journal 和新时钟。
+15. 宣布下一个 Tick，并准备新的私有状态。
 
 服务端不会为了追上墙上时间而跳 Tick，停服期间世界就是暂停。两个 Tick 也绝不会同时
 结算。
@@ -131,9 +131,10 @@ v0.6 将容量改为 `max(10, population × 5)`。规则 v0.7 让 Ranger 射击�
 Core，只有障碍物阻挡。规则 v0.8 加入射程 1-3 的 45° 斜线射击，并且只检查射线实际
 经过的中间格障碍物。规则 v0.9 把战斗中被摧毁 Core 的容量内库存交给对它伤害最高、
 且 Core 在同 Tick 战斗后仍存活的玩家。规则 v0.10 把 Core 的资源动作移到战斗后，
-并加入 Unit 与 Core 的 HP 恢复。规则 v0.11 把维护费欠款从 Core 伤害改为超额 Unit
+并加入 Unit 与 Core 的 HP 恢复。规则 v0.11 曾把维护费欠款从 Core 伤害改为超额 Unit
 伤害。规则 v0.12 加入战斗后无条件、无冷却的 Core 自毁。规则 v0.13 加入无需目标的
-Ranger 按格射击，以及按最低 HP、UUID 确定目标的规则。现有 v0.1 到 v0.12 世界可以在
+Ranger 按格射击，以及按最低 HP、UUID 确定目标的规则。规则 v0.14 删除维护费，改用
+精确的随人口变化的 Unit 价格。现有 v0.1 到 v0.13 世界可以在
 `OPEN` 或 `COMMITTED` 边界升级，
 不会重置游戏状态。当前规则同时移除了复活冷却：Core 被摧毁后会在同一个 Tick 的后续
 阶段立即尝试重生。如果旧服务停在 `LOCKED` 或 `RESOLVING`，必须先用旧规则完成该 Tick，

@@ -88,27 +88,26 @@ This order is part of the protocol, not an implementation detail:
 1. Lock the final valid Agent and Manual plans.
 2. Resolve every `SELF_DESTRUCT`, remove those Units, and drop any Worker cargo
    on their final cells.
-3. Charge upkeep from the remaining population. Apply any shortfall to the
-   farthest excess Units and remove upkeep deaths before they can act.
-4. Resolve Unit movement, and Core migrations that reach their fourth Tick.
-5. Validate new Core `START_MOVE` actions.
-6. Resolve Champion Beacon pickup and drop actions.
-7. Resolve Worker harvest and deposit actions.
-8. Freeze one immutable combat snapshot and accumulate every legal attack.
-9. Apply damage simultaneously, remove destroyed objects, and transfer eligible
+3. Resolve Unit movement, and Core migrations that reach their fourth Tick.
+4. Validate new Core `START_MOVE` actions.
+5. Resolve Champion Beacon pickup and drop actions.
+6. Resolve Worker harvest and deposit actions.
+7. Freeze one immutable combat snapshot and accumulate every legal attack.
+8. Apply damage simultaneously, remove destroyed objects, and transfer eligible
    destroyed-Core inventory.
-10. Resolve `SELF_DESTRUCT` for every Core that survived combat. Destroy its
+9. Resolve `SELF_DESTRUCT` for every Core that survived combat. Destroy its
     inventory and fleet, and drop Worker cargo and the Beacon at their actual
     positions.
-11. Resolve surviving Unit `HEAL` actions in Unit UUID order.
-12. Resolve each remaining Core's `HEAL`, `REPAIR_SHIELD`, or `SPAWN` action.
-13. Immediately attempt to respawn newly destroyed Cores. Retry next Tick only
+10. Resolve surviving Unit `HEAL` actions in Unit UUID order.
+11. Snapshot each player's living population, then resolve each remaining Core's
+    `HEAL`, `REPAIR_SHIELD`, or dynamically priced `SPAWN` action.
+12. Immediately attempt to respawn newly destroyed Cores. Retry next Tick only
     when no legal spawn exists.
-14. After every fourth resolved Tick, replenish only the consumed resource slots
+13. After every fourth resolved Tick, replenish only the consumed resource slots
     in each affected chunk back to that chunk's fixed quota.
-15. Atomically commit the world, resource layer, events, statistics, journal, and
+14. Atomically commit the world, resource layer, events, statistics, journal, and
     new clock.
-16. Announce the next Tick and prepare fresh private states.
+15. Announce the next Tick and prepare fresh private states.
 
 The server never skips a Tick to catch up with wall-clock time; downtime simply
 pauses the world. And two Ticks never resolve at the same time.
@@ -152,11 +151,12 @@ exact 45-degree diagonal fire at range 1-3, with only intermediate shot cells
 checked for obstacles. Rules v0.9 transfers a combat-destroyed Core's inventory,
 up to capacity, to the highest-damage player whose Core survives that combat
 Tick. Rules v0.10 moves Core resource actions after combat and adds Unit and
-Core HP recovery. Rules v0.11 makes unpaid upkeep damage excess Units instead
-of the Core. Rules v0.12 adds unconditional, cooldown-free Core self-destruction
-after combat. Rules v0.13 adds target-free Ranger cell shots and deterministic
-lowest-HP/UUID target selection. Existing v0.1 through v0.12 worlds upgrade at an `OPEN` or
-`COMMITTED` boundary without resetting game state. The current rules also remove
+Core HP recovery. Rules v0.11 made unpaid maintenance damage excess Units instead
+of the Core. Rules v0.12 added unconditional, cooldown-free Core self-destruction
+after combat. Rules v0.13 added target-free Ranger cell shots and deterministic
+lowest-HP/UUID target selection. Rules v0.14 removes maintenance and replaces it
+with exact, population-based Unit prices. Existing v0.1 through v0.13 worlds
+upgrade at an `OPEN` or `COMMITTED` boundary without resetting game state. The current rules also remove
 the respawn cooldown: a destroyed Core gets a replacement attempt later in the
 same Tick. A server stopped in `LOCKED` or `RESOLVING` must finish that Tick under
 its old rules before upgrading.

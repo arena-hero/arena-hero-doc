@@ -34,7 +34,7 @@ Core 在战斗中 HP 归零，或者存活 Core 结算 `SELF_DESTRUCT` 时，下
 4. 最多存入获胜者战后容量 `max(10, population × 5)`，多出的部分直接销毁。
 
 如果获胜者的 Core 也在这个战斗 Tick 被摧毁，受害者库存全部销毁。资源不会进入刚重生
-的 Core，也不会顺延给第二名。当前规则下，维护费欠款不会摧毁 Core。
+的 Core，也不会顺延给第二名。游戏没有自动按人口造成的维护伤害。
 
 同 Tick 有多个 Core 被摧毁时，按受害者玩家 UUID 原始字节序处理。先夺取的资源会占用
 后续战利品可用的容量。Core 存活的获胜者会收到私有 `CORE_RESOURCES_CAPTURED`：
@@ -60,8 +60,6 @@ Worker。正常情况下，你收到的下一份状态已经是 `ACTIVE`，事�
   "respawn_at_tick": 10604,
   "resources": 0,
   "population": 0,
-  "population_tier": 0,
-  "upkeep_next_tick": 0,
   "champion_beacon": {"position": [0, 0]},
   "objects": [],
   "events": []

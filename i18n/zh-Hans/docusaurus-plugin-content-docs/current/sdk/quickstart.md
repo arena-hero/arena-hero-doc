@@ -136,18 +136,17 @@ Core 最少能存 10 点资源，之后每个存活 Unit 提供 5 点容量。�
 下降后，高于新容量的库存会立刻销毁。决定是否调用 `deposit()` 前，可以先看
 `turn.resource_space`。
 
-服务端会在移动前扣 `turn.state.upkeep_next_tick`。先扣 Core 资源；资源不够时，每欠
-1 点就对超额 Unit 造成 1 HP 伤害。离 Core 最近的 19 个 Unit 受保护，越远的 Unit
-越先受伤，Core 自己不会承受欠费伤害。
+生产价格取决于结算生产时的存活人口。不要重复实现公式，直接使用 SDK helper：
 
 ```python
-for event in turn.events:
-    if event.event_type == "UNIT_DAMAGED" and event.reason_code == "UPKEEP_DEFICIT":
-        print(event.target_id, event.values["damage"], event.values["hp"])
+from arena_hero import UnitType, unit_cost
+
+worker_price = unit_cost(UnitType.WORKER, turn.state.population)
 ```
 
-受伤但存活的 Unit 本 Tick 仍可行动。因维护费死亡的 Unit 会在移动或战斗前移除；
-Worker Cargo 和携带的 Beacon 会掉在当前格。
+第 1-20 个 Unit 使用 Worker/Vanguard/Ranger 的基础价格 5/10/12；第 21-25 个第一次
+增加 30%，之后每增加 5 个 Unit 再提高一档。服务端会在同 Tick 自毁和战斗死亡后重新
+计算，因此成功生产事件的 `values.cost` 才是权威价格。
 
 能用分类好的集合时就直接用。例如 `turn.workers` 只包含自己控制的 Worker，
 `turn.visible_enemies` 包含当前看得到的敌方 Unit 和 Core。

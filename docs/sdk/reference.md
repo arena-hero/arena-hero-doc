@@ -157,11 +157,9 @@ difference is that `AsyncTurn.submit()` must be awaited.
 
 `Position` is `tuple[int, int]` in `(x, y)` order.
 
-`state.upkeep_next_tick` is charged before movement. Core resources pay first;
-any deficit damages excess Units, never the Core. The nearest 19 Units are
-protected. Other Units are ordered by descending Manhattan distance from the
-Core, then raw UUID bytes. Upkeep deaths happen before actions, while survivors
-keep their action.
+Production prices are dynamic. Call `unit_cost(unit_type, state.population)` to
+calculate the price shown for the current state. The server recalculates it when
+`SPAWN` resolves, after same-Tick self-destruction and combat deaths.
 
 ### Methods
 
@@ -189,7 +187,7 @@ All controlled Unit objects expose:
 | `pickup_beacon()` | Pick up the Beacon on the current cell. |
 | `drop_beacon()` | Drop a carried Beacon. |
 | `heal()` | Recover HP after combat while sharing a cell with the owned stationary Core. |
-| `self_destruct()` | Remove this Unit before upkeep, with no refund or area damage. |
+| `self_destruct()` | Remove this Unit before movement, with no refund or area damage. |
 | `wait()` | Queue an explicit `WAIT`. |
 | `clear_action()` | Remove this Unit from the queued plan. |
 
@@ -222,8 +220,8 @@ A full Core resolves a deposit as `DEPOSIT_FAILED` with `CORE_RESOURCE_FULL`.
 When population falls, resources above the new capacity are destroyed
 immediately and reported as `CORE_RESOURCE_OVERFLOW_DESTROYED`.
 
-Unpaid upkeep can also kill a Worker. Its complete cargo remains as a resource
-pile on the final cell, just like any other Worker death.
+Any Worker death from combat, Core destruction, or self-destruction leaves its
+complete cargo as a resource pile on the final cell.
 
 Destroying an enemy Core may produce `CORE_RESOURCES_CAPTURED`. Read
 `event.core_resource_capture` for the typed amount stored, victim inventory,
@@ -297,8 +295,6 @@ or loot, and immediately enters the normal respawn flow.
 | `respawn_at_tick` | `int | None` |
 | `resources` | `int` |
 | `population` | `int` |
-| `population_tier` | `int` |
-| `upkeep_next_tick` | `int` |
 | `champion_beacon` | `ChampionBeacon` |
 | `objects` | `tuple[TerrainView | CoreView | UnitView, ...]` |
 | `events` | `tuple[ResolutionEvent, ...]` |
@@ -341,13 +337,6 @@ Event names and reason codes stay as strings so newer server values do not
 break an older SDK. See [Resolution results](../api/resolution-results.md) for
 their meanings.
 
-For upkeep, `UPKEEP_PAID.values` contains `due`, `paid`, and `deficit`. Each
-affected Unit then has `event_type == "UNIT_DAMAGED"` and
-`reason_code == "UPKEEP_DEFICIT"`; `target_id` identifies it and `values`
-contains `damage` and post-damage `hp`. `hp == 0` means the Unit was removed
-before its action. These fields intentionally remain in the forward-compatible
-`values` mapping.
-
 In particular, `HARVEST_FAILED` with `RESOURCE_DEPLETED` means a lower-UUID
 eligible Worker consumed the contested point in that Tick. `resource_amount`
 safely reads the positive amount from `CORE_RESOURCES_CAPTURED`,
@@ -368,7 +357,10 @@ or inapplicable values return `None`.
 from arena_hero import (
     CORE_RESOURCE_CAPACITY_PER_UNIT,
     CORE_RESOURCE_MINIMUM_CAPACITY,
+    UNIT_BASE_COSTS,
+    UnitType,
     core_resource_capacity,
+    unit_cost,
 )
 ```
 
@@ -376,6 +368,19 @@ from arena_hero import (
 `CORE_RESOURCE_MINIMUM_CAPACITY` is `10`.
 `core_resource_capacity(population)` returns
 `max(10, population * 5)` and rejects a negative population.
+`UNIT_BASE_COSTS` is a read-only mapping with Worker 5, Vanguard 10, and Ranger
+12. `unit_cost(unit_type, population)` applies the exact current production
+formula and rejects a negative population:
+
+```text
+exponent = max(0, floor((population - 20) / 5) + 1)
+price = round_half_up(base_price × (13 / 10)^exponent)
+```
+
+Only the final result is rounded. The 21st Unit is the first increased-price
+Unit. `CORE_SPAWN_SUCCEEDED.values.cost` and
+`CORE_SPAWN_FAILED/INSUFFICIENT_RESOURCES.values.required` are authoritative for
+the price actually used at settlement.
 
 ### `Tick`, `Received`, and `Accepted`
 

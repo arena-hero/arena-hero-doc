@@ -10,7 +10,7 @@ description: Worker、Vanguard 和 Ranger 能做什么，需要多少资源。
 
 ## 对比
 
-| Unit | HP | 视野 | 价格 | 攻击 | 职责 |
+| Unit | HP | 视野 | 基础价格 | 攻击 | 职责 |
 |---|---:|---:|---:|---:|---|
 | Worker | 2 | 3 | 5 | 无 | 采集与交付 |
 | Vanguard | 4 | 4 | 10 | 范围 1 格、伤害 1 | 相邻格范围压制 |
@@ -18,6 +18,9 @@ description: Worker、Vanguard 和 Ranger 能做什么，需要多少资源。
 
 `MOVE`、`PICKUP_BEACON`、`DROP_BEACON`、`HEAL`、`SELF_DESTRUCT` 和 `WAIT` 所有 Unit
 都能用，其余动作则要看类型。
+
+表中是人口 0-19 时的基础价格。从人口 20 开始，下一个 Unit 会更贵；详见
+[生产与动态价格](./core-and-economy.md#生产与动态价格)。
 
 ## Worker
 
@@ -82,7 +85,8 @@ Core 同样受 1。多个 Vanguard 打同一格，伤害会在同一份战斗快
 {"type": "SELF_DESTRUCT"}
 ```
 
-它会在扣维护费之前移除这个 Unit，因此本 Tick 按自毁后的实际人口计费。Unit 不再执行
+它会在移动前移除这个 Unit，因此本 Tick 后面的 Core 动作会按自毁后的实际人口计算
+生产价格。Unit 不再执行
 其他动作，不返还生产费用，不造成范围伤害，也不给任何玩家摧毁参与。Worker 携带的资源
 会掉在当前格。携带 Beacon 的 Unit 也会把 Beacon 掉在这里，而且本 Tick 不能再次拾取。玩家
 会收到 `UNIT_SELF_DESTRUCTED`，`units_lost` 同时增加 1。
@@ -100,8 +104,7 @@ Unit 会用掉本 Tick 的完整动作。战斗结束后，它必须仍然存活
 按 UUID 原始字节序依次恢复，然后才结算 Core 动作。致死伤害会先移除 Unit，无法恢复。
 满血或当前没有资源时提交仍是一份合法计划；若到结算时情况没有改变，动作失败且不扣资源。
 
-承受维护费欠款伤害但存活的 Unit 会保留 `HEAL` 动作，可以在这里恢复；因欠费死亡的
-Unit 已经被移除，不会扣资源。
+因战斗死亡的 Unit 已经被移除，不会扣资源。
 
 ## 动作示例
 

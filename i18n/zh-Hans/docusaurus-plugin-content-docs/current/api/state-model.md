@@ -35,8 +35,6 @@ toc_max_heading_level: 3
     "status": "ACTIVE",
     "resources": 5,
     "population": 1,
-    "population_tier": 0,
-    "upkeep_next_tick": 0,
     "champion_beacon": {"position": [0, 0]},
     "objects": [
       {
@@ -74,8 +72,6 @@ toc_max_heading_level: 3
 | `respawn_at_tick` | 正 int64 | 仅重生中 | 找不到合法出生点后，下一次尝试部署的 Tick。 |
 | `resources` | 非负整数 | 是 | Core 里的资源，上限为 `max(10, population × 5)`；Worker 身上的 cargo 另算。 |
 | `population` | 非负整数 | 是 | 存活的己方 Unit 数，不含 Core。 |
-| `population_tier` | 非负整数 | 是 | `floor(population / 20)`。 |
-| `upkeep_next_tick` | 非负整数 | 是 | 当前人口对应的 `tier × (tier + 1) / 2`。Core 资源先支付；欠款保护最近 19 个 Unit，并伤害最远的超额 Unit。 |
 | `champion_beacon` | object | 是 | 公开位置，以及可见时的携带状态。 |
 | `objects` | array | 是 | 己方实体，加上当前可见的地形和敌方实体。 |
 | `events` | array | 是 | 发给这名玩家的结算结果。 |
@@ -83,6 +79,11 @@ toc_max_heading_level: 3
 没有内容时，`objects` 和 `events` 是空数组 `[]`，而不是干脆不出现。Core 被摧毁后通常
 会在同一个 Tick 重生，因此只有首次进入世界或暂时找不到合法出生点时才会发布
 `RESPAWNING`。期间资源和人口字段照样在，但在 `CORE_RESPAWNED` 到来之前没有 Core。
+
+可以用 `population` 估算下一个 Unit 的价格：
+`round_half_up(base_price × (13/10)^k)`，其中
+`k = max(0, floor((population - 20) / 5) + 1)`。服务端会在同 Tick 自毁和战斗结算后
+重新计算，因此最终以生产结果事件为准。
 
 ## Champion Beacon {#champion-beacon}
 

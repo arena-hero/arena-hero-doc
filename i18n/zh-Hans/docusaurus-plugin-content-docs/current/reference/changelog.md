@@ -13,6 +13,30 @@ description: 玩法、协议、前端、SDK、文档和 Skill 的版本化变更
 游戏规则版本和 Python SDK 版本互相独立。公开 HTTP 与 WebSocket API 仍是 v0.1。
 当前文档对应的确切代码见[来源与版本策略](./source-and-version.md)。
 
+## 2026 年 8 月 6 日
+
+### 游戏规则 v0.14 — 动态 Unit 价格取代维护费
+
+- 删除每 Tick 维护费和所有欠费伤害。`population_tier`、`upkeep_next_tick`、
+  `UPKEEP_PAID` 和 `UPKEEP_DEFICIT` 直接从协议中删除，不保留弃用字段。
+- Worker、Vanguard、Ranger 的基础价格仍为 5、10、12，适用于第 1-20 个 Unit。
+  从第 21 个开始，价格为 `round_half_up(base_price × (13/10)^k)`，其中
+  `k = max(0, floor((population - 20) / 5) + 1)`；精确分数只在最后舍入一次。
+- 生产价格使用同 Tick Unit 自毁和战斗死亡后的存活人口。初始和重生 Worker 仍然免费。
+- `CORE_SPAWN_SUCCEEDED.values.cost` 与
+  `CORE_SPAWN_FAILED/INSUFFICIENT_RESOURCES.values.required` 返回实际结算价格。
+- 两个官方网页客户端删除维护费预警和结果，并按当前状态显示动态价格；同 Tick 死亡可能让
+  服务端实际扣款低于预览。
+- Python SDK v0.2.9 源码删除旧状态字段，增加精确的
+  `unit_cost(unit_type, population)` 和只读 `UNIT_BASE_COSTS`。
+
+依赖两个已删除状态字段或枚举维护费事件的客户端需要更新。HTTP 与 WebSocket 仍保持
+API v0.1，因为端点和消息 envelope 没有改变。
+
+来源：[服务端 `b24cfcd`](https://github.com/arena-hero/arena-hero/commit/b24cfcd22b82c0af0f3993397d2696629762e7e5)、
+[前端 `00f4093`](https://github.com/arena-hero/arena-hero-web/commit/00f4093e532309f750a12dfae6864f7b164a898c)
+和 [SDK `423d252`](https://github.com/arena-hero/arena-hero-python/commit/423d252adcca439669adb3e7b04252e53b4430bd)。
+
 ## 2026 年 8 月 3 日
 
 ### 游戏规则 v0.13 — Ranger 真正按格射击
@@ -246,6 +270,7 @@ SDK 版本与游戏规则版本互相独立。
 
 | 版本 | 日期 | 开发者可见变化 |
 |---|---|---|
+| 0.2.9 源码 | 2026-08-06 | 删除维护费状态字段，增加精确的动态 Unit 价格 helper；已提交，尚未发布到 PyPI。 |
 | 0.2.8 | 2026-08-03 | 加入 `ranger.shoot_cell(position)`，并允许 `ShootAction` 不带 `target_id`；已发布到 PyPI。 |
 | 0.2.7 | 2026-08-03 | 加入 `core.self_destruct()`，并允许严格的 Core `SelfDestructAction` 计划。 |
 | 0.2.6 | 2026-08-02 | 已发布到 PyPI；增加 Unit/Core 恢复、类型化 `HealingResult`，并包含未单独发布的 0.2.5 源码中的 `CoreResourceCapture`。 |

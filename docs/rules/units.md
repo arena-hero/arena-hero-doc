@@ -11,7 +11,7 @@ moves at most one cardinal cell per Tick, and performs at most one action.
 
 ## Comparison
 
-| Unit | HP | Vision | Cost | Attack | Special role |
+| Unit | HP | Vision | Base price | Attack | Special role |
 |---|---:|---:|---:|---:|---|
 | Worker | 2 | 3 | 5 | - | Harvest and deposit |
 | Vanguard | 4 | 4 | 10 | 1 sweep damage | Adjacent area pressure |
@@ -19,6 +19,9 @@ moves at most one cardinal cell per Tick, and performs at most one action.
 
 `MOVE`, `PICKUP_BEACON`, `DROP_BEACON`, `HEAL`, `SELF_DESTRUCT`, and `WAIT` are
 available to every Unit. Everything else depends on the type.
+
+These are base prices for population 0-19. The next Unit becomes more expensive
+from population 20 onward; see [Production and dynamic prices](./core-and-economy.md#production-and-dynamic-prices).
 
 ## Worker
 
@@ -115,8 +118,8 @@ Every Unit can send:
 {"type": "SELF_DESTRUCT"}
 ```
 
-It removes that Unit before upkeep is charged, so upkeep for the current Tick
-uses the smaller population. The Unit performs no other action, gives no refund,
+It removes that Unit before movement, so the Core action later in the Tick uses
+the smaller population when pricing a spawn. The Unit performs no other action, gives no refund,
 deals no area damage, and awards no destruction participation. Worker cargo
 drops on the Unit's cell. A carried Beacon also drops there and cannot be picked up again
 until the next Tick. The owner receives `UNIT_SELF_DESTRUCTED`, and
@@ -138,8 +141,7 @@ the Core action. A fatal hit removes the Unit before healing. A full-HP or
 currently unfunded heal is still a valid plan; if nothing changes before
 resolution, it fails without spending resources.
 
-A Unit that survives unpaid-upkeep damage keeps its `HEAL` action and may repair
-that damage here. A Unit killed by upkeep is already gone and spends nothing.
+A Unit killed by combat is already gone and spends nothing.
 
 ## Action schema examples
 

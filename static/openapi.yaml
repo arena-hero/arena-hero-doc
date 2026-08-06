@@ -375,7 +375,7 @@ components:
       type: object
       additionalProperties: false
       description: |
-        For a Unit, removes it before upkeep without refund or area damage; a
+        For a Unit, removes it before movement and spawn pricing without refund or area damage; a
         Worker's cargo becomes a resource pile on its final cell. For a Core,
         resolves after combat with no restrictions, destroys its inventory and
         owned Units, drops cargo and the Beacon, and enters normal respawn
@@ -420,6 +420,12 @@ components:
     SpawnAction:
       type: object
       additionalProperties: false
+      description: |
+        Creates one Unit after combat. Base prices are Worker 5, Vanguard 10,
+        and Ranger 12. With living population N, k is
+        max(0, floor((N - 20) / 5) + 1), and the price is the exact
+        round-half-up value of base_price * (13 / 10)^k. The server measures N
+        after same-Tick self-destruction and combat deaths.
       required: [type, unit_type]
       properties:
         type:

@@ -88,7 +88,7 @@ Unit A: WAIT
 | `PICKUP_BEACON` | 所有 | `{"type":"PICKUP_BEACON"}` | 尝试拾取 actor 同格的地面 Beacon。 |
 | `DROP_BEACON` | 所有 | `{"type":"DROP_BEACON"}` | 当前携带者尝试放下 Beacon。 |
 | `HEAL` | 所有 | `{"type":"HEAL"}` | 战斗后在己方静止 Core 同格恢复 HP，每 1 HP 消耗 1 Core 资源。 |
-| `SELF_DESTRUCT` | 所有 | `{"type":"SELF_DESTRUCT"}` | 在计算维护费之前移除这个 Unit。 |
+| `SELF_DESTRUCT` | 所有 | `{"type":"SELF_DESTRUCT"}` | 在移动和生产定价之前移除这个 Unit。 |
 
 ### 移动
 
@@ -150,7 +150,7 @@ Unit A: WAIT
 
 ### 自毁 Unit
 
-`SELF_DESTRUCT` 不带其他字段。它在维护费之前结算，移除 Unit，并占用该 Unit 本 Tick
+`SELF_DESTRUCT` 不带其他字段。它在移动之前结算，移除 Unit，并占用该 Unit 本 Tick
 的动作。它不返还资源，也不伤害附近对象。Worker 携带的资源会掉在当前格。Unit 携带 Beacon
 时，Beacon 掉在当前格，并且要到下一 Tick 才能再次拾取。
 Worker 的拥有者还会收到带掉落数量的 `WORKER_CARGO_DROPPED`。
@@ -176,8 +176,11 @@ Unit 按 UUID 原始字节序依次恢复，然后才结算 Core 动作。满血
 | `DROP_BEACON` | `{"type":"DROP_BEACON"}` | 携带 Beacon 的 Core 尝试放下它。 |
 | `SELF_DESTRUCT` | `{"type":"SELF_DESTRUCT"}` | 战斗后销毁仍存活的 Core、库存和所有己方 Unit，然后进入普通重生流程。 |
 
-`unit_type` 只能是 `WORKER`、`VANGUARD` 或 `RANGER`，目前的价格分别是 5、10 和 12
-资源。
+`unit_type` 只能是 `WORKER`、`VANGUARD` 或 `RANGER`，基础价格分别是 5、10 和 12。
+人口为 `N` 时，服务端收取 `round_half_up(base_price × (13/10)^k)`，其中
+`k = max(0, floor((N - 20) / 5) + 1)`。第 20 个 Unit 仍是基础价，第 21 个第一次涨价。
+人口在同 Tick 自毁和战斗死亡后计算。实际价格以 `CORE_SPAWN_SUCCEEDED.values.cost` 或
+`CORE_SPAWN_FAILED.values.required` 为准。
 
 迁移中的 Core 可以用 `WAIT` 接着走、用 `CANCEL_MOVE` 停下来，或提交
 `SELF_DESTRUCT`；换成别的动作就是 `CORE_ALREADY_MOVING`。自毁没有资源、Unit、迁移

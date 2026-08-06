@@ -55,8 +55,6 @@ Authorization: Bearer <token>
     "status": "ACTIVE",
     "resources": 5,
     "population": 1,
-    "population_tier": 0,
-    "upkeep_next_tick": 0,
     "champion_beacon": {"position": [0, 0]},
     "objects": [
       {

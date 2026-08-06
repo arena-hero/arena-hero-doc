@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Core 与经济
-description: Core 如何保存资源、生产 Unit、修复、移动并支付维护费。
+description: Core 如何保存资源、生产 Unit、修复和移动。
 ---
 
 # Core 与经济
@@ -16,9 +16,8 @@ description: Core 如何保存资源、生产 Unit、修复、移动并支付维
 | 视野 | 5 |
 | 重生启动资源 | 5 |
 
-战斗伤害先扣护盾，扣完了才动 HP。Core 是你放资源的地方，同时也负责交维护费、接收
-交付、生产 Unit、恢复 HP 和护盾，以及——很慢地——迁移。维护费欠款伤害超额 Unit，
-不会伤害 Core。
+战斗伤害先扣护盾，扣完了才动 HP。Core 是你放资源的地方，也负责接收交付、生产 Unit、
+恢复 HP 和护盾，以及——很慢地——迁移。
 
 ## 资源容量
 
@@ -60,7 +59,7 @@ Worker 只存入剩余容量，装不下的部分继续留在 Worker 身上。Co
 
 任意存活 Core 都可以提交不带其他字段的 `{"type":"SELF_DESTRUCT"}`。它不检查资源、
 Unit 数量、迁移状态或历史自毁次数，也没有冷却。迁移中的 Core 会先推进或完成本 Tick
-位移，仍然支付维护费并承受攻击。
+位移，并照常承受攻击。
 
 战斗优先。如果敌方攻击已经摧毁 Core，照常计算摧毁参与和资源归属，自毁不再执行。
 如果 Core 在战斗后仍存活，它会在 Unit 恢复、Core 恢复、修盾和生产之前自毁：
@@ -74,13 +73,27 @@ Unit 数量、迁移状态或历史自毁次数，也没有冷却。迁移中的
 私有 `CORE_DESTROYED` 使用 `reason_code: SELF_DESTRUCT`，不含 `destroyed_by`；出生点
 部署成功时随后出现 `CORE_RESPAWNED`。新 Core 可在下一 Tick 再次自毁。
 
-## 生产
+## 生产与动态价格
 
-| Unit | 价格 | 出生位置 |
-|---|---:|---|
-| Worker | 5 | Core 格 |
-| Vanguard | 10 | Core 格 |
-| Ranger | 12 | Core 格 |
+前 20 个存活 Unit 使用基础价格。之后每完整增加 5 个 Unit，三种 Unit 的价格都提高 30%：
+
+```text
+N = 结算 Core 动作时的存活 Unit 数
+k = max(0, floor((N - 20) / 5) + 1)
+price = round_half_up(base_price × (13 / 10)^k)
+```
+
+服务端使用精确分数，只在最后舍入一次；刚好一半时向上取整。`N` 包括 Worker、
+Vanguard 和 Ranger，不包括 Core。
+
+| Unit | 基础价格 | N = 0-19 | N = 20-24 | N = 25-29 | N = 30-34 |
+|---|---:|---:|---:|---:|---:|
+| Worker | 5 | 5 | 7 | 8 | 11 |
+| Vanguard | 10 | 10 | 13 | 17 | 22 |
+| Ranger | 12 | 12 | 16 | 20 | 26 |
+
+第 20 个 Unit 仍按基础价购买，第 21 个才第一次涨价。初始 Worker 和每次重生附带的
+Worker 都免费。
 
 每 Tick 最多生产一个。一格能放两个可占位实体，Core 自己已经占掉一个，所以同时最多
 只能有一个 Unit 和它待在一起——往满格里生产会拿到 `CELL_UNIT_LIMIT`，资源不扣。
@@ -89,11 +102,16 @@ Unit 数量、迁移状态或历史自毁次数，也没有冷却。迁移中的
 
 - 在被创建的这个 Tick 里不能行动；
 - 在战斗结束后才创建，所以出生 Tick 不会被攻击；
-- 从下一个 Tick 起计入维护费。
+- 会立刻增加人口，从而影响之后的生产价格。
 
 Worker 交付排在 Core 动作之前，所以这个 Tick 实际存入的资源，可以在动作本身合法时
-用于该 Core 动作。唯一做不到的是回头补上自毁阶段结束后已经扣掉的那笔维护费。
-战斗中从敌方 Core 夺取的资源，可以在同 Tick 先供 Unit 恢复 HP，再供 Core 动作使用。
+用于该 Core 动作。战斗中从敌方 Core 夺取的资源，可以在同 Tick 先供 Unit 恢复 HP，
+再供 Core 动作使用。
+
+生产价格使用 Core 动作阶段开始时的存活人口。Unit 自毁和战斗死亡已经结算，因此都能
+在同 Tick 降低价格。公开状态和官方前端显示的是最新完整状态推算出的价格；如果本 Tick
+有人死亡，服务端实际扣款可能更少。最终以 `CORE_SPAWN_SUCCEEDED.values.cost` 和
+`CORE_SPAWN_FAILED.values.required` 为准。
 
 ## HP 恢复
 
@@ -131,7 +149,7 @@ START_MOVE 结算  -> 进度 1/4
 
 - 不能生产、恢复 HP、修盾，也不能拾取或放下 Beacon，但可以 `SELF_DESTRUCT`；
 - 不能接收 Worker 交付；
-- 照常交维护费、照常挨打；
+- 照常挨打；
 - 库存保留；
 - 同格的 Unit 不会被一起带走。
 
@@ -141,35 +159,5 @@ START_MOVE 结算  -> 进度 1/4
 第 4 Tick 的那次位移，进的是和 Unit 移动同一张全局依赖图。失败的话 Core 原地不动，
 进度清零。
 
-## 人口与维护费
-
-人口只算 Unit，Core 自己从来不计入：
-
-```text
-N = Worker + Vanguard + Ranger
-tier = floor(N / 20)
-upkeep = tier × (tier + 1) / 2
-```
-
-| 人口 | 等级 | 每 Tick 资源 |
-|---:|---:|---:|
-| 0-19 | 0 | 0 |
-| 20-39 | 1 | 1 |
-| 40-59 | 2 | 3 |
-| 60-79 | 3 | 6 |
-| 80-99 | 4 | 10 |
-
-Unit 的 `SELF_DESTRUCT` 会先结算，维护费按自毁后剩余的人口计算。本 Tick 后面新生产
-的 Unit 从下一 Tick 才开始计费；战斗阶段死亡的 Unit 已经支付了本 Tick 维护费。
-
-维护费自动扣，不占 Core 动作。服务端先扣掉 Core 能支付的部分，剩余每 1 点欠款对超额
-Unit 造成 1 HP 伤害。Core 不会因为欠维护费掉盾或掉血。
-
-离 Core 最近的 19 个 Unit 受保护。其他 Unit 按到当前 Core 的曼哈顿距离从远到近排列；
-距离相同时按 Unit UUID 原始字节序。伤害会集中打在第一名身上，死亡后才轮到下一名。
-
-因此死亡的 Unit 会在移动、Worker、Beacon 和战斗阶段前被移除。Worker Cargo 和携带的
-Beacon 原地掉落，但不授予任何敌人摧毁参与。没死的 Unit 保留锁定动作，本 Tick 仍可
-行动，也可以在战斗后合法使用 `HEAL`。私有 `UPKEEP_PAID` 给出 `due`、`paid` 和
-`deficit`；随后每个受伤 Unit 都有 `UNIT_DAMAGED` / `UPKEEP_DEFICIT`，其中包含
-`damage` 和剩余 `hp`。
+游戏没有每 Tick 自动扣除的维护费。人口会影响 Core 容量和下一个 Unit 的价格，但不会
+自动消耗资源，也不会自动伤害 Unit。

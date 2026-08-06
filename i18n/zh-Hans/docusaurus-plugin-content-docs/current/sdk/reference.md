@@ -154,9 +154,8 @@ accepted = await game.submit(plan, idempotency_key="agent-10583-plan-1")
 
 `Position` 是 `(x, y)` 顺序的 `tuple[int, int]`。
 
-`state.upkeep_next_tick` 在移动前扣除。Core 资源先支付，欠款只伤害超额 Unit，不伤害
-Core。离 Core 最近的 19 个 Unit 受保护；其他 Unit 按曼哈顿距离从远到近、同距离按
-UUID 原始字节序处理。欠费死亡发生在动作前，存活 Unit 保留动作。
+生产价格动态变化。用 `unit_cost(unit_type, state.population)` 计算当前状态显示的价格。
+服务端会在 `SPAWN` 结算时按同 Tick 自毁和战斗死亡后的实际人口重新计算。
 
 ### 方法
 
@@ -184,7 +183,7 @@ UUID 原始字节序处理。欠费死亡发生在动作前，存活 Unit 保留
 | `pickup_beacon()` | 拾取当前格的信标。 |
 | `drop_beacon()` | 放下携带的信标。 |
 | `heal()` | 与己方静止 Core 同格时，在战斗后恢复 HP。 |
-| `self_destruct()` | 在维护费前移除这个 Unit；不返还资源，也不造成范围伤害。 |
+| `self_destruct()` | 在移动前移除这个 Unit；不返还资源，也不造成范围伤害。 |
 | `wait()` | 明确提交 `WAIT`。 |
 | `clear_action()` | 把这个 Unit 从待提交计划里移除。 |
 
@@ -213,8 +212,8 @@ UUID 原始字节序处理。欠费死亡发生在动作前，存活 Unit 保留
 Core 已满时，交付结算为 `DEPOSIT_FAILED` / `CORE_RESOURCE_FULL`。人口下降后，高于
 新容量的资源会立刻销毁，并通过 `CORE_RESOURCE_OVERFLOW_DESTROYED` 返回。
 
-维护费欠款也可能杀死 Worker。它携带的全部 Cargo 会和其他死亡情况一样，留在最后
-所在格形成资源堆。
+Worker 因战斗、Core 摧毁或主动自毁死亡时，携带的全部 Cargo 都会留在最后所在格形成
+资源堆。
 
 摧毁敌方 Core 后可能收到 `CORE_RESOURCES_CAPTURED`。通过
 `event.core_resource_capture` 读取实际存入量、受害者原库存、销毁量和获胜者容量。对该
@@ -282,8 +281,6 @@ Core 自毁在迁移中也有效，不检查资源、Unit 数量或冷却。战�
 | `respawn_at_tick` | `int | None` |
 | `resources` | `int` |
 | `population` | `int` |
-| `population_tier` | `int` |
-| `upkeep_next_tick` | `int` |
 | `champion_beacon` | `ChampionBeacon` |
 | `objects` | `tuple[TerrainView | CoreView | UnitView, ...]` |
 | `events` | `tuple[ResolutionEvent, ...]` |
@@ -325,11 +322,6 @@ Core 自毁在迁移中也有效，不检查资源、Unit 数量或冷却。战�
 事件名和原因码保留为字符串，这样服务端以后新增值时，旧版 SDK 不会直接崩掉。具体
 含义见[结算结果](../api/resolution-results.md)。
 
-维护费先看 `UPKEEP_PAID.values` 的 `due`、`paid` 和 `deficit`。每个受影响 Unit 随后
-会有 `event_type == "UNIT_DAMAGED"`、`reason_code == "UPKEEP_DEFICIT"`；`target_id`
-是该 Unit，`values` 包含 `damage` 和伤后 `hp`。`hp == 0` 表示 Unit 已在动作前移除。
-这些字段故意保留在向前兼容的 `values` 中。
-
 其中 `HARVEST_FAILED`/`RESOURCE_DEPLETED` 表示同 Tick 有 UUID 更低的合格 Worker
 消耗了被竞争的资源点。`resource_amount` 可以读取
 `CORE_RESOURCES_CAPTURED`、`CORE_RESOURCE_OVERFLOW_DESTROYED`、`DEPOSIT_SUCCEEDED`、
@@ -349,13 +341,27 @@ Core 自毁在迁移中也有效，不检查资源、Unit 数量或冷却。战�
 from arena_hero import (
     CORE_RESOURCE_CAPACITY_PER_UNIT,
     CORE_RESOURCE_MINIMUM_CAPACITY,
+    UNIT_BASE_COSTS,
+    UnitType,
     core_resource_capacity,
+    unit_cost,
 )
 ```
 
 `CORE_RESOURCE_CAPACITY_PER_UNIT` 的值是 `5`。
 `CORE_RESOURCE_MINIMUM_CAPACITY` 的值是 `10`。
 `core_resource_capacity(population)` 返回 `max(10, population * 5)`；人口为负数时会报错。
+`UNIT_BASE_COSTS` 是只读映射，Worker、Vanguard、Ranger 分别为 5、10、12。
+`unit_cost(unit_type, population)` 使用当前精确生产公式，并拒绝负人口：
+
+```text
+exponent = max(0, floor((population - 20) / 5) + 1)
+price = round_half_up(base_price × (13 / 10)^exponent)
+```
+
+只在最终结果上舍入一次。第 21 个 Unit 是第一个涨价的 Unit。实际结算价格以
+`CORE_SPAWN_SUCCEEDED.values.cost` 和
+`CORE_SPAWN_FAILED/INSUFFICIENT_RESOURCES.values.required` 为准。
 
 ### `Tick`、`Received` 和 `Accepted`
 

@@ -11,13 +11,13 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 | 项目 | 值 |
 |---|---|
 | HTTP 与 WebSocket API | v0.1 |
-| 游戏规则 | v0.13 |
+| 游戏规则 | v0.14 |
 | 服务器仓库 | [`arena-hero/arena-hero`](https://github.com/arena-hero/arena-hero) |
-| 已审查服务器提交 | `57c2a5b2c070c808092ddcf5425d0c87773fc6e2` |
-| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.2.8 源码与 PyPI 版本 |
-| 已审查 SDK 提交 | `e32ff948b7ee05fa932a1305eef164bc45fc2986` |
-| 服务端审查日期 | 2026 年 8 月 3 日 |
-| SDK 审查日期 | 2026 年 8 月 3 日 |
+| 已审查服务器提交 | `b24cfcd22b82c0af0f3993397d2696629762e7e5` |
+| Python SDK | [`arena-hero/arena-hero-python`](https://github.com/arena-hero/arena-hero-python)，v0.2.9 源码 |
+| 已审查 SDK 提交 | `423d252adcca439669adb3e7b04252e53b4430bd` |
+| 服务端审查日期 | 2026 年 8 月 6 日 |
+| SDK 审查日期 | 2026 年 8 月 6 日 |
 | 文档仓库 | [`arena-hero/arena-hero-doc`](https://github.com/arena-hero/arena-hero-doc) |
 | 语言 | 英文、简体中文 |
 
@@ -48,7 +48,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 - 地图生成器契约；
 - 有限资源的区块配额、Cargo 掉落、消耗、刷新与竞争规则；
 - `max(10, population × 5)` 的严格 Core 容量与超额销毁；
-- 维护费欠款保护最近 19 个 Unit、从最远超额 Unit 开始造成伤害且不伤害 Core；
+- 精确的随人口变化的 Unit 价格、战后人口结算和权威生产结果价格；
 - 战斗摧毁 Core 时的资源获胜者、同 Tick 双方 Core 死亡和容量外销毁规则；
 - 战斗后无条件 Core 自毁，包括迁移中行为、全军移除、掉落、归属和立即重生；
 - 战斗后 Unit 与 Core 恢复 HP、Unit 优先使用资源，以及 Core 恢复、修盾和生产位于
@@ -63,7 +63,7 @@ description: 本文档对应的服务端版本，以及哪些修改会影响兼�
 
 ## 为什么现在还没有版本选择器
 
-公开 API 仍是 v0.1，当前游戏规则是 v0.13，所以站点只发布一个当前版本，提供英文和简体
+公开 API 仍是 v0.1，当前游戏规则是 v0.14，所以站点只发布一个当前版本，提供英文和简体
 中文两种语言。等有了第一个稳定的兼容版本，旧协议就可以作为 Docusaurus 版本保留下来。
 
 ## 修改协议时要更新什么

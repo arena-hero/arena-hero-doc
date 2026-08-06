@@ -1,7 +1,7 @@
 ---
 sidebar_position: 3
 title: Core and economy
-description: How the Core stores resources, creates Units, repairs, moves, and pays upkeep.
+description: How the Core stores resources, creates Units, repairs, and moves.
 ---
 
 # Core and economy
@@ -17,9 +17,8 @@ description: How the Core stores resources, creates Units, repairs, moves, and p
 | Starting resources after respawn | 5 |
 
 Combat damage eats shield before it touches HP. The Core is where your resources
-live, and it is also what pays upkeep, receives deposits, builds Units, restores
-HP and shield, and — slowly — migrates. An upkeep shortfall damages excess Units,
-not the Core.
+live. It receives deposits, builds Units, restores HP and shield, and — slowly —
+migrates.
 
 ## Resource storage
 
@@ -66,8 +65,8 @@ A source plan may name at most one Core action:
 
 Any living Core may submit `{"type":"SELF_DESTRUCT"}` with no other fields.
 It has no resource, Unit, movement-state, or cooldown restriction. A migrating
-Core advances or completes its movement first, continues paying upkeep, and can
-still be attacked during that Tick.
+Core advances or completes its movement first and can still be attacked during
+that Tick.
 
 Combat has priority. If an enemy attack destroys the Core, normal destruction
 participation and resource capture apply and the self-destruct does not run. If
@@ -85,13 +84,29 @@ The private `CORE_DESTROYED` event uses `reason_code: SELF_DESTRUCT`, omits
 `destroyed_by`, and is followed by `CORE_RESPAWNED` when placement succeeds.
 The replacement Core may self-destruct again on the next Tick.
 
-## Production
+## Production and dynamic prices
 
-| Unit | Cost | Spawn location |
-|---|---:|---|
-| Worker | 5 | Core cell |
-| Vanguard | 10 | Core cell |
-| Ranger | 12 | Core cell |
+The first 20 living Units use the base prices. After that, all three prices rise
+by 30% for each complete five-Unit band:
+
+```text
+N = living Units when Core actions resolve
+k = max(0, floor((N - 20) / 5) + 1)
+price = round_half_up(base_price × (13 / 10)^k)
+```
+
+The server computes the fraction exactly and rounds only once at the end. A
+half-unit rounds upward. `N` includes Workers, Vanguards, and Rangers, but never
+the Core.
+
+| Unit | Base price | N = 0-19 | N = 20-24 | N = 25-29 | N = 30-34 |
+|---|---:|---:|---:|---:|---:|
+| Worker | 5 | 5 | 7 | 8 | 11 |
+| Vanguard | 10 | 10 | 13 | 17 | 22 |
+| Ranger | 12 | 12 | 16 | 20 | 26 |
+
+The 20th Unit is still sold at its base price; the 21st is the first inflated
+purchase. The initial Worker and every respawn Worker are free.
 
 One Unit per Tick, maximum. Since a cell holds two occupying entities and the Core
 already takes one of those slots, only one Unit can stand with the Core at a time
@@ -102,13 +117,19 @@ A Unit that has just been spawned:
 
 - cannot act during the Tick it was created;
 - is created after combat, so it cannot be attacked during its birth Tick;
-- starts counting toward upkeep from the next Tick.
+- immediately increases population and therefore the price of a later spawn.
 
 Worker deposits resolve before the Core action, so resources actually accepted
-this Tick can pay for that action when it is otherwise legal. They cannot
-retroactively cover upkeep already charged after the self-destruct phase.
-Resources captured from an enemy Core during combat can fund same-Tick Unit
-healing and then the Core action.
+this Tick can pay for that action when it is otherwise legal. Resources captured
+from an enemy Core during combat can fund same-Tick Unit healing and then the
+Core action.
+
+Pricing uses the live population at the start of the Core-action phase. Unit
+self-destruction and combat deaths have already happened, so they can lower the
+price in the same Tick. The public state and official frontend show the price
+implied by the latest complete snapshot; if same-Tick deaths lower it, the
+server may charge less. `CORE_SPAWN_SUCCEEDED.values.cost` and
+`CORE_SPAWN_FAILED.values.required` are authoritative for the settled price.
 
 ## HP recovery
 
@@ -153,7 +174,7 @@ While it is migrating, a Core:
 - cannot spawn, heal, repair, or pick up and drop the Beacon, but may
   `SELF_DESTRUCT`;
 - cannot accept Worker deposits;
-- still pays upkeep and still takes damage;
+- still takes damage;
 - keeps its inventory;
 - leaves any colocated Units behind.
 
@@ -164,40 +185,6 @@ or settle in it before your fourth Tick comes around.
 That fourth-Tick move joins the same global movement dependency graph as Unit
 movement. If it fails, the Core stays put and its progress clears.
 
-## Population and upkeep
-
-Population counts Units only — the Core itself is never counted:
-
-```text
-N = Worker + Vanguard + Ranger
-tier = floor(N / 20)
-upkeep = tier × (tier + 1) / 2
-```
-
-| Population | Tier | Resources per Tick |
-|---:|---:|---:|
-| 0-19 | 0 | 0 |
-| 20-39 | 1 | 1 |
-| 40-59 | 2 | 3 |
-| 60-79 | 3 | 6 |
-| 80-99 | 4 | 10 |
-
-Unit `SELF_DESTRUCT` resolves first, and upkeep uses the population left after
-those removals. Units spawned later in the Tick start counting next Tick; Units
-destroyed during combat have already paid for the current Tick.
-
-Upkeep comes out automatically and costs the Core no action. The server spends
-whatever the Core can pay, then turns every unpaid resource into 1 HP of damage
-to excess Units. The Core never loses shield or HP to upkeep.
-
-The 19 Units nearest the Core are protected. Every other Unit is ordered by
-Manhattan distance from the current Core, farthest first; equal distances use raw
-Unit UUID order. Damage is concentrated on the first Unit until it dies, then
-moves to the next.
-
-A Unit killed this way is removed before movement, Worker actions, Beacon
-actions, or combat. Worker cargo and a carried Beacon drop on its cell, but no
-enemy gets destruction participation. A survivor keeps its locked action and can
-still use a legal post-combat `HEAL`. Read the private `UPKEEP_PAID` event for
-`due`, `paid`, and `deficit`, followed by `UNIT_DAMAGED` /
-`UPKEEP_DEFICIT` events containing `damage` and remaining `hp`.
+There is no per-Tick maintenance charge. Population affects Core storage and the
+price of the next Unit, but it never automatically spends resources or damages
+Units.
